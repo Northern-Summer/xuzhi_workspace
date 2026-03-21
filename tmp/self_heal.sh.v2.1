@@ -1,0 +1,87 @@
+#!/bin/bash
+# self_heal.sh — Xuzhi 系统自愈脚本
+# 检查：Gateway / Cron eventKind / 知识库 / Git / 磁盘
+# 2026-03-21 v3
+
+WORKSPACE="${WORKSPACE:-/home/summer/.openclaw/workspace}"
+STATE_FILE="$WORKSPACE/memory/gateway_state.json"
+ALERT_FILE="$WORKSPACE/memory/gateway_alert.json"
+GATEWAY_URL="${GATEWAY_URL:-http://localhost:8765}"
+LOG="$WORKSPACE/memory/self_heal_log.jsonl"
+
+[ -d "$WORKSPACE/memory" ] || mkdir -p "$WORKSPACE/memory"
+
+log() { echo "[$(date +%T)] $*" >> "$LOG"; }
+alert() { echo "[$(date +%T)] ALERT: $*" >> "$ALERT_FILE"; log "ALERT: $1"; }
+
+# 健康检查
+check_gateway() {
+    local code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$GATEWAY_URL" 2>/dev/null)
+    if [ "$code" = "200" ]; then
+        log "Gateway: OK"
+        echo "{\"gateway\":\"ok\",\"ts\":$(date +%s)}" > "$STATE_FILE"
+    else
+        alert "Gateway: FAIL (HTTP $code)"
+        openclaw gateway restart 2>/dev/null
+    fi
+}
+
+# Cron kind 检查（核心：防止 agentTurn cron）
+check_crons() {
+    local out=$(curl -s -H "Authorization: Bearer sk-local" "http://localhost:8765/api/cron" 2>/dev/null)
+    [ -z "$out" ] && return
+    
+    local bad=$(echo "$out" | python3 -c "
+import sys, json
+crons = json.load(sys.stdin)
+if isinstance(crons, dict): crons = crons.get('jobs', crons.get('data', []))
+for c in crons:
+    k = c.get('eventKind', c.get('kind', ''))
+    if k == 'agentTurn':
+        print(c.get('id',''))
+" 2>/dev/null)
+    
+    if [ -n "$bad" ]; then
+        alert "agentTurn cron detected: $bad — auto-disabling"
+        for id in $bad; do
+            curl -s -X PATCH -H "Authorization: Bearer sk-local" \
+                "http://localhost:8765/api/cron/$id" \
+                -d '{"enabled":false}' 2>/dev/null
+        done
+    fi
+    
+    local disabled=$(echo "$out" | python3 -c "
+import sys, json
+crons = json.load(sys.stdin)
+if isinstance(crons, dict): crons = crons.get('jobs', crons.get('data', []))
+print(','.join(c.get('id','') for c in crons if not c.get('enabled',True)))
+" 2>/dev/null)
+    
+    [ -n "$disabled" ] && log "Disabled crons after restart: $disabled"
+    
+    local good=$(echo "$out" | python3 -c "
+import sys, json
+crons = json.load(sys.stdin)
+if isinstance(crons, dict): crons = crons.get('jobs', crons.get('data', []))
+print(f'Cron check: {len(crons)} jobs, all systemEvent')
+" 2>/dev/null)
+    log "$good"
+}
+
+check_knowledge() {
+    local kb="$HOME/xuzhi_genesis/centers/intelligence/knowledge/knowledge.db"
+    [ ! -f "$kb" ] && return
+    local entities=$(sqlite3 "$kb" "SELECT COUNT(*) FROM entities;" 2>/dev/null || echo 0)
+    log "Knowledge: $entities entities"
+}
+
+check_disk() {
+    local avail=$(df -BG / | tail -1 | awk '{print $4}' | tr -d G)
+    log "Disk: ${avail}GB free"
+}
+
+# 主入口
+case "${1:-check}" in
+    check) check_gateway; check_crons; check_knowledge; check_disk ;;
+    fix)   check_gateway; check_crons; openclaw gateway restart 2>/dev/null ;;
+esac

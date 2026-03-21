@@ -1,0 +1,38 @@
+{
+  "baseline": {
+    "timestamp": "2026-03-20T03:30:00+08:00",
+    "id_score": 80,
+    "components": {
+      "batch_efficiency": 85,
+      "resource_utilization": 70,
+      "response_optimization": 75,
+      "self_iteration": 90
+    },
+    "metrics": {
+      "process_count": 5,
+      "active_sessions": 1,
+      "optimizations_applied": 4,
+      "has_token_tracking": false
+    }
+  },
+  "checkpoints": [
+    {
+      "timestamp": "2026-03-20T03:30:00+08:00",
+      "id_score": 80,
+      "change_from_previous": 0,
+      "notes": "初始基准建立，缺少token使用数据"
+    }
+  ],
+  "optimization_history": [
+    {
+      "timestamp": "2026-03-20T03:09:26+08:00",
+      "optimizations": ["batch_size_increase", "cache_expansion", "model_tuning", "memory_optimization"],
+      "source": "performance.json"
+    }
+  ],
+  "targets": {
+    "next_checkpoint": "2026-03-20T04:00:00+08:00",
+    "target_id_score": 85,
+    "improvement_area": "建立token追踪机制"
+  }
+}

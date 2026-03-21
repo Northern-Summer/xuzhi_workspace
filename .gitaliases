@@ -1,0 +1,52 @@
+# Git 专业别名 — Xuzhi 工学部标准
+# 用途：快速、安全、省力
+# 加载方式：source ~/.gitaliases 或在 ~/.gitconfig 引用
+
+# ── 基础别名 ──────────────────────────────────────────
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline -10'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+
+# ── 专业别名 ──────────────────────────────────────────
+# 撤销上次 commit（保留改动）
+alias gr='git reset --soft HEAD~1'
+
+# 交互式 rebase 最近3个 commit
+alias gri='git rebase -i HEAD~3'
+
+# 查看所有分支简洁图
+alias gbg='git branch --format="%(HEAD) %(refname:short) %(color:green)%(committerdate:short)%(color:reset) %(color:yellow)%(subject)" | column -t'
+
+# 快速查看未推送 commits
+alias gup='git log origin/master..HEAD --oneline'
+
+# 强制推送到 origin（仅限个人分支）
+alias gfp='git push --force-with-lease origin HEAD'
+
+# 查看文件历史（含 renames）
+alias gfh='git log --follow --oneline --'
+
+# 暂存所有追踪文件的修改（不包括新文件）
+alias gapa='git add -u'
+
+# 查看 diff staging 区
+alias gds='git diff --cached'
+
+# ── 安全别名 ──────────────────────────────────────────
+# 安全强制推送（不会覆盖他人push）
+alias gforce='git push --force-with-lease'
+
+# 删除已合并的本地分支
+alias gbm='git branch --merged | grep -v "\*" | xargs -r git branch -d'
+
+# ── 检查别名 ──────────────────────────────────────────
+# 查看 git 配置
+alias gcf='git config --list --show-origin'
+
+# 仓库大小
+alias gsize='git count-objects -vH'
