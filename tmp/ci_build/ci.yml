@@ -1,0 +1,106 @@
+name: Xuzhi Genesis CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  genesis-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run genesis probe
+        run: |
+          cd centers/mind
+          python3 genesis_probe.py
+        continue-on-error: false
+
+  harness-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pytest requests feedparser httpx aiohttp
+
+      - name: Run harness tests
+        run: |
+          cd centers/engineering/harness
+          python3 -m pytest tests/ -q --tb=short
+        continue-on-error: false
+
+  knowledge-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check knowledge base
+        run: |
+          python3 -c "
+          import sqlite3, os
+          db = 'centers/intelligence/knowledge/knowledge.db'
+          if not os.path.exists(db):
+            print('SKIP: knowledge.db not in repo')
+            exit(0)
+          conn = sqlite3.connect(db)
+          c = conn.cursor()
+          c.execute('SELECT COUNT(*) FROM entities')
+          e = c.fetchone()[0]
+          c.execute('SELECT COUNT(*) FROM relations')
+          r = c.fetchone()[0]
+          print(f'entities: {e}, relations: {r}')
+          assert e >= 100, f'entities {e} < 100'
+          assert r >= 100, f'relations {r} < 100'
+          c.execute('PRAGMA integrity_check')
+          assert c.fetchone()[0] == 'ok', 'knowledge.db corrupted'
+          print('OK: knowledge integrity verified')
+          conn.close()
+          "
+
+  self-heal-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run self-heal check
+        run: |
+          bash centers/engineering/self_heal.sh check
+        continue-on-error: false
+
+  memory-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify git sync
+        run: |
+          UPSTREAM=origin/master
+          BEHIND=$(git rev-list --count $UPSTREAM..HEAD 2>/dev/null || echo "0")
+          echo "Commits ahead of $UPSTREAM: $BEHIND"
+          if [ "$BEHIND" -gt "50" ]; then
+            echo "WARNING: $BEHIND commits not pushed"
+            exit(1)
+          fi
+          echo "OK: git sync verified"
