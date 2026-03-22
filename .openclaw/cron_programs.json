@@ -1,0 +1,120 @@
+{
+  "version": 2,
+  "programs": [
+    {
+      "id": "auto-ra-research",
+      "name": "AutoRA Research Cycle",
+      "trigger": {
+        "kind": "cron",
+        "cron": "0 0,6,12,18 * * *",
+        "tz": "UTC"
+      },
+      "session": {
+        "target": "isolated",
+        "session": "isolated"
+      },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Run AutoRA research cycle. Check ~/xuzhi_genesis/centers/engineering/harness/ for tasks. Report findings.",
+        "model": "default"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "webchat"
+      },
+      "enabled": true
+    },
+    {
+      "id": "system-daily-deep",
+      "name": "每日系统深检",
+      "trigger": {
+        "kind": "cron",
+        "cron": "0 11 * * *",
+        "tz": "Asia/Shanghai"
+      },
+      "session": {
+        "target": "isolated",
+        "session": "isolated"
+      },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Run full system health check. Check: git status, cron jobs, disk. Report to chat.",
+        "model": "default"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "webchat"
+      },
+      "enabled": true
+    },
+    {
+      "id": "memory-consolidation",
+      "name": "Memory Consolidation",
+      "trigger": {
+        "kind": "cron",
+        "cron": "0 */6 * * *",
+        "tz": "UTC"
+      },
+      "session": {
+        "target": "isolated",
+        "session": "isolated"
+      },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Consolidate today's memory. Read ~/.xuzhi_memory/daily/$(date +%Y-%m-%d).md, update MEMORY.md.",
+        "model": "default"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "webchat"
+      },
+      "enabled": true
+    },
+    {
+      "id": "gateway-watchdog-light",
+      "name": "Lambda Watchdog",
+      "trigger": {
+        "kind": "cron",
+        "cron": "*/15 * * * *",
+        "tz": "UTC"
+      },
+      "session": {
+        "target": "isolated",
+        "session": "isolated"
+      },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Quick health: curl -s --connect-timeout 3 http://localhost:18789/health. If [error], run: bash ~/.xuzhi_memory/heart_saver.sh checkpoint watchdog_fail. If OK, reply HEARTBEAT_OK only.",
+        "model": "default"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "webchat"
+      },
+      "enabled": true
+    },
+    {
+      "id": "auto-ra-engine",
+      "name": "AutoRA Engine",
+      "trigger": {
+        "kind": "cron",
+        "cron": "0 */4 * * *",
+        "tz": "UTC"
+      },
+      "session": {
+        "target": "isolated",
+        "session": "isolated"
+      },
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Run AutoRA engine tasks. Check ~/xuzhi_genesis/centers/engineering/harness/self_sustaining/ for pending work.",
+        "model": "default"
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "webchat"
+      },
+      "enabled": true
+    }
+  ]
+}
