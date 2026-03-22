@@ -10,6 +10,7 @@ If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out w
 
 Before doing anything else:
 
+0. **自动恢复（肌肉记忆）**: `bash ~/.xuzhi_memory/auto_restore.sh` — 四阶段全自动（身份→Δ计算→执行→记忆折叠），不需要人类提醒
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
 3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
