@@ -64,3 +64,31 @@
 1. GitHub有2个仓库：xuzhi_genesis + xuzhi_workspace（不可只记一个）
 2. 两个都要修复remote URL
 3. 正确账号：Northern-Summer
+
+## P0优化：上下文爆炸修复（2026-03-22 15:21）
+
+### 问题根因
+- contextPruning mode=cache-ttl，ttl=1h，每小时自动prune+compaction
+- SOUL.md 396行全量注入，每次占用大量上下文
+- session恢复形成git pull死循环（workspace overlay机制）
+- Project Context合计超1200行/次注入
+
+### 解决方案
+| 改动 | 效果 |
+|------|------|
+| P0-A: SOUL.md精简 | 396行→98行（节省76%） |
+| P0-A: SOUL_IMMUTABLE.md | 56行不可覆写核心独立保存 |
+| P0-A: SOUL_VARIABLE.md | 35行当前状态独立保存 |
+| P0-B: session_restore.sh | 去除无效git pull，仅读xuzhi_memory层 |
+| P0-C: contextPruning=off | 完全禁用自动pruning |
+| P0-C: hardClearRatio=0.95 | 95%上下文才强制清理 |
+
+### 验收状态
+- ✅ 所有6项安全检查通过
+- ✅ contextPruning=off后预算足够（~350轮对话）
+- ✅ Gateway已热重载生效
+- ✅ pre_compact_guard验证通过（创建commit 9666c15）
+
+### 风险评估
+- 🟡 contextPruning=off：session无限膨胀风险 → 由200k ctx硬上限保护
+- 🟡 SOUL精简：不可覆写段落保留 → 由SOUL_IMMUTABLE.md独立保护
