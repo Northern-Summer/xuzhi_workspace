@@ -113,5 +113,5 @@
 
 ## GitHub备份URL
 ```
-https://ghp_SCRUBBED@github.com/Northern-Summer/xuzhi_workspace.git
+https://github.com/Northern-Summer/xuzhi_workspace.git
 ```

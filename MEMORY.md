@@ -15,14 +15,10 @@
 | Northern-Summer/xuzhi_genesis | ✅ 存在 | SSH → summer-zhou (不存在) |
 | Northern-Summer/xuzhi_workspace | ✅ 存在 (被遗忘→现已更新) | SSH → summer-zhou (不存在) |
 
-## GitHub Token
-`ghp_SCRUBBED`
-
-## ✅ 正确HTTP远程URL（禁止SSH）
-```
-https://ghp_SCRUBBED@github.com/Northern-Summer/xuzhi_genesis.git
-https://ghp_SCRUBBED@github.com/Northern-Summer/xuzhi_workspace.git
-```
+## ⚠️ Token 存储原则
+- Token 不应明文写入文件（GitHub Secret Scanning 会阻止 push）
+- 使用 `git remote -v` 查看当前配置的 remote URL
+- Token 如需使用：通过 GitHub CLI (`gh auth token`) 或环境变量
 
 ## Git远程配置（本地，错误）
 | 仓库 | 本地remote | 问题 |
