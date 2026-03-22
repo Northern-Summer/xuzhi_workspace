@@ -1,0 +1,76 @@
+#!/bin/bash
+# Pre-commit hook for notes workspace
+# Checks: trailing newlines, file sizes, line lengths, HEARTBEAT reminders
+
+echo "Running pre-commit checks..."
+
+# Colors
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+ERRORS=0
+
+# 1. Check markdown files for trailing newlines
+echo "Checking markdown trailing newlines..."
+for f in $(git diff --cached --name-only | grep -E '\.md$'); do
+    if [ -f "$f" ] && [ -s "$f" ]; then
+        last_char=$(tail -c 1 "$f" | xxd -p | tr -d '\n')
+        if [ "$last_char" != "0a" ] && [ -n "$last_char" ]; then
+            echo -e "${RED}FAIL${NC}: $f missing trailing newline"
+            ERRORS=$((ERRORS + 1))
+        fi
+    fi
+done
+
+# 2. Check for large files (>1MB)
+echo "Checking for large files..."
+for f in $(git diff --cached --name-only); do
+    if [ -f "$f" ]; then
+        size=$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f" 2>/dev/null || echo 0)
+        if [ "$size" -gt 1048576 ]; then
+            echo -e "${RED}FAIL${NC}: $f is too large ($size bytes > 1MB)"
+            ERRORS=$((ERRORS + 1))
+        fi
+    fi
+done
+
+# 3. Check memory file line lengths
+echo "Checking memory file line lengths..."
+for f in $(git diff --cached --name-only | grep -E '^memory/.*\.md$'); do
+    if [ -f "$f" ]; then
+        long_lines=$(awk 'length > 120' "$f" | wc -l)
+        if [ "$long_lines" -gt 5 ]; then
+            echo -e "${YELLOW}WARNING${NC}: $f has $long_lines lines > 120 chars"
+        fi
+    fi
+done
+
+# 4. Check for hardcoded secrets
+echo "Checking for hardcoded secrets..."
+if git diff --cached --name-only | xargs grep -r -i -E "(api[_-]?key|token|password|secret)\s*[:=]\s*['\"]?[a-zA-Z0-9]{20,}" 2>/dev/null; then
+    echo -e "${RED}FAIL${NC}: Possible hardcoded secrets detected"
+    ERRORS=$((ERRORS + 1))
+fi
+
+# 5. HEARTBEAT.md reminder
+echo "Checking for HEARTBEAT changes..."
+if git diff --cached --name-only | grep -q "HEARTBEAT.md"; then
+    echo -e "${YELLOW}REMINDER${NC}: HEARTBEAT.md has changes - will affect heartbeat behavior"
+fi
+
+# 6. Cron-related changes reminder
+echo "Checking for cron-related changes..."
+if git diff --cached --name-only | grep -qE "(cron|openclaw)"; then
+    echo -e "${YELLOW}REMINDER${NC}: Cron/OpenClaw config changed - schedule may be affected"
+fi
+
+# Summary
+if [ $ERRORS -gt 0 ]; then
+    echo -e "${RED}Pre-commit failed with $ERRORS error(s)${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Pre-commit checks passed${NC}"
+exit 0

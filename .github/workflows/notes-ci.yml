@@ -1,0 +1,143 @@
+name: Notes CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  markdown-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Check for trailing newlines in markdown files
+        run: |
+          for f in $(find . -name "*.md" -type f); do
+            if [ -s "$f" ]; then
+              last_char=$(tail -c 1 "$f" | xxd -p | tr -d '\n')
+              if [ "$last_char" != "0a" ] && [ -n "$last_char" ]; then
+                echo "FAIL: $f missing trailing newline"
+                exit 1
+              fi
+            fi
+          done
+          echo "OK: All markdown files have trailing newlines"
+      
+      - name: Check for hardcoded secrets
+        run: |
+          # Check for common secret patterns
+          if grep -r -i -E "(api[_-]?key|token|password|secret)\s*[:=]\s*['\"]?[a-zA-Z0-9]{20,}" --include="*.md" . 2>/dev/null; then
+            echo "FAIL: Possible hardcoded secrets found"
+            exit 1
+          fi
+          if grep -r -E "(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,}|Bearer\s+[a-zA-Z0-9])" --include="*.md" . 2>/dev/null; then
+            echo "FAIL: Possible API keys/tokens found"
+            exit 1
+          fi
+          echo "OK: No hardcoded secrets detected"
+
+      - name: Check memory file count
+        run: |
+          memory_count=$(find ./memory -name "*.md" 2>/dev/null | wc -l)
+          echo "Memory files: $memory_count"
+          if [ "$memory_count" -gt 500 ]; then
+            echo "WARNING: High memory file count ($memory_count), consider cleanup"
+          else
+            echo "OK: Memory file count is reasonable"
+          fi
+      
+      - name: Check memory file line lengths
+        run: |
+          long_lines=0
+          for f in $(find ./memory -name "*.md" -type f 2>/dev/null); do
+            while IFS= read -r line; do
+              if [ ${#line} -gt 120 ]; then
+                long_lines=$((long_lines + 1))
+              fi
+            done < "$f"
+          done
+          if [ "$long_lines" -gt 10 ]; then
+            echo "WARNING: $long_lines lines over 120 chars in memory files"
+          else
+            echo "OK: Line lengths OK"
+          fi
+
+  link-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check@3
+      
+      - name: Check markdown links
+        run: |
+          errors=0
+          for f in $(find . -name "*.md" -type f); do
+            if ! markdown-link-check --config .markdownlinkcheck.json "$f" 2>&1 | tee /tmp/mlc_output.txt | grep -q "\[404\]"; then
+              echo "Links OK: $f"
+            else
+              echo "BROKEN LINKS: $f"
+              cat /tmp/mlc_output.txt
+              errors=$((errors + 1))
+            fi
+          done
+          if [ "$errors" -gt 0 ]; then
+            echo "FAIL: $errors files have broken links"
+            exit 1
+          fi
+
+  workspace-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Check MEMORY.md exists and non-empty
+        run: |
+          if [ ! -f MEMORY.md ]; then
+            echo "FAIL: MEMORY.md does not exist"
+            exit 1
+          fi
+          size=$(stat -f%z MEMORY.md 2>/dev/null || stat -c%s MEMORY.md 2>/dev/null)
+          if [ "$size" -lt 100 ]; then
+            echo "FAIL: MEMORY.md is too small ($size bytes)"
+            exit 1
+          fi
+          echo "OK: MEMORY.md exists ($size bytes)"
+      
+      - name: Check AGENTS.md and SOUL.md exist
+        run: |
+          for f in AGENTS.md SOUL.md; do
+            if [ ! -f "$f" ]; then
+              echo "FAIL: $f missing"
+              exit 1
+            fi
+          done
+          echo "OK: Core files exist"
+
+  notify-success:
+    needs: [markdown-lint, link-check, workspace-health]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Log success
+        run: echo "CI passed successfully"
+
+  notify-failure:
+    needs: [markdown-lint, link-check, workspace-health]
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Log failure
+        run: echo "CI failed - check logs above"
