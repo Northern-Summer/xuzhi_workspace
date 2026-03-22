@@ -9,11 +9,13 @@
 ## 任务入口（每30分钟心跳触发）
 
 ### 0. 上下文监控（最高优先级）
-- 检查 `openclaw status` 的 Context 行
+- **正确入口**：调用 `session_status` 工具（或 `openclaw session status` 命令）
+- **判断字段**：工具输出中 `Context: Xk/Yk (Z%)` 的 Z 数值
+- **Dashboard 参考**：Dashboard 轮询延迟和缓存策略导致数值偏高（实测差约 10-15%），以 tool 输出为准
 - **> 90%**: 执行 `bash ~/.xuzhi_memory/pre_compact_guard.sh` → 警告用户开新会话 `/new`
-- **85-90%**: 通知用户context偏高，建议近期开新会话
+- **85-90%**: 通知用户 context 偏高，建议近期开新会话
 - **< 85%**: 无操作，继续
-- 不依赖OpenClaw auto-compaction，完全手动控制
+- **不依赖** OpenClaw auto-compaction，完全手动控制
 
 ### 1. 系统哨兵检查（每次心跳）
 - 检查 git hash 有无变化
@@ -28,7 +30,7 @@
 ### 3. Git 自推（每日）
 - 检查未提交改动，如有则自动 commit + push
 - 目标：所有 local commits 必须在24小时内推送到 origin
-- **注意**：xuzhi_genesis 是只读挂载（Windows bind mount），git push 命令需通过 cron 执行
+- **注意**：xuzhi_genesis 中，centers/engineering/ 可写，centers/intelligence/、centers/mind/、centers/task/ 为只读 bind mount。push 命令通过 cron 执行。
 
 ### 4. 知识库补充（每6小时）
 - 运行 seed_collector.py（如有新种子源）
@@ -45,7 +47,7 @@
 - 检查 Harness tests 全部通过
 
 ## 关键路径（更新：2026-03-22）
-- **可写**: ~/xuzhi_genesis/ — 已确认可写（2026-03-22 验证）
+- **可写**: ~/xuzhi_genesis/ — 已确认可写（2026-03-22 验证）✅
 - **可写**: ~/.openclaw/workspace/tmp/ — 临时脚本副本
 - **真实记忆**: ~/.xuzhi_memory/ — 独立于 OpenClaw 的记忆存储（主）
   - `manifests/` — 核心记忆快照（STABLE 版本永久保存）

@@ -1,12 +1,13 @@
 {
   "lastChecks": {
     "cron_status": 1742536200,
-    "heartbeat": 1742536200
+    "heartbeat": 1742690820
   },
   "cron_health": {
     "01946794": {"name": "Lambda 30min", "runs": 4, "last": "2026-03-21T15:45"},
     "0195a3b3": {"name": "Lambda 5min", "runs": 1, "last": "2026-03-21T15:41"},
-    "0193eec4": {"name": "AutoRA direct", "runs": 1, "last": "2026-03-21T15:34"}
+    "0193eec4": {"name": "AutoRA direct", "runs": 1, "last": "2026-03-21T15:34"},
+    "autonomous_loop": {"name": "1hr autonomous", "runs": 1, "last": "2026-03-22T21:46", "terminated": "SIGTERM at 19.8min/60min"}
   },
-  "updated": "2026-03-21T15:56"
+  "updated": "2026-03-22T14:07"
 }
