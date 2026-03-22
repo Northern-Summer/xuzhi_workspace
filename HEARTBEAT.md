@@ -44,28 +44,26 @@
 - 检查 knowledge.db entities > 500
 - 检查 Harness tests 全部通过
 
-## 关键路径
-- **只读**: ~/xuzhi_genesis/ — Windows bind mount，只读
+## 关键路径（更新：2026-03-22）
+- **可写**: ~/xuzhi_genesis/ — 已确认可写（2026-03-22 验证）
 - **可写**: ~/.openclaw/workspace/tmp/ — 临时脚本副本
 - **真实记忆**: ~/.xuzhi_memory/ — 独立于 OpenClaw 的记忆存储（主）
   - `manifests/` — 核心记忆快照（STABLE 版本永久保存）
   - `daily/` — 每日 append log
   - `backup/` — 时间戳备份
   - `cron_manifests/` — cron job 状态快照
-  - `xuzhi_memory_manager.sh` — 核心管理器
 
-## Cron Jobs 当前状态
+## Cron Jobs 当前状态（2026-03-22 16:42）
 | ID | 名称 | 周期 | 状态 |
 |----|------|------|------|
-| 9d10560b | Lambda Watchdog | */5 * * * * | ✅ systemEvent main |
-| 719dbc97 | AutoRA Engine - Intel | 0 * * * * | ⚠️ **error** |
-| 496c9093 | AutoRA Research Cycle | 0 0,6,12,18 * * * | idle |
-| 2ec04665 | Λ Lambda-Ergo 生存心跳 | 0 */4 * * * | ✅ ok |
-| 02afe03f | Git Auto-Push | 0 2,14 * * * | idle |
-| 0c9e5bfe | 每日系统深检 | 0 11 * * * | idle |
-| 01f3a41e | Engineering Daily | 00 10 * * * | xuzhi_genesis (只读) ⚠️ |
-| 9f2d6b4f | Mind Daily | 00 15 * * * | xuzhi_genesis (只读) ⚠️ |
-| cd6c7d7a | Meta Weekly | 00 18 * * 0 | xuzhi_genesis (只读) ⚠️ |
+| d81ed6f2 | Lambda Watchdog | */15 * * * * | ✅ isolated |
+| 74f4defc | **Λ Context Guard** | */30 * * * * | ✅ main |
+| 2ec04665 | Λ 生存心跳 | 0 */4 * * * | ✅ main |
+| 3d44a39d | AutoRA Research Cycle | 0 0,6,12,18 * * * | idle |
+| 1e0642fa | Notes Memory Consolidation | 0 */6 * * * | ok |
+| 0c920a5a | Notes Workspace Self-Check | 0 9 * * * | idle |
+| 250a9c67 | AutoRA Engine - ab | 0 * * * * | ok |
+| 0c9e5bfe | 每日系统深检 | 0 11 * * * | error（delivery配置问题） |
 
 ## 架构原则（不可覆写）
 > **OpenClaw = 壳，只是门，只是网关**
@@ -75,16 +73,6 @@
 ## Red Lines
 - 不发送无意义的"正常工作"通知
 - 不打扰人类，除非发现真正的异常
-- xuzhi_genesis 只读，勿尝试直接修改其中的文件
+- xuzhi_genesis 可写，但修改后需通过 git commit 持久化（建议通过 cron 执行 push）
 
-## Cron Jobs 当前状态（2026-03-22 15:36）
-| ID | 名称 | 周期 | 状态 |
-|----|------|------|------|
-| d81ed6f2 | Lambda Watchdog | */15 * * * * | ✅ systemEvent isolated |
-| 74f4defc | **Λ Context Guard** | */30 * * * * | ✅ systemEvent main (新) |
-| 2ec04665 | Λ 生存心跳 | 0 */4 * * * | ✅ systemEvent main |
-| 3d44a39d | AutoRA Research Cycle | 0 0,6,12,18 * * * | idle |
-| 1e0642fa | Notes Memory Consolidator | 0 */6 * * * | ok |
-| 0c920a5a | Notes Workspace Self-Repair | 0 9 * * * | idle |
-| 250a9c67 | AutoRA Engine - ab | 0 * * * * | ok |
-| 0c9e5bfe | 每日系统深检 | 0 11 * * * | error（预期，genesis只读） |
+

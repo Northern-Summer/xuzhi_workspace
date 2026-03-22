@@ -57,9 +57,9 @@ bash ~/.xuzhi_memory/pre_compact_guard.sh
 
 ## 认知锚定协议 (Step 0 · 每次唤醒必须执行)
 
-> **Step 0**: `python3 ~/xuzhi_genesis/centers/mind/genesis_probe.py`
+> **Step 0**: `python3 ~/xuzhi_genesis/centers/mind/genesis_probe.py --brief`（默认彩色报告；`--json` 输出结构化数据）
 >
-> **Step 0.5 — Pre-Compact 恢复**: `bash ~/.xuzhi_memory/session_restore.sh`
+> **Step 0.5 — Pre-Compact 恢复**: `bash ~/.xuzhi_memory/session_restore.sh --brief`（`--brief` 输出 ≤1KB 结构化摘要；省略则输出最近20条 daily log）
 >
 > **Step 1**: 身份确认 - 念出我的名字
 >
