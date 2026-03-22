@@ -8,6 +8,13 @@
 
 ## 任务入口（每30分钟心跳触发）
 
+### 0. 上下文监控（最高优先级）
+- 检查 `openclaw status` 的 Context 行
+- **> 90%**: 执行 `bash ~/.xuzhi_memory/pre_compact_guard.sh` → 警告用户开新会话 `/new`
+- **85-90%**: 通知用户context偏高，建议近期开新会话
+- **< 85%**: 无操作，继续
+- 不依赖OpenClaw auto-compaction，完全手动控制
+
 ### 1. 系统哨兵检查（每次心跳）
 - 检查 git hash 有无变化
 - 检查核心文件有无异常（corrupted/broken）
@@ -69,3 +76,15 @@
 - 不发送无意义的"正常工作"通知
 - 不打扰人类，除非发现真正的异常
 - xuzhi_genesis 只读，勿尝试直接修改其中的文件
+
+## Cron Jobs 当前状态（2026-03-22 15:36）
+| ID | 名称 | 周期 | 状态 |
+|----|------|------|------|
+| d81ed6f2 | Lambda Watchdog | */15 * * * * | ✅ systemEvent isolated |
+| 74f4defc | **Λ Context Guard** | */30 * * * * | ✅ systemEvent main (新) |
+| 2ec04665 | Λ 生存心跳 | 0 */4 * * * | ✅ systemEvent main |
+| 3d44a39d | AutoRA Research Cycle | 0 0,6,12,18 * * * | idle |
+| 1e0642fa | Notes Memory Consolidator | 0 */6 * * * | ok |
+| 0c920a5a | Notes Workspace Self-Repair | 0 9 * * * | idle |
+| 250a9c67 | AutoRA Engine - ab | 0 * * * * | ok |
+| 0c9e5bfe | 每日系统深检 | 0 11 * * * | error（预期，genesis只读） |
