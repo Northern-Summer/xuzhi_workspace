@@ -1,13 +1,44 @@
 ---
 name: "multi-search-engine"
-description: "Multi search engine integration with 17 engines (8 CN + 9 Global). Supports advanced search operators, time filters, site search, privacy engines, and WolframAlpha knowledge queries. No API keys required."
+description: "Multi search engine integration with 17 engines (8 CN + 9 Global) + local SearXNG. Zero API cost when using local SearXNG."
 ---
 
-# Multi Search Engine v2.0.1
+# Multi Search Engine v2.1
 
-Integration of 17 search engines for web crawling without API keys.
+## 本地 SearXNG（优先使用，零 API 消耗）
 
-## Search Engines
+**地址**: `http://127.0.0.1:8080`（Docker Desktop 上 SearXNG）
+
+**优势**: 零 API 消耗、JSON 结构化返回、可多引擎聚合
+
+**使用方法**:
+```bash
+python3 ~/.openclaw/workspace/skills/multi-search-engine/searxng_client.py "<搜索词>" [引擎]
+# 例: python3 searxng_client.py "hello world" bing,ddg
+```
+
+**可用引擎**: bing, ddg, google, wikipedia, qwant, brave, startpage
+
+**API 调用**（程序内使用）:
+```python
+import sys
+sys.path.insert(0, "~/.openclaw/workspace/skills/multi-search-engine")
+from searxng_client import search
+
+result = search("搜索词", engines=["bing", "ddg"], max_results=10)
+for r in result["results"]:
+    print(r["title"], r["url"], r["snippet"])
+```
+
+**限制**: 
+- Google/DDG/Startpage 等被墙引擎需要 Clash Verge 代理
+- Wikipedia 引擎在当前配置下返回 0 条（需进一步调试）
+
+---
+
+## 旧版 web_fetch（备用）
+
+当 SearXNG 不可用时，使用以下 URL 模板 + web_fetch 工具。
 
 ### Domestic (8)
 - **Baidu**: `https://www.baidu.com/s?wd={keyword}`
@@ -30,31 +61,6 @@ Integration of 17 search engines for web crawling without API keys.
 - **Qwant**: `https://www.qwant.com/?q={keyword}`
 - **WolframAlpha**: `https://www.wolframalpha.com/input?i={keyword}`
 
-## Quick Examples
-
-```javascript
-// Basic search
-web_fetch({"url": "https://www.google.com/search?q=python+tutorial"})
-
-// Site-specific
-web_fetch({"url": "https://www.google.com/search?q=site:github.com+react"})
-
-// File type
-web_fetch({"url": "https://www.google.com/search?q=machine+learning+filetype:pdf"})
-
-// Time filter (past week)
-web_fetch({"url": "https://www.google.com/search?q=ai+news&tbs=qdr:w"})
-
-// Privacy search
-web_fetch({"url": "https://duckduckgo.com/html/?q=privacy+tools"})
-
-// DuckDuckGo Bangs
-web_fetch({"url": "https://duckduckgo.com/html/?q=!gh+tensorflow"})
-
-// Knowledge calculation
-web_fetch({"url": "https://www.wolframalpha.com/input?i=100+USD+to+CNY"})
-```
-
 ## Advanced Operators
 
 | Operator | Example | Description |
@@ -74,30 +80,6 @@ web_fetch({"url": "https://www.wolframalpha.com/input?i=100+USD+to+CNY"})
 | `tbs=qdr:w` | Past week |
 | `tbs=qdr:m` | Past month |
 | `tbs=qdr:y` | Past year |
-
-## Privacy Engines
-
-- **DuckDuckGo**: No tracking
-- **Startpage**: Google results + privacy
-- **Brave**: Independent index
-- **Qwant**: EU GDPR compliant
-
-## Bangs Shortcuts (DuckDuckGo)
-
-| Bang | Destination |
-|------|-------------|
-| `!g` | Google |
-| `!gh` | GitHub |
-| `!so` | Stack Overflow |
-| `!w` | Wikipedia |
-| `!yt` | YouTube |
-
-## WolframAlpha Queries
-
-- Math: `integrate x^2 dx`
-- Conversion: `100 USD to CNY`
-- Stocks: `AAPL stock`
-- Weather: `weather in Beijing`
 
 ## Documentation
 
