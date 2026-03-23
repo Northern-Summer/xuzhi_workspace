@@ -1,0 +1,12 @@
+2026-03-24 07:39:32 [heal] === 健康检查开始 ===
+2026-03-24 07:39:32 [heal] Gateway: ✅
+2026-03-24 07:39:32 [heal] 无 aborted sessions
+2026-03-24 07:39:32 [heal] === 检查结束 ===
+2026-03-24 07:39:51 [heal] === 健康检查开始 ===
+2026-03-24 07:39:51 [heal] Gateway: ✅
+2026-03-24 07:39:51 [heal] AUTH FAIL: HTML response, token invalid
+2026-03-24 07:39:51 [heal] === 检查结束 ===
+2026-03-24 07:45:02 [heal] === 健康检查开始 ===
+2026-03-24 07:45:02 [heal] Gateway: ✅
+2026-03-24 07:45:02 [heal] AUTH FAIL: HTML response, token invalid
+2026-03-24 07:45:02 [heal] === 检查结束 ===
