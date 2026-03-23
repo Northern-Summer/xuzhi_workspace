@@ -9,11 +9,16 @@
 - workspace: `/home/summer/.openclaw/workspace/`
 - 记忆: `/home/summer/.openclaw/workspace/memory/daily/`
 
+## ⚠️ 元原则：联网获取TOP最佳实践
+> 每次做决定前，先联网搜索行业最佳实践，不闭门造车。
+> 工具：本地 SearXNG (`python3 ~/.openclaw/workspace/skills/multi-search-engine/searxng_client.py "query"`)
+> 零 API 消耗，优先使用。
+
 ## GitHub（两个仓库）
-| 仓库 | 状态 | 本地remote问题 |
-|------|------|---------------|
-| Northern-Summer/xuzhi_genesis | ✅ 存在 | SSH → summer-zhou (不存在) |
-| Northern-Summer/xuzhi_workspace | ✅ 存在 (被遗忘→现已更新) | SSH → summer-zhou (不存在) |
+| 仓库 | 状态 | remote |
+|------|------|--------|
+| Northern-Summer/Xuzhi_genesis | ✅ | HTTPS+Token 已修复 |
+| Northern-Summer/xuzhi_workspace | ✅ | HTTPS+Token |
 
 ## ⚠️ Token 存储原则
 - Token 不应明文写入文件（GitHub Secret Scanning 会阻止 push）

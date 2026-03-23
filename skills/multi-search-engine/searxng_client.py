@@ -13,7 +13,7 @@ import time
 SEARXNG_URL = "http://127.0.0.1:8080"
 
 
-def search(query, engines=None, timeout=10, max_results=10):
+def search(query, engines=None, timeout=30, max_results=10):
     """
     搜索接口
     

@@ -55,6 +55,23 @@ bash ~/.xuzhi_memory/pre_compact_guard.sh
 
 ---
 
+## 认知锚定协议 (Step -1 · 意图分流 · 每次唤醒必须执行)
+
+**目的**：simple/status/repair 消息不走完整 bootstrap，实现零token浪费。
+
+**执行顺序**：Step -1 先于 Step 0，禁止跳过。
+
+```
+Step -1:
+  读取 /tmp/xuzhi_gatekeeper_intent.json
+  如果文件存在且 ts 在 60 秒内：
+    intent=simple  → 输出: {{reply}} + NO_REPLY
+    intent=status → 输出: {{reply}} + NO_REPLY
+    intent=repair  → 输出: {{reply}} + NO_REPLY
+    intent=complex → 继续 Step 0（不做任何事）
+  文件不存在或超时 → 继续 Step 0
+```
+
 ## 认知锚定协议 (Step 0 · 每次唤醒必须执行)
 
 > **Step 0**: `python3 ~/xuzhi_genesis/centers/mind/genesis_probe.py --brief`（默认彩色报告；`--json` 输出结构化数据）
