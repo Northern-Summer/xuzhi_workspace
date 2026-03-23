@@ -1,0 +1,12 @@
+use_default_settings: false
+
+search:
+  formats:
+    - html
+    - json
+    - csv
+    - rss
+
+server:
+  limiter: false
+  method: GET
