@@ -1,8 +1,6 @@
 #!/bin/bash
-# self_heal.sh — 系统健康检查与自愈（bash版，无LLM调用）
-# 被 self_sustaining_loop.sh 的 check_health() 调用
-# 2026-03-24 红蓝队修复：修正operator token路径，增强aborted检测+自愈
-
+# self_heal.sh — 系统健康检查与自愈
+# 2026-03-24 重写：使用 sessions.json（dict格式）做 aborted 检测
 set -euo pipefail
 
 HOME="${HOME:-/home/summer}"
@@ -10,109 +8,110 @@ AUTH_FILE="$HOME/.openclaw/identity/device-auth.json"
 QUEUE="$HOME/.xuzhi_memory/watchdog_command_queue.json"
 CHECKPOINT="$HOME/.xuzhi_memory/watchdog_checkpoint.json"
 TASKS="$HOME/.openclaw/tasks/tasks.json"
+SESSIONS="$HOME/.openclaw/agents/main/sessions/sessions.json"
+ABORTED_LIST="$HOME/.xuzhi_memory/aborted_detected.txt"
 LOG="$HOME/.xuzhi_memory/task_center/self_heal.log"
 
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') [heal] $*" >> "$LOG"; }
+mkdir -p "$(dirname "$LOG")"
 
-get_token() {
-    python3 -c "
-import json
-d=json.load(open('$AUTH_FILE'))
-print(d.get('tokens',{}).get('operator',{}).get('token','') or '')
-" 2>/dev/null
-}
-
-gateway_health() {
+# ── Gateway 健康 ─────────────────────────────────────
+check_gateway() {
     local h
     h=$(curl -s --connect-timeout 3 http://localhost:18789/health 2>/dev/null)
     if echo "$h" | grep -q '"ok":true'; then
-        echo "ok"
+        log "Gateway: ✅"
         return 0
     else
-        echo "fail"
+        log "Gateway: ❌ $h"
         return 1
     fi
 }
 
-# ── 检测 aborted sessions ───────────────────────────────
-check_aborted() {
-    local token="$1"
-    local out
-    out=$(curl -s --connect-timeout 5 \
-        -H "Authorization: Bearer $token" \
-        -H "Content-Type: application/json" \
-        "http://localhost:18789/sessions" 2>/dev/null)
-    
-    if echo "$out" | grep -q "<html"; then
-        log "AUTH FAIL: HTML response, token invalid"
+# ── 检测 aborted sessions ─────────────────────────────
+# 数据源：sessions.json（main agent的sessions）
+# 注意：跨agent的aborted需要 isolated cron job 调用 sessions_list 检测
+check_aborted_from_file() {
+    if [[ ! -f "$SESSIONS" ]]; then
+        log "sessions.json 不存在"
         return 0
     fi
     
-    local result
-    result=$(echo "$out" | python3 -c "
-import json, sys
-try:
-    d = json.load(sys.stdin)
-    sessions = d if isinstance(d, list) else d.get('sessions', d.get('data', []))
-    aborted = [(s['key'], s.get('displayName','')) for s in sessions if s.get('abortedLastRun')]
-    print(len(aborted))
-    for k, dn in aborted: print(k)
-except Exception as e:
-    print('ERR:', e)
-" 2>/dev/null) || result="0"
+    # 写入当前检测时间
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$ABORTED_LIST"
+    
+    # 检测超时未活跃的 agent main sessions（>3小时无更新）
+    python3 -c "
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+sessions_file = Path('$SESSIONS')
+if not sessions_file.exists():
+    print('no_sessions_file')
+    exit()
+
+with open(sessions_file) as f:
+    data = json.load(f)
+
+NOW = datetime.now(timezone.utc)
+THREE_HOURS = 3 * 3600
+
+# 只检查 agent main sessions（非 cron/subagent）
+aborted = []
+for key, s in data.items():
+    if ':main' not in key or 'cron:' in key or 'subagent:' in key:
+        continue
+    
+    updated = s.get('updatedAt', 0)
+    if not updated:
+        continue
+    
+    age_seconds = (NOW - datetime.fromtimestamp(updated/1000, tz=timezone.utc)).total_seconds()
+    
+    if age_seconds > THREE_HOURS:
+        aborted.append((key, round(age_seconds/3600, 1)))
+
+print(f'ABORTED:{len(aborted)}')
+for k, h in aborted:
+    print(f'{k}|{h}h')
+" >> "$ABORTED_LIST"
     
     local count
-    count=$(echo "$result" | head -1)
+    count=$(grep "^ABORTED:" "$ABORTED_LIST" | cut -d: -f2)
     
-    if [[ "$count" =~ ^[0-9]+$ ]] && (( count > 0 )); then
-        log "检测到 $count 个 aborted sessions"
-        echo "$result" | tail -n +2 | while read -r key; do
-            [[ -z "$key" ]] && continue
-            log "生成修复命令: $key"
-            python3 -c "
+    if [[ -n "$count" && "$count" != "0" ]]; then
+        log "检测到 $count 个超时未活跃 agent sessions"
+        grep -v "^ABORTED:" "$ABORTED_LIST" | while read -r line; do
+            log "  $line"
+            
+            # 写入修复命令
+            local key
+            key=$(echo "$line" | cut -d'|' -f1)
+            if [[ -n "$key" ]]; then
+                python3 -c "
 import json
 queue = []
 if [[ -f '$QUEUE' ]]; then
     try: queue = json.load(open('$QUEUE')).get('commands', [])
     except: pass
 fi
-# 检查是否已在队列
 if not any(c.get('session_key') == '$key' for c in queue):
-    queue.append({'cmd': 'sessions_send', 'session_key': '$key', 'msg': '【WD修复】检测到你上轮异常中止。请回复任意内容确认存活。', 'note': 'aborted_recovery'})
-json.dump({'commands': queue}, open('$QUEUE', 'w'))
+    queue.append({'cmd': 'sessions_send', 'session_key': '$key', 'msg': '【WD修复】检测到你超过3小时未活跃。请回复任意内容确认存活。', 'note': 'stale_recovery'})
+    json.dump({'commands': queue}, open('$QUEUE', 'w'))
 "
+            fi
         done
     else
-        log "无 aborted sessions"
+        log "无超时 agent sessions（<3小时未活跃）"
     fi
 }
 
-# ── 修复断点卡死（>1小时未动） ──────────────────────
-fix_stuck_checkpoint() {
-    if [[ -f "$CHECKPOINT" ]]; then
-        local ts age
-        ts=$(python3 -c "import json; d=json.load(open('$CHECKPOINT')); print(d.get('ts',''))" 2>/dev/null)
-        if [[ -n "$ts" ]]; then
-            age=$(python3 -c "
-from datetime import datetime, timezone
-now = datetime.now(timezone.utc)
-t = datetime.fromisoformat('$ts'.replace('Z','+00:00'))
-print(int((now - t).total_seconds()))
-" 2>/dev/null) || age=0
-            if (( age > 3600 )); then
-                log "断点卡死(${age}s)，重置idle"
-                python3 -c "import json; json.dump({'phase':'idle','idx':0,'pending_done':'','ts':''}, open('$CHECKPOINT', 'w'))"
-            fi
-        fi
-    fi
-}
-
-# ── 清理 tasks.json 中超时任务（>2小时仍在进行） ──────
+# ── 清理 stale 任务 ─────────────────────────────────
 cleanup_stale_tasks() {
     if [[ ! -f "$TASKS" ]]; then return; fi
     python3 -c "
 import json, time
-from datetime import datetime, timezone
 d = json.load(open('$TASKS'))
 tasks = d if isinstance(d, list) else d.get('tasks', [])
 now_ts = time.time()
@@ -120,36 +119,52 @@ stale = []
 for t in tasks:
     if t.get('status') == '进行':
         created = t.get('created_at', 0)
-        if created and (now_ts - created) > 7200:  # 2h
+        if created and (now_ts - created) > 7200:
             stale.append(t.get('id'))
             t['status'] = '放弃'
-            t['completion_report'] = '超时未完成（>2h），Λ系统自动清理'
+            t['completion_report'] = '超时(>2h)，Λ自动清理'
 if stale:
-    print('Stale tasks cleaned:', stale)
+    print('Stale:', stale)
     json.dump(d, open('$TASKS', 'w'), ensure_ascii=False)
 " 2>/dev/null
 }
 
-# ── 主流程 ───────────────────────────────────────────
-main() {
-    log "=== 健康检查开始 ==="
+# ── 修复断点卡死 ────────────────────────────────────
+fix_checkpoint() {
+    if [[ ! -f "$CHECKPOINT" ]]; then return; fi
     
-    local gh
-    gh=$(gateway_health)
-    [[ "$gh" == "ok" ]] && log "Gateway: ✅" || log "Gateway: ❌"
+    python3 -c "
+import json
+from datetime import datetime, timezone
+d = json.load(open('$CHECKPOINT'))
+ts = d.get('ts','')
+if not ts:
+    print('no_ts')
+    exit()
+t = datetime.fromisoformat(ts.replace('Z','+00:00'))
+age = (datetime.now(timezone.utc) - t).total_seconds()
+print(f'checkpoint_age:{int(age)}')
+if age > 3600:
+    print('STALE')
+" > /tmp/checkpoint_age.txt 2>/dev/null
     
-    local tok
-    tok=$(get_token)
-    if [[ -n "$tok" && ${#tok} -gt 20 ]]; then
-        check_aborted "$tok"
-    else
-        log "Token无效(length=${#tok})，跳过aborted检测"
+    local result
+    result=$(cat /tmp/checkpoint_age.txt)
+    
+    if echo "$result" | grep -q "STALE"; then
+        log "断点卡死，重置idle"
+        python3 -c "import json; json.dump({'phase':'idle','idx':0,'pending_done':'','ts':''}, open('$CHECKPOINT', 'w'))"
     fi
-    
-    fix_stuck_checkpoint
+}
+
+# ── 主流程 ──────────────────────────────────────────
+main() {
+    log "=== 健康检查 ==="
+    check_gateway
+    check_aborted_from_file
+    fix_checkpoint
     cleanup_stale_tasks
-    
-    log "=== 检查结束 ==="
+    log "=== 完成 ==="
 }
 
 main "$@"
