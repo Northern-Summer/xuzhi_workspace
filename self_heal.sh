@@ -39,33 +39,36 @@ check_gateway() {
 }
 
 # ── T2: >80% agents aborted（真实检测.jsonl文件）─────
+# 修复：使用固定的7个注册agent列表，不再依赖目录扫描计数；
+#       活跃定义：30分钟内有过任意session文件修改；
+#       阈值：abort_rate >= 80（即7个agent中≥6个不活跃）才触发。
 check_agent_abort_rate() {
-    local total=0
-    local aborted=0
-    
-    # 计算所有 agent 的活跃 session 文件
-    for agent_dir in "$HOME"/.openclaw/agents/*/sessions/; do
-        [[ -d "$agent_dir" ]] || continue
-        agent_name=$(basename "$(dirname "$agent_dir")")
-        
-        # 统计有效 session 文件（30分钟内修改过 = 活跃）
-        active_count=$(find "$agent_dir" -name "*.jsonl" -mmin -1800 2>/dev/null | grep -v ".deleted." | grep -v ".reset." | wc -l)
-        
-        if [[ "$active_count" -gt 0 ]]; then
-            ((total++))
+    local REGISTERED_AGENTS=(
+        "main"
+        "xuzhi-delta-forge"
+        "xuzhi-gamma-scribe"
+        "xuzhi-omega-chenxi"
+        "xuzhi-phi-sentinel"
+        "xuzhi-psi-philosopher"
+        "xuzhi-theta-seeker"
+    )
+    local TOTAL=7
+    local ACTIVE=0
+
+    for agent_dir in "${REGISTERED_AGENTS[@]}"; do
+        local SESSION_DIR="$HOME/.openclaw/agents/${agent_dir}/sessions/"
+        [[ -d "$SESSION_DIR" ]] || continue
+        # 30分钟内有过修改的 session 文件（排除 deleted/reset）
+        local RECENT=$(find "$SESSION_DIR" -name "*.jsonl" -mmin -1800 \
+            2>/dev/null | grep -v ".deleted." | grep -v ".reset." | wc -l)
+        if (( RECENT > 0 )); then
+            ((ACTIVE++))
         fi
     done
-    
-    # 当前 main session 是否活跃（10分钟内修改）
-    main_active=$(find "$HOME/.openclaw/agents/main/sessions/" -name "*.jsonl" -mmin -10 2>/dev/null | grep -v ".deleted." | grep -v ".reset." | wc -l)
-    
-    if [[ "$total" -gt 0 ]]; then
-        local inactive=$((total - main_active))
-        local pct=$(( inactive * 100 / total ))
-        echo "${pct}"
-    else
-        echo "100"  # 无活跃session = 100% 不活跃
-    fi
+
+    local INACTIVE=$(( TOTAL - ACTIVE ))
+    local PCT=$(( INACTIVE * 100 / TOTAL ))
+    echo "${PCT},${ACTIVE},${TOTAL}"   # 返回 百分比,活跃数,总数
 }
 
 # ── T3: checkpoint 卡死 >30分钟 ──────────────────
@@ -194,11 +197,14 @@ check_red_blue_triggers() {
         triggers+=("T1:Gateway不可达(2次确认)")
     fi
     
-    # T2: >80% agents aborted
+    # T2: >80% agents aborted（7个注册agent中≥6个30分钟无活动）
+    local abort_result
+    abort_result=$(check_agent_abort_rate)
     local abort_pct
-    abort_pct=$(check_agent_abort_rate)
+    abort_pct=$(echo "$abort_result" | cut -d, -f1)
     if [[ "$abort_pct" =~ ^[0-9]+$ ]] && (( abort_pct >= 80 )); then
-        triggers+=("T2:Agent不活跃率${abort_pct}%")
+        local active_cnt=$(echo "$abort_result" | cut -d, -f2)
+        triggers+=("T2:Agent不活跃率${abort_pct}%(${active_cnt}/7活跃)")
     fi
     
     # T3: checkpoint 卡死 >30分钟
