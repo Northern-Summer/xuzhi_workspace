@@ -74,6 +74,11 @@ if [[ "$EXPERT_CYCLE" == "0" ]]; then
     python3 "$HOME/.xuzhi_memory/task_center/expert_tracker.py" \
         >> "$HOME/.xuzhi_memory/expert_tracker/tracker.log" 2>&1 \
         || log "Expert Tracker: 异常"
+    log "Expert Watchdog: 验证学习闭环"
+    python3 "$HOME/.xuzhi_memory/task_center/expert_watchdog.py" \
+        >> "$HOME/.xuzhi_memory/expert_tracker/watchdog.log" 2>&1
+        >> "$HOME/.xuzhi_memory/expert_tracker/tracker.log" 2>&1 \
+        || log "Expert Tracker: 异常"
 fi
 
 log "=== 完成 ==="
