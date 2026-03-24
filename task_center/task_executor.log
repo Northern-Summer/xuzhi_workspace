@@ -24,3 +24,27 @@
 2026-03-24 12:18:52 [exec] 选取 3 个任务（等待总数: 84）
 2026-03-24 12:18:55 [exec] ✅ cron execution agent 创建成功: 309a1279-394f-4e8e-b6fa-cefbba3a24bb
 2026-03-24 12:18:55 [exec] === 执行器完成 ===
+2026-03-24 12:30:02 [exec] === 任务执行器启动 ===
+2026-03-24 12:30:02 [exec] === 任务执行器启动 ===
+2026-03-24 12:30:02 [exec] 选取 3 个任务（等待总数: 82）
+2026-03-24 12:30:02 [exec] 选取 3 个任务（等待总数: 82）
+2026-03-24 12:30:06 [exec] ✅ cron execution agent 创建成功: d831860f-f8f8-4e02-a538-98ce9fbcfd1e
+2026-03-24 12:30:06 [exec] ✅ cron execution agent 创建成功: d831860f-f8f8-4e02-a538-98ce9fbcfd1e
+2026-03-24 12:30:06 [exec] === 执行器完成 ===
+2026-03-24 12:30:06 [exec] === 执行器完成 ===
+2026-03-24 12:30:40 [exec] === 任务执行器启动 ===
+2026-03-24 12:30:40 [exec] 选取 3 个任务（等待总数: 82）
+2026-03-24 12:30:51 [exec] ❌ cron job 创建失败: gateway connect failed: Error: gateway closed (1000): 
+Error: gateway closed (1000 normal closure): no close reason
+Gateway target: ws://127.0.0.1:187
+2026-03-24 12:30:51 [exec] === 执行器失败 ===
+2026-03-24 12:31:16 [exec] === 任务执行器启动 ===
+2026-03-24 12:31:16 [exec] 选取 3 个任务（等待总数: 82）
+2026-03-24 12:31:25 [exec] ❌ cron job 创建失败: gateway connect failed: Error: gateway closed (1000): 
+Error: gateway closed (1000 normal closure): no close reason
+Gateway target: ws://127.0.0.1:187
+2026-03-24 12:31:25 [exec] === 执行器失败 ===
+2026-03-24 12:31:29 [exec] === 任务执行器启动 ===
+2026-03-24 12:31:29 [exec] 选取 3 个任务（等待总数: 82）
+2026-03-24 12:31:34 [exec] ✅ cron execution agent 创建成功: 87b5e78e-ba84-45b9-bd4d-bc896c18b031
+2026-03-24 12:31:34 [exec] === 执行器完成 ===

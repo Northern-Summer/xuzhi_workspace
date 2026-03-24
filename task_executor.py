@@ -50,6 +50,10 @@ def get_waiting_tasks():
                 break
             if dept in by_dept and by_dept[dept]:
                 t = by_dept[dept][0]
+                # 跳过已被认领的任务（claim_task.py 会失败，导致整个批次的子agent认领失败）
+                if t.get("status") == "进行":
+                    log(f"跳过任务#{t['id']}（已由 {t.get('participants',[])} 认领）")
+                    continue
                 selected.append((t, AGENT_MAP.get(dept, "Λ")))
         
         return selected, len(waiting)
@@ -98,29 +102,40 @@ def build_prompt(selected):
     
     task_ids = ",".join(ids)
     
-    # execution agent 的任务：使用 sessions_spawn 派发子 agent 执行每个任务
-    prompt = f"""你是 Xuzhi 系统的任务派发 agent。你需要使用 `sessions_spawn` 工具为每个任务派发独立的执行 subagent。
+    # execution agent 直接执行任务（避免 nested spawn 膨胀）
+    prompt = f"""你是 Xuzhi 系统的自主执行 agent。请逐个完成以下 {len(selected)} 个任务。
 
 **你的任务列表：**
 {lines}
 
-**你需要做的事情：**
-1. 对每个任务调用 `sessions_spawn` 工具，派发一个独立的 subagent 来执行该任务
-2. 每个 subagent 的 `task` 参数应包含：
-   - 认领任务: `python3 {HOME}/xuzhi_genesis/centers/task/claim_task.py <agent_id> <task_id>`
-   - 执行任务（根据标题描述自主判断，用 web_search/exec 等工具）
-   - 完成任务: `python3 {HOME}/xuzhi_genesis/centers/task/complete_task.py <task_id> <agent_id> --report '分析结论摘要'`
-   - 记录反馈: `python3 {HOME}/xuzhi_genesis/centers/mind/society/log_feedback.py --agent <agent_id> --task 'task_<task_id>' --feedback positive --reason '自主执行完成'`
+**对每个任务执行以下完整流程：**
 
-**sessions_spawn 调用示例（你需要对每个任务调用一次）：**
+**步骤1 — 认领任务：**
+```bash
+python3 {HOME}/xuzhi_genesis/centers/task/claim_task.py <agent_id> <task_id>
 ```
-sessions_spawn(task="认领任务: python3 .../claim_task.py Λ 36\n然后执行任务...", runtime="subagent", mode="run", runTimeoutSeconds=300)
+
+**步骤2 — 自主执行：**
+- 根据任务标题和描述，自主判断行动（使用 exec、read、write、web_search 等工具）
+- 工程任务：分析/修改代码、运行命令
+- 情报任务：web搜索、信息整理
+- 哲学任务：分析论证、撰写短文
+- 原则：尽所能真实完成，不要空跑
+
+**步骤3 — 完成任务：**
+```bash
+python3 {HOME}/xuzhi_genesis/centers/task/complete_task.py <task_id> <agent_id> --report '分析结论或完成摘要（不少于50字）'
+```
+
+**步骤4 — 记录反馈（提升评分）：**
+```bash
+python3 {HOME}/xuzhi_genesis/centers/mind/society/log_feedback.py --agent <agent_id> --task 'task_<task_id>' --feedback positive --reason '因果分析任务自主完成'
 ```
 
 **重要规则：**
-- 必须对每个任务都调用 `sessions_spawn` 派发子 agent
-- 派发完成后，输出：【派发完成: {task_ids}】
-- 不要尝试自己执行任务，派发给 subagent 即可"""
+- 必须对每个任务都完整执行4个步骤
+- 认领失败（任务已被认领）则跳过该任务
+- 全部完成后输出：【批次完成: {task_ids}】"""
 
     return prompt
 
