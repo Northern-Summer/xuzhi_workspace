@@ -1,2 +1,40 @@
 2026-03-24 11:35:03 [quota_guard] 配额: 77%
 2026-03-24 11:35:08 [quota_guard] AutoRA cron 已恢复（配额77%正常）
+2026-03-24 12:00:03 [quota_guard] 配额: 77%
+{
+  "id": "250a9c67-01b3-432e-8889-b3bbf68bfba5",
+  "agentId": "main",
+  "sessionKey": "agent:main:main",
+  "name": "AutoRA Engine - ab",
+  "enabled": true,
+  "createdAtMs": 1774144863999,
+  "updatedAtMs": 1774324807710,
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 * * * *",
+    "tz": "Asia/Shanghai",
+    "staggerMs": 300000
+  },
+  "sessionTarget": "isolated",
+  "wakeMode": "now",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "cd ~/xuzhi_genesis/centers/engineering/harness && python3 -m pytest tests/ -q --tb=short 2>&1 | tail -5 && echo '---' && cd ~/xuzhi_genesis && git add -A && git commit -m 'AutoRA cycle' && timeout 30 git push origin master 2>&1 | tail -3",
+    "timeoutSeconds": 600
+  },
+  "delivery": {
+    "mode": "none",
+    "to": "http://localhost:18789/webhook/autoraresult"
+  },
+  "state": {
+    "lastRunAtMs": 1774321351598,
+    "lastRunStatus": "error",
+    "lastStatus": "error",
+    "lastDurationMs": 37781,
+    "lastDeliveryStatus": "unknown",
+    "consecutiveErrors": 1,
+    "nextRunAtMs": 1774324951588,
+    "lastError": "Channel is required (no configured channels detected). Set delivery.channel explicitly or use a main session with a previous channel."
+  }
+}
+2026-03-24 12:00:07 [quota_guard] AutoRA cron 已恢复（配额77%正常）
