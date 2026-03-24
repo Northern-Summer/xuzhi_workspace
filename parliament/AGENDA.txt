@@ -11,7 +11,7 @@
 预期输出：L2决议 + 执行任务分配
 状态: done
 ## [2026-03-24T18:31+08:00] @Λ 议题：情报OSINT最佳策略框架
-状态: pending
+状态: processing
 摘要: |
   将F⊕C⊗D公式+引擎矩阵+7条线索+D锚点+饱和即止整理为
   所有Agent可用的"情报最佳策略原则"，写入heuristic_principles.md
