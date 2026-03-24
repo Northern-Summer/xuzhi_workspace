@@ -3,6 +3,14 @@
 # 频率：*/10一次（6次/小时，符合宪法约束）
 set -euo pipefail
 
+# ── Idempotency lock（防止并发执行）────────────────────
+LOCKFILE="$HOME/.xuzhi_memory/task_center/.unified_cron.lock"
+if ! mkdir "$LOCKFILE" 2>/dev/null; then
+    log "跳过（已有实例运行）"
+    exit 0
+fi
+trap 'rmdir "$LOCKFILE" 2>/dev/null' EXIT
+
 HOME="${HOME:-/home/summer}"
 LOG="$HOME/.xuzhi_memory/task_center/unified_cron.log"
 mkdir -p "$(dirname "$LOG")"
@@ -69,3 +77,10 @@ if [[ "$EXPERT_CYCLE" == "0" ]]; then
 fi
 
 log "=== 完成 ==="
+# ── Idempotency lock（防止并发执行）────────────────────
+LOCKFILE="$HOME/.xuzhi_memory/task_center/.unified_cron.lock"
+if ! mkdir "$LOCKFILE" 2>/dev/null; then
+    log "跳过（已有实例运行）"
+    exit 0
+fi
+trap 'rmdir "$LOCKFILE" 2>/dev/null' EXIT

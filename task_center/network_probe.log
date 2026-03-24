@@ -5,3 +5,17 @@
 20:17:25   ❌ semantic_scholar: 10615ms — <urlopen error _ssl.c:983: The handshake operation timed out
 20:17:25   ❌ brave: 0ms — no API key
 20:17:25 === 可用源: ['arxiv', 'searxng'] ===
+20:35:15 === 网络探测开始 ===
+20:35:15   ❌ github: 535ms — HTTP Error 401: Unauthorized
+20:35:16   ✅ arxiv: 350ms
+20:35:18   ✅ searxng: 2364ms — localhost:8080
+20:35:18   ❌ semantic_scholar: 306ms — HTTP Error 429: 
+20:35:18   ❌ brave: 0ms — no API key
+20:35:18 === 可用源: ['arxiv', 'searxng'] ===
+20:43:09 === 网络探测开始 ===
+20:43:10   ❌ github: 642ms — HTTP Error 401: Unauthorized
+20:43:10   ✅ arxiv: 510ms
+20:43:12   ✅ searxng: 2312ms — localhost:8080
+20:43:13   ❌ semantic_scholar: 471ms — HTTP Error 429: 
+20:43:13   ❌ brave: 0ms — no API key
+20:43:13 === 可用源: ['arxiv', 'searxng'] ===

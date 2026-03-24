@@ -1,0 +1,41 @@
+20:43:02 [chaos] === 混沌测试开始 ===
+20:43:09 [chaos] 基线: Gateway=✅ Crons=✅ Queue=✅ 等待:91 进行:1
+20:43:09 [chaos] 
+── network_flap ──
+20:43:09 [chaos] EXPERIMENT: 网络探测容错...
+20:43:13 [chaos]   ✅ 网络探测抗波动: 20:43:09 === 网络探测开始 ===
+20:43:10   ❌ github: 642ms — HTTP Error 401: Unauthorized
+20:43:10   ✅ arxiv: 510ms
+20:43:12   ✅ searxng: 2312ms — localhost:8080
+20:43:13   ❌ semantic_scholar: 471ms — HTTP Error 429: 
+20:43:13   ❌ brave: 0ms — no API key
+20:43:13 === 可用源: ['arxiv', 'searxng'] ===
+20:43:13 [chaos] 
+── task_queue_blocked ──
+20:43:13 [chaos] EXPERIMENT: 任务队列写入测试...
+20:43:13 [chaos]   结果: ✅ 队列正常 — 等待:91 进行:1
+20:43:13 [chaos]   锁文件已清理
+20:43:13 [chaos] 
+── cron_overlap ──
+20:43:13 [chaos] EXPERIMENT: unified_cron 并发触发...
+20:43:20 [chaos]   结果: 
+20:43:20 [chaos] 
+── quota_exhaustion ──
+20:43:20 [chaos] EXPERIMENT: 配额耗尽降级...
+20:43:20 [chaos]   当前配额: 74%
+20:43:20 [chaos]   → 配额充足，跳过降级测试
+20:43:20 [chaos] 
+── gateway_down ──
+20:43:20 [chaos] EXPERIMENT: Gateway 短暂不可达（不执行真正的gateway stop）
+20:43:20 [chaos]   → 验证 isolated agent 在 Gateway 不可达时能否独立完成任务
+20:43:24 [chaos]   ✅ Gateway 正常（不进行破坏性测试）
+20:43:24 [chaos]   注：真正的混沌测试需要staging环境
+20:43:24 [chaos] 
+=== 混沌测试汇总 ===
+20:43:24 [chaos]   ✅ network_flap
+20:43:24 [chaos]   ✅ task_queue_blocked
+20:43:24 [chaos]   ✅ cron_overlap
+20:43:24 [chaos]   ✅ quota_exhaustion
+20:43:24 [chaos]   ✅ gateway_down
+20:43:24 [chaos] 
+总体: ✅ 全通过

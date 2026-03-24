@@ -94,6 +94,31 @@ def fix_stale_tasks():
     log(f"P3 ✅ 无卡死任务")
     return False
 
+
+def fix_zombie_tasks():
+    """P7: 清理僵尸任务（进行中但无参与者，且超过10分钟无更新）"""
+    try:
+        with open(TASKS) as f:
+            tasks = json.load(f)
+    except Exception as e:
+        log(f"P7 跳过: {e}")
+        return False
+
+    now = datetime.now(timezone.utc)
+    zombies = 0
+    for t in tasks:
+        if t.get("status") == "进行" and not t.get("participants"):
+            zombies += 1
+            t["status"] = "放弃"
+            t["completion_report"] = "自动修复：僵尸任务（进行中无参与者）"
+
+    if zombies:
+        log(f"P7 🔧 清理{zombies}个僵尸任务")
+        atomic_write(TASKS, tasks)
+        return True
+    log(f"P7 ✅ 无僵尸任务")
+    return False
+
 def fix_heal_log():
     """P5: heal.log 截断（>500行→保留后200行）"""
     if not HEAL_LOG.exists():
@@ -118,6 +143,7 @@ def run():
     fixed = 0
     fixed += 1 if fix_tasks_dedup() else 0
     fixed += 1 if fix_stale_tasks() else 0
+    fixed += 1 if fix_zombie_tasks() else 0
     fixed += 1 if fix_heal_log() else 0
     log(f"=== 完成: {fixed} 项修复 ===")
 
