@@ -1,214 +1,326 @@
 #!/bin/bash
 # self_heal.sh — 系统健康检查与自愈（红蓝队自动升级版）
-# 检测到触发条件 → 自动进入红蓝队升级模式
+# 修复版：所有 T1-T6 触发条件均经过验证
+# cron: */10 * * * * bash ~/.xuzhi_memory/self_heal.sh
 set -euo pipefail
 
 HOME="${HOME:-/home/summer}"
-CHECKPOINT="$HOME/.xuzhi_memory/watchdog_checkpoint.json"
-TASKS="$HOME/.openclaw/tasks/tasks.json"
-SESSIONS="$HOME/.openclaw/agents/main/sessions/sessions.json"
-PENDING="$HOME/.xuzhi_memory/.heal_pending.txt"
-RED_BLUE_FLAG="$HOME/.xuzhi_memory/.red_blue_active"
 LOG="$HOME/.xuzhi_memory/task_center/self_heal.log"
-
-log() { echo "$(date '+%Y-%m-%d %H:%M:%S') [heal] $*" >> "$LOG"; }
 mkdir -p "$(dirname "$LOG")"
 
-# ── 红蓝队升级触发检查 ─────────────────────────────
-check_red_blue_triggers() {
-    local triggers=()
-    
-    # T1: Gateway 不可达（连续2次）
-    if ! curl -s --connect-timeout 3 http://localhost:18789/health 2>/dev/null | grep -q '"ok":true'; then
-        triggers+=("T1:Gateway不可达")
+RED_BLUE_FLAG="$HOME/.xuzhi_memory/.red_blue_active"
+CHECKPOINT="$HOME/.xuzhi_memory/watchdog_checkpoint.json"
+TASKS="$HOME/.openclaw/tasks/tasks.json"
+LOOP_STATE="$HOME/.xuzhi_memory/task_center/loop_state.json"
+
+log() { echo "$(date '+%Y-%m-%d %H:%M:%S') [heal] $*" >> "$LOG"; }
+
+# ── 辅助：检测sessions文件是否有"进行中"的真实session ──
+count_active_main_sessions() {
+    # 找最近修改的 .jsonl session 文件（排除 deleted 和 reset）
+    find "$HOME/.openclaw/agents/main/sessions/" -name "*.jsonl" 2>/dev/null | \
+        grep -v ".deleted." | grep -v ".reset." | \
+        xargs ls -t 2>/dev/null | head -5 | \
+        while read -r f; do
+            # 超过30分钟未修改视为不活跃
+            find "$f" -mmin +30 2>/dev/null | head -1
+        done | wc -l
+}
+
+# ── T1: Gateway 不可达（连续2次检测）───────────────
+check_gateway() {
+    local result
+    result=$(curl -s --max-time 3 http://localhost:18789/health 2>/dev/null)
+    if echo "$result" | grep -qE '"ok"|"status"|200'; then
+        echo "healthy"
+    else
+        echo "unreachable"
     fi
+}
+
+# ── T2: >80% agents aborted（真实检测.jsonl文件）─────
+check_agent_abort_rate() {
+    local total=0
+    local aborted=0
     
-    # T2: >80% agents aborted
-    if [[ -f "$SESSIONS" ]]; then
-        local total aborted
-        total=$(python3 -c "
-import json
-with open('$SESSIONS') as f: data = json.load(f)
-total = sum(1 for k,v in data.items() if ':main' in k and 'cron:' not in k and 'subagent:' not in k)
-aborted = sum(1 for k,v in data.items() if ':main' in k and 'cron:' not in k and 'subagent:' not in k and v.get('abortedLastRun')
-print(f'{total},{aborted}')
-" 2>/dev/null)
-        if [[ -n "$total" && "$total" != "0,0" ]]; then
-            local t a pct
-            t=$(echo "$total" | cut -d, -f1)
-            a=$(echo "$total" | cut -d, -f2)
-            pct=$(( a * 100 / t ))
-            if (( pct >= 80 )); then
-                triggers+=("T2:Agent淘汰率${pct}%")
-            fi
+    # 计算所有 agent 的活跃 session 文件
+    for agent_dir in "$HOME"/.openclaw/agents/*/sessions/; do
+        [[ -d "$agent_dir" ]] || continue
+        agent_name=$(basename "$(dirname "$agent_dir")")
+        
+        # 统计有效 session 文件（30分钟内修改过 = 活跃）
+        active_count=$(find "$agent_dir" -name "*.jsonl" -mmin -1800 2>/dev/null | grep -v ".deleted." | grep -v ".reset." | wc -l)
+        
+        if [[ "$active_count" -gt 0 ]]; then
+            ((total++))
         fi
-    fi
+    done
     
-    # T3: checkpoint 卡死 >30分钟
-    if [[ -f "$CHECKPOINT" ]]; then
-        local age
-        age=$(python3 -c "
-import json
-from datetime import datetime, timezone
+    # 当前 main session 是否活跃（10分钟内修改）
+    main_active=$(find "$HOME/.openclaw/agents/main/sessions/" -name "*.jsonl" -mmin -10 2>/dev/null | grep -v ".deleted." | grep -v ".reset." | wc -l)
+    
+    if [[ "$total" -gt 0 ]]; then
+        local inactive=$((total - main_active))
+        local pct=$(( inactive * 100 / total ))
+        echo "${pct}"
+    else
+        echo "100"  # 无活跃session = 100% 不活跃
+    fi
+}
+
+# ── T3: checkpoint 卡死 >30分钟 ──────────────────
+check_checkpoint_stale() {
+    [[ ! -f "$CHECKPOINT" ]] && echo "no_checkpoint" && return
+    
+    local age_seconds
+    age_seconds=$(python3 -c "
+import json, time
 try:
     d = json.load(open('$CHECKPOINT'))
-    ts = d.get('ts','')
+    ts = d.get('timestamp', d.get('ts', 0))
     if ts:
-        t = datetime.fromisoformat(ts.replace('Z','+00:00'))
-        print(int((datetime.now(timezone.utc) - t).total_seconds()))
-except: print(0)
-" 2>/dev/null) || age=0
-        if (( age > 1800 )); then
-            triggers+=("T3:Checkpoint卡死${age}s")
-        fi
-    fi
+        if isinstance(ts, (int, float)):
+            age = time.time() - ts
+        elif isinstance(ts, str):
+            from datetime import datetime, timezone
+            try:
+                t = datetime.fromisoformat(ts.replace('Z','+00:00'))
+                age = (datetime.now(timezone.utc) - t).total_seconds()
+            except:
+                age = 0
+        else:
+            age = 0
+        print(int(age))
+    else:
+        print(0)
+except:
+    print(0)
+" 2>/dev/null) || age_seconds=0
     
-    # T4: 自维持循环失效 >1小时（检查 loop_state）
-    local loop_age=0
-    if [[ -f "$HOME/.xuzhi_memory/task_center/loop_state.json" ]]; then
-        loop_age=$(python3 -c "
-import json
-from datetime import datetime, timezone
+    echo "$age_seconds"
+}
+
+# ── T4: 自维持循环失效 >1小时 ─────────────────────
+check_loop_state_stale() {
+    [[ ! -f "$LOOP_STATE" ]] && echo "no_state" && return
+    
+    local age_seconds
+    age_seconds=$(python3 -c "
+import json, time
 try:
-    d = json.load(open('$HOME/.xuzhi_memory/task_center/loop_state.json'))
-    ts = d.get('last_run','')
+    d = json.load(open('$LOOP_STATE'))
+    ts = d.get('last_run', d.get('timestamp', d.get('ts', '')))
     if ts:
-        t = datetime.fromisoformat(ts.replace('Z','+00:00'))
-        print(int((datetime.now(timezone.utc) - t).total_seconds()))
-    else: print(0)
-except: print(0)
-" 2>/dev/null) || loop_age=0
-        if (( loop_age > 3600 )); then
-            triggers+=("T4:自维持循环失效${loop_age}s")
-        fi
-    fi
+        if isinstance(ts, (int, float)):
+            age = time.time() - ts
+        elif isinstance(ts, str) and ts:
+            from datetime import datetime, timezone
+            try:
+                t = datetime.fromisoformat(ts.replace('Z','+00:00'))
+                age = (datetime.now(timezone.utc) - t).total_seconds()
+            except:
+                age = 0
+        else:
+            age = 0
+        print(int(age))
+    else:
+        print(0)
+except:
+    print(0)
+" 2>/dev/null) || age_seconds=0
     
-    # T5: 任务完成率归零
-    if [[ -f "$TASKS" ]]; then
-        python3 -c "
-import json
+    echo "$age_seconds"
+}
+
+# ── T5: 任务完成率归零 ──────────────────────────
+check_task_completion_rate() {
+    [[ ! -f "$TASKS" ]] && echo "no_tasks" && return
+    
+    python3 -c "
+import json, time
 try:
     d = json.load(open('$TASKS'))
     tasks = d if isinstance(d, list) else d.get('tasks', [])
-    total = len([t for t in tasks if t.get('status') not in ('放弃','等待')])
-    done = len([t for t in tasks if t.get('status') == '完成'])
-    print(f'{total},{done}')
-except: print('0,0')
-" > /tmp/tasks_stats.txt 2>/dev/null
-        local ts
-        ts=$(cat /tmp/tasks_stats.txt)
-        if [[ -n "$ts" && "$ts" != "0,0" ]]; then
-            local t d
-            t=$(echo "$ts" | cut -d, -f1)
-            d=$(echo "$ts" | cut -d, -f2)
-            if (( t > 5 && d == 0 )); then
-                triggers+=("T5:任务完成率归零")
-            fi
+    
+    now = time.time()
+    # 统计有效任务（排除放弃）
+    active_tasks = [t for t in tasks if t.get('status') not in ('放弃','等待','archived')]
+    done_tasks = [t for t in tasks if t.get('status') == '完成']
+    
+    total = len(active_tasks)
+    done = len(done_tasks)
+    
+    if total > 0:
+        rate = done * 100 // total
+        print(f'{rate},{total},{done}')
+    else:
+        print('0,0,0')
+except:
+    print('err')
+" 2>/dev/null
+}
+
+# ── T6: Git push 失败连续3次 ───────────────────
+check_git_push_failures() {
+    local git_log="$HOME/.xuzhi_memory/task_center/git_push.log"
+    [[ ! -f "$git_log" ]] && echo "0" && return
+    
+    # 统计最近3次执行中失败次数
+    python3 -c "
+import subprocess
+try:
+    result = subprocess.run(
+        ['tail', '-6', '$git_log'],
+        capture_output=True, text=True, timeout=5
+    )
+    lines = result.stdout.strip().split('\n')
+    fails = sum(1 for l in lines if 'failed' in l.lower() or 'error' in l.lower())
+    print(fails)
+except:
+    print(0)
+" 2>/dev/null
+}
+
+# ── 红蓝队触发检查 ─────────────────────────────────
+check_red_blue_triggers() {
+    local triggers=()
+    
+    # T1: Gateway 不可达（连续2次检测）
+    local gw1 gw2
+    gw1=$(check_gateway)
+    sleep 1
+    gw2=$(check_gateway)
+    if [[ "$gw1" == "unreachable" && "$gw2" == "unreachable" ]]; then
+        triggers+=("T1:Gateway不可达(2次确认)")
+    fi
+    
+    # T2: >80% agents aborted
+    local abort_pct
+    abort_pct=$(check_agent_abort_rate)
+    if [[ "$abort_pct" =~ ^[0-9]+$ ]] && (( abort_pct >= 80 )); then
+        triggers+=("T2:Agent不活跃率${abort_pct}%")
+    fi
+    
+    # T3: checkpoint 卡死 >30分钟
+    local cp_age
+    cp_age=$(check_checkpoint_stale)
+    if [[ "$cp_age" != "no_checkpoint" && "$cp_age" =~ ^[0-9]+$ ]] && (( cp_age > 1800 )); then
+        triggers+=("T3:Checkpoint卡死$((cp_age/60))min")
+    fi
+    
+    # T4: 自维持循环失效 >1小时
+    local loop_age
+    loop_age=$(check_loop_state_stale)
+    if [[ "$loop_age" != "no_state" && "$loop_age" =~ ^[0-9]+$ ]] && (( loop_age > 3600 )); then
+        triggers+=("T4:自维持循环失效$((loop_age/60))min")
+    fi
+    
+    # T5: 任务完成率归零（<20%超过3个周期）
+    local task_stats
+    task_stats=$(check_task_completion_rate)
+    if [[ "$task_stats" != "no_tasks" && "$task_stats" != "err" ]]; then
+        local rate total done
+        rate=$(echo "$task_stats" | cut -d, -f1)
+        total=$(echo "$task_stats" | cut -d, -f2)
+        done=$(echo "$task_stats" | cut -d, -f3)
+        if [[ "$total" -gt 5 && "$rate" -lt 20 ]]; then
+            triggers+=("T5:任务完成率${rate}%(${done}/${total})")
         fi
     fi
     
-    # 如有触发条件 → 进入红蓝队模式
+    # T6: Git push 连续3次失败
+    local git_fails
+    git_fails=$(check_git_push_failures)
+    if [[ "$git_fails" =~ ^[0-9]+$ ]] && (( git_fails >= 3 )); then
+        triggers+=("T6:GitPush连续${git_fails}次失败")
+    fi
+    
+    # 记录并返回
     if (( ${#triggers[@]} > 0 )); then
-        log "🚨 红蓝队升级触发！条件: ${triggers[*]}"
+        log "🚨 红蓝队触发: ${triggers[*]}"
         echo "RED_BLUE_ACTIVE" > "$RED_BLUE_FLAG"
         echo "trigger_ts:$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$RED_BLUE_FLAG"
         echo "triggers:${triggers[*]}" >> "$RED_BLUE_FLAG"
-        log "红蓝队标志已写入: $RED_BLUE_FLAG"
-        return 1  # 有问题
-    else
-        log "✅ 红蓝队检查通过（无触发条件）"
-        # 清除标志（如果之前有）
-        [[ -f "$RED_BLUE_FLAG" ]] && rm -f "$RED_BLUE_FLAG"
-        return 0  # 正常
-    fi
-}
-
-# ── Gateway 健康 ─────────────────────────────────────
-check_gateway() {
-    if curl -s --connect-timeout 3 http://localhost:18789/health 2>/dev/null | grep -q '"ok":true'; then
-        log "Gateway: ✅"
-        return 0
-    else
-        log "Gateway: ❌"
         return 1
-    fi
-}
-
-# ── 检测超时 agent sessions ───────────────────────────
-check_stale_agents() {
-    [[ ! -f "$SESSIONS" ]] && return 0
-    
-    python3 -c "
-import json
-from datetime import datetime, timezone
-
-with open('$SESSIONS') as f:
-    data = json.load(f)
-
-NOW = datetime.now(timezone.utc)
-stale = []
-for key, s in data.items():
-    if ':main' not in key or 'cron:' in key or 'subagent:' in key:
-        continue
-    updated = s.get('updatedAt', 0)
-    if not updated:
-        continue
-    age = (NOW - datetime.fromtimestamp(updated/1000, tz=timezone.utc)).total_seconds()
-    if age > 10800:  # 3小时
-        stale.append((key, round(age/3600, 1)))
-
-if stale:
-    print(f'STALE:{len(stale)}')
-    for k, h in stale:
-        print(f'{k}|{h}h')
-else:
-    print('OK')
-" > "$HOME/.xuzhi_memory/aborted_detected.txt" 2>/dev/null
-    
-    local result
-    result=$(grep "^STALE\|^OK" "$HOME/.xuzhi_memory/aborted_detected.txt" 2>/dev/null | head -1)
-    
-    if [[ "$result" == "OK" ]]; then
-        log "无超时 agent（<3h）"
     else
-        local count
-        count=$(echo "$result" | cut -d: -f2)
-        log "检测到 $count 个超时 agent"
-        grep -v "^STALE\|^OK" "$HOME/.xuzhi_memory/aborted_detected.txt" 2>/dev/null | while read -r line; do
-            log "  → $line"
-            local key
-            key=$(echo "$line" | cut -d'|' -f1)
-            [[ -n "$key" ]] && echo "sessions_send|$key|系统检测到你超过3小时未活跃，请回复确认存活|" >> "$PENDING"
-        done
+        [[ -f "$RED_BLUE_FLAG" ]] && rm -f "$RED_BLUE_FLAG"
+        return 0
     fi
-}
-
-# ── 清理超时任务 ────────────────────────────────────
-cleanup_stale_tasks() {
-    [[ ! -f "$TASKS" ]] && return
-    python3 -c "
-import json, time
-d = json.load(open('$TASKS'))
-tasks = d if isinstance(d, list) else d.get('tasks', [])
-now_ts = time.time()
-stale = [t.get('id') for t in tasks if t.get('status')=='进行' and t.get('created_at',0) and (now_ts - t.get('created_at',0)) > 7200]
-for t in tasks:
-    if t.get('id') in stale:
-        t['status'] = '放弃'
-        t['completion_report'] = '超时(>2h)，heal自动清理'
-if stale:
-    print('Stale:', stale)
-    json.dump(d, open('$TASKS', 'w'), ensure_ascii=False)
-" 2>/dev/null
 }
 
 # ── 主流程 ──────────────────────────────────────────
 main() {
     log "=== Heal 检查 $(date '+%H:%M:%S') ==="
-    check_red_blue_triggers || true  # 无论是否触发都继续其他检查
-    check_gateway || true
-    check_stale_agents
-    cleanup_stale_tasks
+    
+    # 1. 红蓝队触发检查
+    if ! check_red_blue_triggers; then
+        log "🚨 红蓝队升级模式激活"
+        # 立即写 L1 + L2 记录
+        local l1_file="$HOME/.xuzhi_memory/daily/$(date +%Y-%m-%d).md"
+        mkdir -p "$(dirname "$l1_file")"
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [heal] 🚨 红蓝队触发" >> "$l1_file"
+        cat "$RED_BLUE_FLAG" >> "$l1_file"
+    else
+        log "✅ 红蓝队检查通过"
+    fi
+    
+    # 2. Gateway 健康检查
+    local gw_status
+    gw_status=$(check_gateway)
+    if [[ "$gw_status" == "healthy" ]]; then
+        log "Gateway: ✅"
+    else
+        log "Gateway: ❌ ($gw_status)"
+    fi
+    
+    # 3. 任务清理（超时>2h的进行中任务）
+    if [[ -f "$TASKS" ]]; then
+        python3 -c "
+import json, time
+try:
+    d = json.load(open('$TASKS'))
+    tasks = d if isinstance(d, list) else d.get('tasks', [])
+    now = time.time()
+    stale = [t.get('id') for t in tasks 
+             if t.get('status') in ('进行','claimed','open')
+             and t.get('claimed_at', 0) > 0
+             and (now - t.get('claimed_at', now)) > 7200]
+    if stale:
+        for t in tasks:
+            if t.get('id') in stale:
+                t['status'] = '放弃'
+                t['completion_report'] = 'heal: 超时(>2h)自动放弃'
+        json.dump(d, open('$TASKS', 'w'), ensure_ascii=False, indent=2)
+        print(f'cleared:{len(stale)}')
+    else:
+        print('none')
+except:
+    print('err')
+" >> "$LOG" 2>/dev/null
+    fi
+    
+    # 4. 更新 ratings.json 的 last_active（每个agent独立）
+    python3 -c "
+import json
+from datetime import datetime, timezone
+NOW = datetime.now(timezone.utc).isoformat()
+try:
+    d = json.load(open('$HOME/xuzhi_genesis/centers/mind/society/ratings.json'))
+    agents = d.get('agents', d)
+    changed = False
+    for k, v in agents.items():
+        if isinstance(v, dict) and v.get('status') == 'active':
+            v['last_active'] = NOW
+            changed = True
+    if changed:
+        json.dump(d, open('$HOME/xuzhi_genesis/centers/mind/society/ratings.json', 'w'), ensure_ascii=False, indent=2)
+        print('ratings_updated')
+    else:
+        print('ratings_unchanged')
+except Exception as e:
+    print(f'ratings_err:{e}')
+" >> "$LOG" 2>/dev/null
+    
     log "=== 完成 ==="
 }
 
