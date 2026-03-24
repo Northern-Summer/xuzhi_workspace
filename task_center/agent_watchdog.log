@@ -43,3 +43,61 @@
 21:10:57   → 触发激活（连续2次）...
 21:11:00   ✅ Ψ 激活已派发
 21:11:00 === Agent Watchdog 完成: 4 个激活 ===
+21:14:46 === Agent Watchdog 开始 ===
+21:14:46   ❌ Λ: sessions.json 不存在（可能是 main session 在 Gateway）
+21:14:46   ⚠️ Δ: STALE(795min) | 连续失败: 1次
+21:14:46   ✅ Φ: 健康（16min前活跃）
+21:14:46   ⚠️ Ω: STALE(1093min) | 连续失败: 1次
+21:14:46   ✅ Γ: 健康（14min前活跃）
+21:14:46   ⚠️ Θ: STALE(795min) | 连续失败: 1次
+21:14:46   ⚠️ Ψ: ABORTED, STALE(899min) | 连续失败: 1次
+21:14:46 === Agent Watchdog 完成: 0 个激活 ===
+21:15:12 === Agent Watchdog 开始 ===
+21:15:12   ❌ Λ: sessions.json 不存在（可能是 main session 在 Gateway）
+21:15:12   ⚠️ Δ: STALE(795min) | 连续失败: 2次
+21:15:12   ✅ Φ: 健康（16min前活跃）
+21:15:12   ⚠️ Ω: STALE(1094min) | 连续失败: 2次
+21:15:12   ✅ Γ: 健康（14min前活跃）
+21:15:12   ⚠️ Θ: STALE(796min) | 连续失败: 2次
+21:15:12   ⚠️ Ψ: ABORTED, STALE(900min) | 连续失败: 2次
+21:15:12 === Agent Watchdog 完成: 0 个激活 ===
+21:15:49 === Agent Watchdog 开始 ===
+21:15:49   ❌ Λ: sessions.json 不存在（可能是 main session 在 Gateway）
+21:15:49   ⚠️ Δ: STALE(796min) | 连续失败: 3次
+21:15:49   ✅ Φ: 健康（17min前活跃）
+21:15:49   ⚠️ Ω: STALE(1094min) | 连续失败: 3次
+21:15:49   ✅ Γ: 健康（15min前活跃）
+21:15:49   ⚠️ Θ: STALE(796min) | 连续失败: 3次
+21:15:49   ⚠️ Ψ: ABORTED, STALE(900min) | 连续失败: 3次
+21:15:49 === Agent Watchdog 完成: 0 个激活 ===
+21:16:23 === Agent Watchdog 开始 ===
+21:16:23   ❌ Λ: sessions.json 不存在（可能是 main session 在 Gateway）
+21:16:23   ⚠️ Δ: STALE(796min) | 连续失败: 4次
+21:16:23   ✅ Φ: 健康（18min前活跃）
+21:16:23   ⚠️ Ω: STALE(1095min) | 连续失败: 4次
+21:16:23   ✅ Γ: 健康（16min前活跃）
+21:16:23   ⚠️ Θ: STALE(797min) | 连续失败: 4次
+21:16:23   ⚠️ Ψ: ABORTED, STALE(901min) | 连续失败: 4次
+21:16:23 === Agent Watchdog 完成: 0 个激活 ===
+21:17:54 === Agent Watchdog 开始 ===
+21:17:54   ✅ Λ: 健康（ratings.last_active 正常）
+21:17:54   ⚠️ Δ: STALE(798min) | fails=5
+21:17:54   ⏳ Δ: 冷却中，跳过
+21:17:54   ⚠️ Ω: STALE(1097min) | fails=5
+21:17:54   ⏳ Ω: 冷却中，跳过
+21:17:54   ⚠️ Θ: STALE(798min) | fails=5
+21:17:54   ⏳ Θ: 冷却中，跳过
+21:17:54   ⚠️ Ψ: ABORTED, STALE(902min) | fails=5
+21:17:54   ⏳ Ψ: 冷却中，跳过
+21:17:54 === Agent Watchdog 完成: 0 个激活 ===
+21:18:06 === Agent Watchdog 开始 ===
+21:18:06   ✅ Λ: 健康（ratings.last_active 正常）
+21:18:06   ⚠️ Δ: STALE(798min) | fails=6
+21:18:06   ⏳ Δ: 冷却中，跳过
+21:18:06   ⚠️ Ω: STALE(1097min) | fails=6
+21:18:06   ⏳ Ω: 冷却中，跳过
+21:18:06   ⚠️ Θ: STALE(798min) | fails=6
+21:18:06   ⏳ Θ: 冷却中，跳过
+21:18:06   ⚠️ Ψ: ABORTED, STALE(903min) | fails=6
+21:18:06   ⏳ Ψ: 冷却中，跳过
+21:18:06 === Agent Watchdog 完成: 0 个激活 ===
