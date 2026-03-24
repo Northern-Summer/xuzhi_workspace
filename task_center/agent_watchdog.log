@@ -101,3 +101,25 @@
 21:18:06   ⚠️ Ψ: ABORTED, STALE(903min) | fails=6
 21:18:06   ⏳ Ψ: 冷却中，跳过
 21:18:06 === Agent Watchdog 完成: 0 个激活 ===
+21:20:03 === Agent Watchdog 开始 ===
+21:20:03   ✅ Λ: 健康（ratings.last_active 正常）
+21:20:03   ⚠️ Δ: STALE(800min) | fails=7
+21:20:03   ⏳ Δ: 冷却中，跳过
+21:20:03   ⚠️ Ω: STALE(1099min) | fails=7
+21:20:03   ⏳ Ω: 冷却中，跳过
+21:20:03   ⚠️ Θ: STALE(800min) | fails=7
+21:20:03   ⏳ Θ: 冷却中，跳过
+21:20:03   ⚠️ Ψ: ABORTED, STALE(905min) | fails=7
+21:20:03   ⏳ Ψ: 冷却中，跳过
+21:20:03 === Agent Watchdog 完成: 0 个激活 ===
+21:20:03 === Agent Watchdog 开始 ===
+21:20:03   ✅ Λ: 健康（ratings.last_active 正常）
+21:20:03   ⚠️ Δ: STALE(800min) | fails=7
+21:20:03   ⏳ Δ: 冷却中，跳过
+21:20:03   ⚠️ Ω: STALE(1099min) | fails=7
+21:20:03   ⏳ Ω: 冷却中，跳过
+21:20:03   ⚠️ Θ: STALE(800min) | fails=7
+21:20:03   ⏳ Θ: 冷却中，跳过
+21:20:03   ⚠️ Ψ: ABORTED, STALE(905min) | fails=7
+21:20:03   ⏳ Ψ: 冷却中，跳过
+21:20:03 === Agent Watchdog 完成: 0 个激活 ===
