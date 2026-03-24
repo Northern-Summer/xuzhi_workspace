@@ -1,0 +1,7 @@
+21:03:38 [expert-wd] === Expert Watchdog 开始 ===
+21:03:38 [expert-wd]   ❌ tracker: changes.json无last_run
+21:03:38 [expert-wd]   ✅ changes: 最后change: 2026-03-24
+21:03:38 [expert-wd]   ✅ tasks: 完成=0 进行=0 等待=20
+21:03:38 [expert-wd]   ❌ memory: 24h内无memory更新
+21:03:38 [expert-wd] ⚠️  链断裂第 1 次
+21:03:38 [expert-wd] === Watchdog 完成 ===

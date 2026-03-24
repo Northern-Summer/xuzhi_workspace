@@ -178,3 +178,9 @@ ratings_updated
 err
 ratings_updated
 2026-03-24 20:50:08 [heal] === 完成 ===
+2026-03-24 21:00:05 [heal] === Heal 检查 21:00:05 ===
+2026-03-24 21:00:06 [heal] ✅ 红蓝队检查通过
+2026-03-24 21:00:06 [heal] Gateway: ✅
+none
+ratings_updated
+2026-03-24 21:00:06 [heal] === 完成 ===

@@ -235,6 +235,7 @@ def update_activity(db):
     activity_db["last_update"] = now[:19]
     changes_db["last_update"] = now[:19]
     save(ACTIVITY, activity_db)
+    changes_db['last_run'] = datetime.now(timezone.utc).isoformat()
     save(CHANGES, changes_db)
     return new_changes
 
