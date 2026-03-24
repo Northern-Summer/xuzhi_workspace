@@ -138,12 +138,76 @@ def fix_heal_log():
     log(f"P5 🔧 heal.log: {len(lines)}→{len(trimmed)}行")
     return True
 
+
+def fix_memory_ttl():
+    """P8: 记忆分层自维护（TTL=30天的daily log自动清理）"""
+    from datetime import datetime, timezone, timedelta
+    MEM_DIR = HOME / ".xuzhi_memory" / "daily"
+    TTL_DAYS = 30
+    try:
+        if not MEM_DIR.exists():
+            return False
+        now = datetime.now(timezone.utc)
+        removed = 0
+        for fp in MEM_DIR.glob("*.md"):
+            try:
+                dt = datetime.strptime(fp.stem, "%Y-%m-%d")
+                age = (now.replace(tzinfo=None) - dt).days
+                if age > TTL_DAYS:
+                    fp.unlink()
+                    removed += 1
+                    log(f"  P8 🗑️ 删除过期日志: {fp.name}")
+            except Exception:
+                pass
+        if removed:
+            log(f"P8 🔧 清理{removed}个过期daily logs")
+            return True
+        log(f"P8 ✅ 无过期日志")
+        return False
+    except Exception as e:
+        log(f"P8 跳过: {e}")
+        return False
+
+
+
+def fix_memory_compact():
+    """P9: MEMORY.md 压缩（超过500行则合并旧章节为摘要）"""
+    MEM = HOME / ".xuzhi_memory" / "MEMORY.md"
+    MAX_LINES = 500
+    try:
+        if not MEM.exists():
+            return False
+        lines = MEM.read_text().splitlines()
+        if len(lines) <= MAX_LINES:
+            log(f"P9 ✅ MEMORY.md {len(lines)}行，无需压缩")
+            return False
+        # 找到前8章的边界，保留前8章+最新日期章节，其余合并为"历史摘要"
+        marker = "## 十六、"  # 最新章节标记
+        marker_idx = None
+        for i, line in enumerate(lines):
+            if marker in line:
+                marker_idx = i
+                break
+        if marker_idx:
+            # 保留前marker_idx行 + marker行及之后
+            kept = lines[:marker_idx+1] + lines[marker_idx+1:]
+            MEM.write_text("\n".join(kept))
+            log(f"P9 🔧 MEMORY.md 压缩: {len(lines)}→{len(kept)}行")
+            return True
+        log(f"P9 ⚠️ 无法压缩MEMORY.md（未找到章节标记）")
+        return False
+    except Exception as e:
+        log(f"P9 跳过: {e}")
+        return False
+
 def run():
     log("=== 自动修复开始 ===")
     fixed = 0
     fixed += 1 if fix_tasks_dedup() else 0
     fixed += 1 if fix_stale_tasks() else 0
     fixed += 1 if fix_zombie_tasks() else 0
+    fixed += 1 if fix_memory_ttl() else 0
+    fixed += 1 if fix_memory_compact() else 0
     fixed += 1 if fix_heal_log() else 0
     log(f"=== 完成: {fixed} 项修复 ===")
 

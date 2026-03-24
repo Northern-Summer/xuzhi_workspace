@@ -49,14 +49,16 @@
 
 ## 五、记忆分层原则
 
-| 层级 | 内容 | TTL |
-|------|------|-----|
-| SOUL.md | 当前 session 的行为定义 | 当前 session |
-| MEMORY.md | 长期记忆，所有 Agent 共享 | 永久 |
-| memory/*.md | Agent 个人记忆 | 永久 |
-| daily/*.md | 每日运行日志 | 30天 |
-| constitutional_core.md | 宪法核心 | 永久 |
-| manifests/ | 系统核心定义 | 永久 |
+| 层级 | 内容 | TTL | 自维护 |
+|------|------|-----|--------|
+| SOUL.md | 当前 session 的行为定义 | 当前 session | — |
+| MEMORY.md | 长期记忆，所有 Agent 共享 | 永久 | ✅ P8自动重建索引 |
+| memory/*.md | Agent 个人记忆 | 永久 | — |
+| daily/*.md | 每日运行日志 | **30天** | ✅ P8自动清理过期文件 |
+| constitutional_core.md | 宪法核心 | 永久（不可删） | — |
+| manifests/ | 系统核心定义 | 永久 | — |
+
+> **自维护机制**：P8 由 `self_repair.py` 每30分钟自动执行，清理超过30天的daily日志。
 
 ---
 
