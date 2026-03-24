@@ -32,3 +32,11 @@
 20:46:40 [repair] P8 ✅ 无过期日志
 20:46:40 [repair] P9 ✅ MEMORY.md 275行，无需压缩
 20:46:40 [repair] === 完成: 0 项修复 ===
+20:58:55 [repair] === 自动修复开始 ===
+20:58:55 [repair] P1 ✅ 无重复ID
+20:58:55 [repair] P3 ✅ 无卡死任务
+20:58:55 [repair] P7 ✅ 无僵尸任务
+20:58:55 [repair] P8 ✅ 无过期日志
+20:58:55 [repair] P9 ✅ MEMORY.md 275行，无需压缩
+20:58:55 [repair] P6 ✅ T3 checkpoint 正常（0min前更新）
+20:58:55 [repair] === 完成: 0 项修复 ===

@@ -200,6 +200,31 @@ def fix_memory_compact():
         log(f"P9 跳过: {e}")
         return False
 
+
+def fix_stale_t3_checkpoint():
+    """P6: T3 监控 checkpoint 自动清理（超过30分钟未更新则重置）"""
+    from datetime import datetime, timezone, timedelta
+    CP = HOME / ".xuzhi_memory" / "watchdog_checkpoint.json"
+    try:
+        if not CP.exists():
+            return False
+        data = json.loads(CP.read_text())
+        updated = data.get("updated_at", "")
+        if not updated:
+            return False
+        dt = datetime.fromisoformat(updated.replace("Z", "+00:00"))
+        age_min = (datetime.now(timezone.utc) - dt).total_seconds() / 60
+        if age_min > 30:
+            fresh = {"updated_at": datetime.now(timezone.utc).isoformat(), "failed_checks": []}
+            CP.write_text(json.dumps(fresh, indent=2))
+            log(f"P6 🔧 T3 checkpoint 重置（age={age_min:.0f}min）")
+            return True
+        log(f"P6 ✅ T3 checkpoint 正常（{age_min:.0f}min前更新）")
+        return False
+    except Exception as e:
+        log(f"P6 跳过: {e}")
+        return False
+
 def run():
     log("=== 自动修复开始 ===")
     fixed = 0
@@ -209,6 +234,7 @@ def run():
     fixed += 1 if fix_memory_ttl() else 0
     fixed += 1 if fix_memory_compact() else 0
     fixed += 1 if fix_heal_log() else 0
+    fixed += 1 if fix_stale_t3_checkpoint() else 0
     log(f"=== 完成: {fixed} 项修复 ===")
 
 if __name__ == "__main__":

@@ -1,1 +1,4 @@
-{"timestamp": "2026-03-24T11:31:01.081866+00:00", "status": "ok", "check_interval_s": 60}
+{
+  "updated_at": "2026-03-24T12:58:34.461476+00:00",
+  "failed_checks": []
+}
