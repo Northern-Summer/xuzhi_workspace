@@ -1,0 +1,235 @@
+{
+  "changes": [
+    {
+      "dept": "engineering",
+      "expert": "Tong Jia",
+      "affiliation": "",
+      "new_title": "VP-VLA: Visual Prompting as an Interface for Vision-Language-Action Models",
+      "new_url": "http://arxiv.org/abs/2603.22003v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.OS",
+        "cs.SE"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Ying Li",
+      "affiliation": "",
+      "new_title": "ThinkJEPA: Empowering Latent World Models with Large Vision-Language Reasoning Model",
+      "new_url": "http://arxiv.org/abs/2603.22281v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.OS",
+        "cs.SE"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Yusheng Zheng",
+      "affiliation": "",
+      "new_title": "Mainly on the Plane: Observing the Extended, Ionized Disks of Milky Way Analogs in IllustrisTNG",
+      "new_url": "http://arxiv.org/abs/2603.22257v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.OS"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Zibin Zheng",
+      "affiliation": "",
+      "new_title": "Mainly on the Plane: Observing the Extended, Ionized Disks of Milky Way Analogs in IllustrisTNG",
+      "new_url": "http://arxiv.org/abs/2603.22257v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.SE"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Tianxiang Xu",
+      "affiliation": "",
+      "new_title": "DualCoT-VLA: Visual-Linguistic Chain of Thought via Parallel Reasoning for Vision-Language-Action Models",
+      "new_url": "http://arxiv.org/abs/2603.22280v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.SE",
+        "cs.LG"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Xiaoyan Zhu",
+      "affiliation": "",
+      "new_title": "Omni-WorldBench: Towards a Comprehensive Interaction-Centric Evaluation for World Models",
+      "new_url": "http://arxiv.org/abs/2603.22212v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.SE",
+        "cs.LG"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Xin Lai",
+      "affiliation": "",
+      "new_title": "DualCoT-VLA: Visual-Linguistic Chain of Thought via Parallel Reasoning for Vision-Language-Action Models",
+      "new_url": "http://arxiv.org/abs/2603.22280v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.SE",
+        "cs.LG"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Sizhe Dang",
+      "affiliation": "",
+      "new_title": "Omni-WorldBench: Towards a Comprehensive Interaction-Centric Evaluation for World Models",
+      "new_url": "http://arxiv.org/abs/2603.22212v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.SE",
+        "cs.LG"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Xin Lian",
+      "affiliation": "",
+      "new_title": "DualCoT-VLA: Visual-Linguistic Chain of Thought via Parallel Reasoning for Vision-Language-Action Models",
+      "new_url": "http://arxiv.org/abs/2603.22280v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.SE",
+        "cs.LG"
+      ]
+    },
+    {
+      "dept": "engineering",
+      "expert": "Hangyu Cheng",
+      "affiliation": "",
+      "new_title": "Exceptional Points in Quasinormal Spectra of Hairy Black Holes",
+      "new_url": "http://arxiv.org/abs/2603.22261v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "cs.SE",
+        "cs.LG"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Elka Rusta",
+      "affiliation": "",
+      "new_title": "The Pristine HeII Emitter near GN-z11: Constraining the Mass Distribution of the First Stars",
+      "new_url": "http://arxiv.org/abs/2603.20363v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "astro-ph.CO"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Stefania Salvadori",
+      "affiliation": "",
+      "new_title": "A Multidisciplinary AI Board for Multimodal Dementia Characterization and Risk Assessment",
+      "new_url": "http://arxiv.org/abs/2603.21597v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "astro-ph.CO"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Roberto Maiolino",
+      "affiliation": "",
+      "new_title": "Little Red and Blue Dots: simply stratified Broad Line Regions",
+      "new_url": "http://arxiv.org/abs/2603.22277v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "astro-ph.CO"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Stefano Carniani",
+      "affiliation": "",
+      "new_title": "Little Red and Blue Dots: simply stratified Broad Line Regions",
+      "new_url": "http://arxiv.org/abs/2603.22277v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "astro-ph.CO"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Hannah Übler",
+      "affiliation": "",
+      "new_title": "Little Red and Blue Dots: simply stratified Broad Line Regions",
+      "new_url": "http://arxiv.org/abs/2603.22277v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "astro-ph.CO"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Atsushi Ono",
+      "affiliation": "",
+      "new_title": "Entropy of affine permutations and universality of affine atomic lengths",
+      "new_url": "http://arxiv.org/abs/2603.22256v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "physics.comp-ph",
+        "quant-ph"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Steve Shkoller",
+      "affiliation": "",
+      "new_title": "Intermittent Sub-grid Wave Correction from Differentiated Riemann Variables",
+      "new_url": "http://arxiv.org/abs/2603.22084v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "physics.comp-ph"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Paulsamy Muruganandam",
+      "affiliation": "",
+      "new_title": "A robust method for classification of chimera states",
+      "new_url": "http://arxiv.org/abs/2603.22026v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "astro-ph.CO",
+        "physics.comp-ph"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Ze Tao",
+      "affiliation": "",
+      "new_title": "Exceptional Points in Quasinormal Spectra of Hairy Black Holes",
+      "new_url": "http://arxiv.org/abs/2603.22261v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "physics.comp-ph"
+      ]
+    },
+    {
+      "dept": "science",
+      "expert": "Fujun Liu",
+      "affiliation": "",
+      "new_title": "UniMotion: A Unified Framework for Motion-Text-Vision Understanding and Generation",
+      "new_url": "http://arxiv.org/abs/2603.22282v1",
+      "discovered_at": "2026-03-24",
+      "categories": [
+        "physics.comp-ph"
+      ]
+    }
+  ],
+  "last_update": "2026-03-24T12:20:56"
+}

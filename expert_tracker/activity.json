@@ -1,0 +1,145 @@
+{
+  "activities": {
+    "engineering:Tong Jia": {
+      "dept": "engineering",
+      "expert": "Tong Jia",
+      "latest_title": "VP-VLA: Visual Prompting as an Interface for Vision-Language-Action Models",
+      "latest_url": "http://arxiv.org/abs/2603.22003v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Ying Li": {
+      "dept": "engineering",
+      "expert": "Ying Li",
+      "latest_title": "ThinkJEPA: Empowering Latent World Models with Large Vision-Language Reasoning Model",
+      "latest_url": "http://arxiv.org/abs/2603.22281v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Yusheng Zheng": {
+      "dept": "engineering",
+      "expert": "Yusheng Zheng",
+      "latest_title": "Mainly on the Plane: Observing the Extended, Ionized Disks of Milky Way Analogs in IllustrisTNG",
+      "latest_url": "http://arxiv.org/abs/2603.22257v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Zibin Zheng": {
+      "dept": "engineering",
+      "expert": "Zibin Zheng",
+      "latest_title": "Mainly on the Plane: Observing the Extended, Ionized Disks of Milky Way Analogs in IllustrisTNG",
+      "latest_url": "http://arxiv.org/abs/2603.22257v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Tianxiang Xu": {
+      "dept": "engineering",
+      "expert": "Tianxiang Xu",
+      "latest_title": "DualCoT-VLA: Visual-Linguistic Chain of Thought via Parallel Reasoning for Vision-Language-Action Models",
+      "latest_url": "http://arxiv.org/abs/2603.22280v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Xiaoyan Zhu": {
+      "dept": "engineering",
+      "expert": "Xiaoyan Zhu",
+      "latest_title": "Omni-WorldBench: Towards a Comprehensive Interaction-Centric Evaluation for World Models",
+      "latest_url": "http://arxiv.org/abs/2603.22212v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Xin Lai": {
+      "dept": "engineering",
+      "expert": "Xin Lai",
+      "latest_title": "DualCoT-VLA: Visual-Linguistic Chain of Thought via Parallel Reasoning for Vision-Language-Action Models",
+      "latest_url": "http://arxiv.org/abs/2603.22280v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Sizhe Dang": {
+      "dept": "engineering",
+      "expert": "Sizhe Dang",
+      "latest_title": "Omni-WorldBench: Towards a Comprehensive Interaction-Centric Evaluation for World Models",
+      "latest_url": "http://arxiv.org/abs/2603.22212v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Xin Lian": {
+      "dept": "engineering",
+      "expert": "Xin Lian",
+      "latest_title": "DualCoT-VLA: Visual-Linguistic Chain of Thought via Parallel Reasoning for Vision-Language-Action Models",
+      "latest_url": "http://arxiv.org/abs/2603.22280v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "engineering:Hangyu Cheng": {
+      "dept": "engineering",
+      "expert": "Hangyu Cheng",
+      "latest_title": "Exceptional Points in Quasinormal Spectra of Hairy Black Holes",
+      "latest_url": "http://arxiv.org/abs/2603.22261v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Elka Rusta": {
+      "dept": "science",
+      "expert": "Elka Rusta",
+      "latest_title": "The Pristine HeII Emitter near GN-z11: Constraining the Mass Distribution of the First Stars",
+      "latest_url": "http://arxiv.org/abs/2603.20363v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Stefania Salvadori": {
+      "dept": "science",
+      "expert": "Stefania Salvadori",
+      "latest_title": "A Multidisciplinary AI Board for Multimodal Dementia Characterization and Risk Assessment",
+      "latest_url": "http://arxiv.org/abs/2603.21597v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Roberto Maiolino": {
+      "dept": "science",
+      "expert": "Roberto Maiolino",
+      "latest_title": "Little Red and Blue Dots: simply stratified Broad Line Regions",
+      "latest_url": "http://arxiv.org/abs/2603.22277v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Stefano Carniani": {
+      "dept": "science",
+      "expert": "Stefano Carniani",
+      "latest_title": "Little Red and Blue Dots: simply stratified Broad Line Regions",
+      "latest_url": "http://arxiv.org/abs/2603.22277v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Hannah Übler": {
+      "dept": "science",
+      "expert": "Hannah Übler",
+      "latest_title": "Little Red and Blue Dots: simply stratified Broad Line Regions",
+      "latest_url": "http://arxiv.org/abs/2603.22277v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Atsushi Ono": {
+      "dept": "science",
+      "expert": "Atsushi Ono",
+      "latest_title": "Entropy of affine permutations and universality of affine atomic lengths",
+      "latest_url": "http://arxiv.org/abs/2603.22256v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Steve Shkoller": {
+      "dept": "science",
+      "expert": "Steve Shkoller",
+      "latest_title": "Intermittent Sub-grid Wave Correction from Differentiated Riemann Variables",
+      "latest_url": "http://arxiv.org/abs/2603.22084v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Paulsamy Muruganandam": {
+      "dept": "science",
+      "expert": "Paulsamy Muruganandam",
+      "latest_title": "A robust method for classification of chimera states",
+      "latest_url": "http://arxiv.org/abs/2603.22026v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Ze Tao": {
+      "dept": "science",
+      "expert": "Ze Tao",
+      "latest_title": "Exceptional Points in Quasinormal Spectra of Hairy Black Holes",
+      "latest_url": "http://arxiv.org/abs/2603.22261v1",
+      "updated_at": "2026-03-24T12:20:56"
+    },
+    "science:Fujun Liu": {
+      "dept": "science",
+      "expert": "Fujun Liu",
+      "latest_title": "UniMotion: A Unified Framework for Motion-Text-Vision Understanding and Generation",
+      "latest_url": "http://arxiv.org/abs/2603.22282v1",
+      "updated_at": "2026-03-24T12:20:56"
+    }
+  },
+  "last_update": "2026-03-24T12:20:56"
+}

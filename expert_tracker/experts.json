@@ -1,0 +1,1242 @@
+{
+  "departments": {
+    "engineering": {
+      "experts": [
+        {
+          "name": "Tong Jia",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "Efficient Failure Management for Multi-Agent Systems with Reasoning Trace Representation",
+              "summary": "Large Language Models (LLM)-based Multi-Agent Systems (MASs) have emerged as a new paradigm in software system design, increasingly demonstrating strong reasoning and collaboration capabilities. As these systems become more complex and autonomous, effective failure management is essential to ensure",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21522v1"
+            },
+            {
+              "title": "RuntimeSlicer: Towards Generalizable Unified Runtime State Representation for Failure Management",
+              "summary": "Modern software systems operate at unprecedented scale and complexity, where effective failure management is critical yet increasingly challenging. Metrics, traces, and logs provide complementary views of system runtime behavior, but existing failure management approaches typically rely on task-orie",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21495v1"
+            },
+            {
+              "title": "DeLog: An Efficient Log Compression Framework with Pattern Signature Synthesis",
+              "summary": "Parser-based log compression, which separates static templates from dynamic variables, is a promising approach to exploit the unique structure of log data. However, its performance on complex production logs is often unsatisfactory. This performance gap coincides with a known degradation in the accu",
+              "published": "2026-01-21",
+              "url": "http://arxiv.org/abs/2601.15084v2"
+            }
+          ],
+          "categories": [
+            "cs.OS",
+            "cs.SE"
+          ]
+        },
+        {
+          "name": "Ying Li",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "Efficient Failure Management for Multi-Agent Systems with Reasoning Trace Representation",
+              "summary": "Large Language Models (LLM)-based Multi-Agent Systems (MASs) have emerged as a new paradigm in software system design, increasingly demonstrating strong reasoning and collaboration capabilities. As these systems become more complex and autonomous, effective failure management is essential to ensure",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21522v1"
+            },
+            {
+              "title": "RuntimeSlicer: Towards Generalizable Unified Runtime State Representation for Failure Management",
+              "summary": "Modern software systems operate at unprecedented scale and complexity, where effective failure management is critical yet increasingly challenging. Metrics, traces, and logs provide complementary views of system runtime behavior, but existing failure management approaches typically rely on task-orie",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21495v1"
+            },
+            {
+              "title": "DeLog: An Efficient Log Compression Framework with Pattern Signature Synthesis",
+              "summary": "Parser-based log compression, which separates static templates from dynamic variables, is a promising approach to exploit the unique structure of log data. However, its performance on complex production logs is often unsatisfactory. This performance gap coincides with a known degradation in the accu",
+              "published": "2026-01-21",
+              "url": "http://arxiv.org/abs/2601.15084v2"
+            }
+          ],
+          "categories": [
+            "cs.OS",
+            "cs.SE"
+          ]
+        },
+        {
+          "name": "Yusheng Zheng",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "NCCLbpf: Verified, Composable Policy Execution for GPU Collective Communication",
+              "summary": "NCCL is the de facto standard for collective GPU communication in large-scale distributed training, relying heavily on plugins to customize runtime behavior. However, these plugins execute as unverified native code within NCCL's address space, risking job crashes, silent state corruption, and downti",
+              "published": "2026-03-12",
+              "url": "http://arxiv.org/abs/2603.11438v1"
+            },
+            {
+              "title": "AgentCgroup: Understanding and Controlling OS Resources of AI Agents",
+              "summary": "AI agents are increasingly deployed in multi-tenant cloud environments, where they execute diverse tool calls within sandboxed containers, each call with distinct resource demands and rapid fluctuations. We present a systematic characterization of OS-level resource dynamics in sandboxed AI coding ag",
+              "published": "2026-02-10",
+              "url": "http://arxiv.org/abs/2602.09345v2"
+            },
+            {
+              "title": "Fork, Explore, Commit: OS Primitives for Agentic Exploration",
+              "summary": "AI agents increasingly perform agentic exploration: pursuing multiple solution paths in parallel and committing only the successful one. Because each exploration path may modify files and spawn processes, agents require isolated environments with atomic commit and rollback semantics for both filesys",
+              "published": "2026-02-09",
+              "url": "http://arxiv.org/abs/2602.08199v2"
+            }
+          ],
+          "categories": [
+            "cs.OS"
+          ]
+        },
+        {
+          "name": "Zibin Zheng",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Dynamic analysis enhances issue resolution",
+              "summary": "Translating natural language descriptions into viable code fixes remains a fundamental challenge in software engineering. While the proliferation of agentic large language models (LLMs) has vastly improved automated repository-level debugging, current frameworks hit a ceiling when dealing with sophi",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22048v1"
+            },
+            {
+              "title": "LogFold: Compressing Logs with Structured Tokens and Hybrid Encoding",
+              "summary": "Logs are essential for diagnosing failures and conducting retrospective studies, leading many software organizations to retain log messages for a long time. Nevertheless, the volume of generated log data grows rapidly as software systems grow, necessitating an effective compression method. Apart fro",
+              "published": "2026-03-21",
+              "url": "http://arxiv.org/abs/2603.20618v1"
+            }
+          ],
+          "categories": [
+            "cs.SE"
+          ]
+        },
+        {
+          "name": "Tianxiang Xu",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            },
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            }
+          ],
+          "categories": [
+            "cs.SE",
+            "cs.LG"
+          ]
+        },
+        {
+          "name": "Xiaoyan Zhu",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            },
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            }
+          ],
+          "categories": [
+            "cs.SE",
+            "cs.LG"
+          ]
+        },
+        {
+          "name": "Xin Lai",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            },
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            }
+          ],
+          "categories": [
+            "cs.SE",
+            "cs.LG"
+          ]
+        },
+        {
+          "name": "Sizhe Dang",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            },
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            }
+          ],
+          "categories": [
+            "cs.SE",
+            "cs.LG"
+          ]
+        },
+        {
+          "name": "Xin Lian",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            },
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            }
+          ],
+          "categories": [
+            "cs.SE",
+            "cs.LG"
+          ]
+        },
+        {
+          "name": "Hangyu Cheng",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            },
+            {
+              "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+              "summary": "Ensuring consistency between research papers and their corresponding software implementations is fundamental to software reliability and scientific reproducibility. However, this problem remains underexplored, particularly in the domain of bioinformatics, where discrepancies between methodological d",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22018v1"
+            }
+          ],
+          "categories": [
+            "cs.SE",
+            "cs.LG"
+          ]
+        }
+      ],
+      "last_refresh": "2026-03-24",
+      "next_refresh": "2026-03-31"
+    },
+    "science": {
+      "experts": [
+        {
+          "name": "Elka Rusta",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "The Pristine HeII Emitter near GN-z11: Constraining the Mass Distribution of the First Stars",
+              "summary": "The properties of the first metal-free stars remain largely unknown, and so far, the only data-driven constraints on their mass distribution (IMF) come from near-field cosmology. Here, we interpret new observations of the C1 and C2 components of Hebe, the HeII emitter near the galaxy GN-z11. Using a",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20363v1"
+            },
+            {
+              "title": "The search for Population III: Confirmation of a HeII emitter with no metal lines at z=10.6",
+              "summary": "We report the confirmation of a HeII$λ$1640 emitter located at 3 pkpc from the galaxy GN-z11, at z=10.6. The detection, based on JWST NIRSpec-IFU high-resolution spectroscopy, confirms a previous claim based on medium-resolution spectroscopy. The HeII$λ$1640 identification is further supported by th",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20362v1"
+            },
+            {
+              "title": "GA-NIFS & JADES: Confirmation of pristine gas near GN-z11",
+              "summary": "According to the leading cosmological model, a first generation of stars called Population III (PopIII), condensed almost entirely out of hydrogen and helium, must have initiated the creation of all heavier chemical elements. Here we report the detection of ionised hydrogen (H$γ_{4342}$) with $S/N$=",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20360v1"
+            }
+          ],
+          "categories": [
+            "astro-ph.CO"
+          ]
+        },
+        {
+          "name": "Stefania Salvadori",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "The Pristine HeII Emitter near GN-z11: Constraining the Mass Distribution of the First Stars",
+              "summary": "The properties of the first metal-free stars remain largely unknown, and so far, the only data-driven constraints on their mass distribution (IMF) come from near-field cosmology. Here, we interpret new observations of the C1 and C2 components of Hebe, the HeII emitter near the galaxy GN-z11. Using a",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20363v1"
+            },
+            {
+              "title": "The search for Population III: Confirmation of a HeII emitter with no metal lines at z=10.6",
+              "summary": "We report the confirmation of a HeII$λ$1640 emitter located at 3 pkpc from the galaxy GN-z11, at z=10.6. The detection, based on JWST NIRSpec-IFU high-resolution spectroscopy, confirms a previous claim based on medium-resolution spectroscopy. The HeII$λ$1640 identification is further supported by th",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20362v1"
+            },
+            {
+              "title": "GA-NIFS & JADES: Confirmation of pristine gas near GN-z11",
+              "summary": "According to the leading cosmological model, a first generation of stars called Population III (PopIII), condensed almost entirely out of hydrogen and helium, must have initiated the creation of all heavier chemical elements. Here we report the detection of ionised hydrogen (H$γ_{4342}$) with $S/N$=",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20360v1"
+            }
+          ],
+          "categories": [
+            "astro-ph.CO"
+          ]
+        },
+        {
+          "name": "Roberto Maiolino",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "The Pristine HeII Emitter near GN-z11: Constraining the Mass Distribution of the First Stars",
+              "summary": "The properties of the first metal-free stars remain largely unknown, and so far, the only data-driven constraints on their mass distribution (IMF) come from near-field cosmology. Here, we interpret new observations of the C1 and C2 components of Hebe, the HeII emitter near the galaxy GN-z11. Using a",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20363v1"
+            },
+            {
+              "title": "The search for Population III: Confirmation of a HeII emitter with no metal lines at z=10.6",
+              "summary": "We report the confirmation of a HeII$λ$1640 emitter located at 3 pkpc from the galaxy GN-z11, at z=10.6. The detection, based on JWST NIRSpec-IFU high-resolution spectroscopy, confirms a previous claim based on medium-resolution spectroscopy. The HeII$λ$1640 identification is further supported by th",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20362v1"
+            },
+            {
+              "title": "GA-NIFS & JADES: Confirmation of pristine gas near GN-z11",
+              "summary": "According to the leading cosmological model, a first generation of stars called Population III (PopIII), condensed almost entirely out of hydrogen and helium, must have initiated the creation of all heavier chemical elements. Here we report the detection of ionised hydrogen (H$γ_{4342}$) with $S/N$=",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20360v1"
+            }
+          ],
+          "categories": [
+            "astro-ph.CO"
+          ]
+        },
+        {
+          "name": "Stefano Carniani",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "The Pristine HeII Emitter near GN-z11: Constraining the Mass Distribution of the First Stars",
+              "summary": "The properties of the first metal-free stars remain largely unknown, and so far, the only data-driven constraints on their mass distribution (IMF) come from near-field cosmology. Here, we interpret new observations of the C1 and C2 components of Hebe, the HeII emitter near the galaxy GN-z11. Using a",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20363v1"
+            },
+            {
+              "title": "The search for Population III: Confirmation of a HeII emitter with no metal lines at z=10.6",
+              "summary": "We report the confirmation of a HeII$λ$1640 emitter located at 3 pkpc from the galaxy GN-z11, at z=10.6. The detection, based on JWST NIRSpec-IFU high-resolution spectroscopy, confirms a previous claim based on medium-resolution spectroscopy. The HeII$λ$1640 identification is further supported by th",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20362v1"
+            },
+            {
+              "title": "GA-NIFS & JADES: Confirmation of pristine gas near GN-z11",
+              "summary": "According to the leading cosmological model, a first generation of stars called Population III (PopIII), condensed almost entirely out of hydrogen and helium, must have initiated the creation of all heavier chemical elements. Here we report the detection of ionised hydrogen (H$γ_{4342}$) with $S/N$=",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20360v1"
+            }
+          ],
+          "categories": [
+            "astro-ph.CO"
+          ]
+        },
+        {
+          "name": "Hannah Übler",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "The Pristine HeII Emitter near GN-z11: Constraining the Mass Distribution of the First Stars",
+              "summary": "The properties of the first metal-free stars remain largely unknown, and so far, the only data-driven constraints on their mass distribution (IMF) come from near-field cosmology. Here, we interpret new observations of the C1 and C2 components of Hebe, the HeII emitter near the galaxy GN-z11. Using a",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20363v1"
+            },
+            {
+              "title": "The search for Population III: Confirmation of a HeII emitter with no metal lines at z=10.6",
+              "summary": "We report the confirmation of a HeII$λ$1640 emitter located at 3 pkpc from the galaxy GN-z11, at z=10.6. The detection, based on JWST NIRSpec-IFU high-resolution spectroscopy, confirms a previous claim based on medium-resolution spectroscopy. The HeII$λ$1640 identification is further supported by th",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20362v1"
+            },
+            {
+              "title": "GA-NIFS & JADES: Confirmation of pristine gas near GN-z11",
+              "summary": "According to the leading cosmological model, a first generation of stars called Population III (PopIII), condensed almost entirely out of hydrogen and helium, must have initiated the creation of all heavier chemical elements. Here we report the detection of ionised hydrogen (H$γ_{4342}$) with $S/N$=",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.20360v1"
+            }
+          ],
+          "categories": [
+            "astro-ph.CO"
+          ]
+        },
+        {
+          "name": "Atsushi Ono",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Tangent equations of motion for nonlinear response functions",
+              "summary": "Nonlinear response functions, formulated as multipoint correlation functions or Volterra kernels, encode the dynamical and spectroscopic properties of physical systems and underpin a wide range of nonlinear transport and optical phenomena. However, their evaluation rapidly becomes prohibitive at hig",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22137v1"
+            },
+            {
+              "title": "Tangent equations of motion for nonlinear response functions",
+              "summary": "Nonlinear response functions, formulated as multipoint correlation functions or Volterra kernels, encode the dynamical and spectroscopic properties of physical systems and underpin a wide range of nonlinear transport and optical phenomena. However, their evaluation rapidly becomes prohibitive at hig",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22137v1"
+            }
+          ],
+          "categories": [
+            "physics.comp-ph",
+            "quant-ph"
+          ]
+        },
+        {
+          "name": "Steve Shkoller",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Intermittent Sub-grid Wave Correction from Differentiated Riemann Variables",
+              "summary": "We introduce a low-cost every-$K$-step correction for one-dimensional Euler computations. The correction uses differentiated Riemann variables (DRVs) -- characteristic derivatives that isolate the left acoustic wave, the contact, and the right acoustic wave -- to locate the current wave packet, samp",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22084v1"
+            },
+            {
+              "title": "Sub-cell Wave Reconstruction from Differentiated Riemann Variables",
+              "summary": "We introduce a postprocessing procedure that recovers sub-cell wave geometry from a standard one-dimensional Euler shock-capturing computation using differentiated Riemann variables (DRVs) -- characteristic derivatives that separate the three wave families into distinct localized spikes. Filtered DR",
+              "published": "2026-03-17",
+              "url": "http://arxiv.org/abs/2603.16830v1"
+            }
+          ],
+          "categories": [
+            "physics.comp-ph"
+          ]
+        },
+        {
+          "name": "Paulsamy Muruganandam",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "A robust method for classification of chimera states",
+              "summary": "Chimera states are one of the most intriguing phenomena in nonlinear dynamics, characterized by the coexistence of coherent and incoherent behavior in systems of coupled identical oscillators. Despite extensive studies and numerous observations in different settings, the development of reliable and",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22026v1"
+            },
+            {
+              "title": "Vortex Retention Mediated Turbulent Transitions in Self-Gravitating Bosonic and Axionic Condensates",
+              "summary": "We investigate turbulent spin-down dynamics in self-gravitating Bose-Einstein condensates, comparing purely bosonic and axionic (higher-order interacting) systems. Through simulations of the Gross-Pitaevskii-Poisson system, we study condensates pinned to a crust potential undergoing rapid rotation s",
+              "published": "2026-03-19",
+              "url": "http://arxiv.org/abs/2603.18880v1"
+            }
+          ],
+          "categories": [
+            "astro-ph.CO",
+            "physics.comp-ph"
+          ]
+        },
+        {
+          "name": "Ze Tao",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "PICS: A Partition-of-unity Information-geometric Certified Solver for Coupled Partial Differential Equations",
+              "summary": "Coupled partial differential equations underpin a wide range of multiphysics systems, yet existing neural PDE solvers still struggle to resolve localized high-risk regions and often fail to preserve structural admissibility across coupled fields. To address these limitations, we propose the Partitio",
+              "published": "2026-03-22",
+              "url": "http://arxiv.org/abs/2603.21271v1"
+            },
+            {
+              "title": "A Unified Benchmark Study of Shock-Like Problems in Two-Dimensional Steady Electrohydrodynamic Flow Based on LSTM-PINN",
+              "summary": "Accurately resolving steady electrohydrodynamic (EHD) flows presents a formidable computational challenge due to the strong nonlinear coupling between charged-particle density, velocity fields, and electric potential. These interactions frequently induce sharp transition layers, crossing fronts, and",
+              "published": "2026-03-22",
+              "url": "http://arxiv.org/abs/2603.21227v1"
+            }
+          ],
+          "categories": [
+            "physics.comp-ph"
+          ]
+        },
+        {
+          "name": "Fujun Liu",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "PICS: A Partition-of-unity Information-geometric Certified Solver for Coupled Partial Differential Equations",
+              "summary": "Coupled partial differential equations underpin a wide range of multiphysics systems, yet existing neural PDE solvers still struggle to resolve localized high-risk regions and often fail to preserve structural admissibility across coupled fields. To address these limitations, we propose the Partitio",
+              "published": "2026-03-22",
+              "url": "http://arxiv.org/abs/2603.21271v1"
+            },
+            {
+              "title": "A Unified Benchmark Study of Shock-Like Problems in Two-Dimensional Steady Electrohydrodynamic Flow Based on LSTM-PINN",
+              "summary": "Accurately resolving steady electrohydrodynamic (EHD) flows presents a formidable computational challenge due to the strong nonlinear coupling between charged-particle density, velocity fields, and electric potential. These interactions frequently induce sharp transition layers, crossing fronts, and",
+              "published": "2026-03-22",
+              "url": "http://arxiv.org/abs/2603.21227v1"
+            }
+          ],
+          "categories": [
+            "physics.comp-ph"
+          ]
+        }
+      ],
+      "last_refresh": "2026-03-24",
+      "next_refresh": "2026-03-31"
+    },
+    "mind": {
+      "experts": [
+        {
+          "name": "Arturo Tozzi",
+          "affiliation": "",
+          "paper_count": 6,
+          "papers": [
+            {
+              "title": "Topological analysis of bladder filling",
+              "summary": "Bladder function is typically assessed through pressure volume relations, compliance indices and flow measurements, whereas structural evaluation relies largely on qualitative imaging findings. These approaches do not formally quantify how bladder geometry changes during filling. To distinguish stru",
+              "published": "2026-03-01",
+              "url": "http://arxiv.org/abs/2603.01054v1"
+            },
+            {
+              "title": "Geometric and topological constraints on oral seal formation during infant breastfeeding",
+              "summary": "Breastfeeding efficiency relies on coordinated tongue motion, sustained tissue contact and maintenance of an effective intraoral seal. Current assessments of seal formation mainly use local kinematic descriptors or pressure recordings, which do not capture the global structural continuity of the sea",
+              "published": "2026-02-19",
+              "url": "http://arxiv.org/abs/2602.17389v1"
+            },
+            {
+              "title": "Towards a topological view of blood pressure regulation",
+              "summary": "Blood pressure regulation is commonly addressed in terms of local mechanisms such as vascular resistance, compliance and neurohumoral control. However, the human vasculature encompasses multiple quasi-closed flow loops under both physiological and pathological conditions. To test whether these loops",
+              "published": "2026-02-10",
+              "url": "http://arxiv.org/abs/2602.10011v1"
+            }
+          ],
+          "categories": [
+            "q-bio.OT"
+          ]
+        },
+        {
+          "name": "Bros Victor",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Politics of Questions in News: A Mixed-Methods Study of Interrogative Stances as Markers of Voice and Power",
+              "summary": "Interrogatives in news discourse have been examined in linguistics and conversation analysis, but mostly in broadcast interviews and relatively small, often English-language corpora, while large-scale computational studies of news rarely distinguish interrogatives from declaratives or differentiate",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21823v1"
+            },
+            {
+              "title": "Triangulating Temporal Dynamics in Multilingual Swiss Online News",
+              "summary": "Analyzing news coverage in multilingual societies can offer valuable insights into the dynamics of public discourse and the development of collective narratives, yet comprehensive studies that account for linguistic and cultural diversity within national media ecosystems remain limited, particularly",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21519v1"
+            }
+          ],
+          "categories": [
+            "cs.CY"
+          ]
+        },
+        {
+          "name": "Gatica-Perez Daniel",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Politics of Questions in News: A Mixed-Methods Study of Interrogative Stances as Markers of Voice and Power",
+              "summary": "Interrogatives in news discourse have been examined in linguistics and conversation analysis, but mostly in broadcast interviews and relatively small, often English-language corpora, while large-scale computational studies of news rarely distinguish interrogatives from declaratives or differentiate",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21823v1"
+            },
+            {
+              "title": "Triangulating Temporal Dynamics in Multilingual Swiss Online News",
+              "summary": "Analyzing news coverage in multilingual societies can offer valuable insights into the dynamics of public discourse and the development of collective narratives, yet comprehensive studies that account for linguistic and cultural diversity within national media ecosystems remain limited, particularly",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21519v1"
+            }
+          ],
+          "categories": [
+            "cs.CY"
+          ]
+        },
+        {
+          "name": "Xinyue Liu",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Alignment Whack-a-Mole : Finetuning Activates Verbatim Recall of Copyrighted Books in Large Language Models",
+              "summary": "Frontier LLM companies have repeatedly assured courts and regulators that their models do not store copies of training data. They further rely on safety alignment strategies via RLHF, system prompts, and output filters to block verbatim regurgitation of copyrighted works, and have cited the efficacy",
+              "published": "2026-03-21",
+              "url": "http://arxiv.org/abs/2603.20957v1"
+            },
+            {
+              "title": "Mamba-VMR: Multimodal Query Augmentation via Generated Videos for Precise Temporal Grounding",
+              "summary": "Text-driven video moment retrieval (VMR) remains challenging due to limited capture of hidden temporal dynamics in untrimmed videos, leading to imprecise grounding in long sequences. Traditional methods rely on natural language queries (NLQs) or static image augmentations, overlooking motion sequenc",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22121v1"
+            }
+          ],
+          "categories": [
+            "cs.CY",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Srijaya Nandi",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Trick or Treat? Free-ranging dogs use human behavioural cues for foraging",
+              "summary": "Animals that display behavioural flexibility and adaptability thrive in urban environments, due to their ability to exploit novel anthropogenic resources. Since humans are an important component of such urban environments, animals that apply heterospecific learning in their decision-making are more",
+              "published": "2025-12-21",
+              "url": "http://arxiv.org/abs/2512.18681v1"
+            },
+            {
+              "title": "Food, Affection and Gaze: Which Cues do Free-Ranging Dogs Consider for Engaging with Humans?",
+              "summary": "Free-ranging dogs (Canis lupus familiaris) constitute the majority of the global dog population and rely heavily on human-derived resources. Studies show different levels of responses to various cues like food, petting and gazing by humans. However, the relative importance that dogs associate with t",
+              "published": "2025-12-10",
+              "url": "http://arxiv.org/abs/2512.09493v1"
+            }
+          ],
+          "categories": [
+            "q-bio.OT"
+          ]
+        },
+        {
+          "name": "Anindita Bhadra",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Trick or Treat? Free-ranging dogs use human behavioural cues for foraging",
+              "summary": "Animals that display behavioural flexibility and adaptability thrive in urban environments, due to their ability to exploit novel anthropogenic resources. Since humans are an important component of such urban environments, animals that apply heterospecific learning in their decision-making are more",
+              "published": "2025-12-21",
+              "url": "http://arxiv.org/abs/2512.18681v1"
+            },
+            {
+              "title": "Food, Affection and Gaze: Which Cues do Free-Ranging Dogs Consider for Engaging with Humans?",
+              "summary": "Free-ranging dogs (Canis lupus familiaris) constitute the majority of the global dog population and rely heavily on human-derived resources. Studies show different levels of responses to various cues like food, petting and gazing by humans. However, the relative importance that dogs associate with t",
+              "published": "2025-12-10",
+              "url": "http://arxiv.org/abs/2512.09493v1"
+            }
+          ],
+          "categories": [
+            "q-bio.OT"
+          ]
+        },
+        {
+          "name": "Xinyu Lu",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Suiren-1.0 Technical Report: A Family of Molecular Foundation Models",
+              "summary": "We introduce Suiren-1.0, a family of molecular foundation models for the accurate modeling of diverse organic systems. Suiren-1.0 comprising three specialized variants (Suiren-Base, Suiren-Dimer, and Suiren-ConfAvg) is integrated within an algorithmic framework that bridges the gap between 3D confor",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21942v1"
+            },
+            {
+              "title": "P^2O: Joint Policy and Prompt Optimization",
+              "summary": "Reinforcement Learning with Verifiable Rewards (RLVR) has emerged as a powerful paradigm for enhancing the reasoning capabilities of Large Language Models (LLMs). However, vanilla RLVR suffers from inefficient exploration, particularly when confronting \"hard samples\" that yield nearzero success rate",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21877v1"
+            }
+          ],
+          "categories": [
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Philip O'Sullivan",
+          "affiliation": "",
+          "paper_count": 1,
+          "papers": [
+            {
+              "title": "Generalized Sequential Monte Carlo Sampling for Redistricting Simulation",
+              "summary": "Simulation methods have become important tools for quantifying partisan and racial bias in redistricting plans. We generalize the Sequential Monte Carlo (SMC) algorithm of McCartan and Imai (2023), one of the commonly used approaches. First, our generalized SMC (gSMC) algorithm can split off regions",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22188v1"
+            }
+          ],
+          "categories": [
+            "cs.CY"
+          ]
+        },
+        {
+          "name": "Kosuke Imai",
+          "affiliation": "",
+          "paper_count": 1,
+          "papers": [
+            {
+              "title": "Generalized Sequential Monte Carlo Sampling for Redistricting Simulation",
+              "summary": "Simulation methods have become important tools for quantifying partisan and racial bias in redistricting plans. We generalize the Sequential Monte Carlo (SMC) algorithm of McCartan and Imai (2023), one of the commonly used approaches. First, our generalized SMC (gSMC) algorithm can split off regions",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22188v1"
+            }
+          ],
+          "categories": [
+            "cs.CY"
+          ]
+        },
+        {
+          "name": "Cory McCartan",
+          "affiliation": "",
+          "paper_count": 1,
+          "papers": [
+            {
+              "title": "Generalized Sequential Monte Carlo Sampling for Redistricting Simulation",
+              "summary": "Simulation methods have become important tools for quantifying partisan and racial bias in redistricting plans. We generalize the Sequential Monte Carlo (SMC) algorithm of McCartan and Imai (2023), one of the commonly used approaches. First, our generalized SMC (gSMC) algorithm can split off regions",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22188v1"
+            }
+          ],
+          "categories": [
+            "cs.CY"
+          ]
+        }
+      ],
+      "last_refresh": "2026-03-24",
+      "next_refresh": "2026-03-31"
+    },
+    "philosophy": {
+      "experts": [
+        {
+          "name": "Jacob A. Barandes",
+          "affiliation": "",
+          "paper_count": 4,
+          "papers": [
+            {
+              "title": "Pilot-Wave Theories as Hidden Markov Models",
+              "summary": "The original version of the de Broglie-Bohm pilot-wave theory, also called Bohmian mechanics, attempted to treat the wave function or pilot wave as a part of the physical ontology of nature. More recent versions of the de Broglie-Bohm theory appearing in the last few decades have tried to regard the",
+              "published": "2026-02-11",
+              "url": "http://arxiv.org/abs/2602.10569v1"
+            },
+            {
+              "title": "Historical Debates over the Physical Reality of the Wave Function",
+              "summary": "This paper provides a detailed historical account of early debates over wave-function realism, the modern term for the view that the wave function of quantum theory is physically real. As this paper will show, the idea of physical waves associated with particles had its roots in work by Einstein and",
+              "published": "2026-02-10",
+              "url": "http://arxiv.org/abs/2602.09397v1"
+            },
+            {
+              "title": "The Trouble with Weak Values",
+              "summary": "In quantum theory, a weak value is a complex number with a somewhat technical definition: it is a ratio whose numerator is the matrix element of a self-adjoint operator and whose denominator is the inner product of a corresponding pair of state vectors. Weak values first appeared in the research lit",
+              "published": "2026-02-10",
+              "url": "http://arxiv.org/abs/2602.09380v1"
+            }
+          ],
+          "categories": [
+            "physics.hist-ph"
+          ]
+        },
+        {
+          "name": "Harry Sticker",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "Projection and Invariance in Scientific Explanation",
+              "summary": "Scientific knowledge exhibits three structural features that the standard picture of progressive replacement does not adequately explain: the persistence of superseded theories, the stable coexistence of incompatible frameworks, and the productivity of multiple descriptions of the same domain withou",
+              "published": "2026-03-17",
+              "url": "http://arxiv.org/abs/2603.19323v1"
+            },
+            {
+              "title": "The Architecture of Inter-Level Representation",
+              "summary": "Inter-level connections in science routinely require constructs that neither of the connected theories contains. Statistical mechanics requires assumptions such as the Stosszahlansatz to generate thermodynamic irreversibility - assumptions that Hamiltonian mechanics cannot provide. Quantum chemistry",
+              "published": "2026-03-10",
+              "url": "http://arxiv.org/abs/2603.09626v1"
+            },
+            {
+              "title": "Activation and Alignment: A Causal Account of the Scientific Revolution",
+              "summary": "Standard historiographical approaches to the Scientific Revolution illuminate background conditions but leave three puzzles unresolved: what triggered the initial escalation of inherited tensions, what made early investigative efforts durable, and why natural philosophy became the locus of transform",
+              "published": "2026-03-02",
+              "url": "http://arxiv.org/abs/2603.02399v1"
+            }
+          ],
+          "categories": [
+            "physics.hist-ph"
+          ]
+        },
+        {
+          "name": "Paul Borrill",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "Background and Intellectual Development: Supplementary Material for the Category Mistake Papers",
+              "summary": "This supplement documents the intellectual trajectory that led to the Category Mistake framework and the Forward-In-Time-Only (FITO) analysis presented in our recent arXiv papers. The ideas crystallized over fifteen years of research, conversation, and engineering practice -- beginning with a 2014 S",
+              "published": "2026-03-06",
+              "url": "http://arxiv.org/abs/2603.16907v1"
+            },
+            {
+              "title": "The Semantic Arrow of Time, Part I: From Eddington to Ethernet",
+              "summary": "This is the first of five papers comprising The Semantic Arrow of Time. The argument begins with a claim: computing's arrow of time is semantic, not thermodynamic. The direction in which meaning is preserved or destroyed across transactions is not a consequence of the second law but of design choice",
+              "published": "2026-03-02",
+              "url": "http://arxiv.org/abs/2603.01440v1"
+            },
+            {
+              "title": "The Category Mistake of Cislunar Time: Why NASA Cannot Synchronize What Doesn't Exist",
+              "summary": "In April 2024, the White House directed NASA to establish Coordinated Lunar Time (LTC) by December 2026. The programme assumes that a unified time standard can be constructed by deploying atomic clocks on the lunar surface, computing relativistic corrections, and distributing synchronized time via L",
+              "published": "2026-02-20",
+              "url": "http://arxiv.org/abs/2602.18641v1"
+            }
+          ],
+          "categories": [
+            "physics.hist-ph"
+          ]
+        },
+        {
+          "name": "Christian Durán-Romero",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Adiabatic renormalization for modified dispersion relations in cosmology",
+              "summary": "We investigate the behavior of scalar quantum fields in cosmological backgrounds under modified dispersion relations, specifically focusing on how ultraviolet asymptotics influence field quantization. We establish the conditions for both the validity of the adiabatic approximation and the unitary eq",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21995v1"
+            },
+            {
+              "title": "Adiabatic renormalization for modified dispersion relations in cosmology",
+              "summary": "We investigate the behavior of scalar quantum fields in cosmological backgrounds under modified dispersion relations, specifically focusing on how ultraviolet asymptotics influence field quantization. We establish the conditions for both the validity of the adiabatic approximation and the unitary eq",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21995v1"
+            }
+          ],
+          "categories": [
+            "gr-qc",
+            "hep-th"
+          ]
+        },
+        {
+          "name": "Luis J. Garay",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Adiabatic renormalization for modified dispersion relations in cosmology",
+              "summary": "We investigate the behavior of scalar quantum fields in cosmological backgrounds under modified dispersion relations, specifically focusing on how ultraviolet asymptotics influence field quantization. We establish the conditions for both the validity of the adiabatic approximation and the unitary eq",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21995v1"
+            },
+            {
+              "title": "Adiabatic renormalization for modified dispersion relations in cosmology",
+              "summary": "We investigate the behavior of scalar quantum fields in cosmological backgrounds under modified dispersion relations, specifically focusing on how ultraviolet asymptotics influence field quantization. We establish the conditions for both the validity of the adiabatic approximation and the unitary eq",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21995v1"
+            }
+          ],
+          "categories": [
+            "gr-qc",
+            "hep-th"
+          ]
+        },
+        {
+          "name": "Mercedes Martín-Benito",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Adiabatic renormalization for modified dispersion relations in cosmology",
+              "summary": "We investigate the behavior of scalar quantum fields in cosmological backgrounds under modified dispersion relations, specifically focusing on how ultraviolet asymptotics influence field quantization. We establish the conditions for both the validity of the adiabatic approximation and the unitary eq",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21995v1"
+            },
+            {
+              "title": "Adiabatic renormalization for modified dispersion relations in cosmology",
+              "summary": "We investigate the behavior of scalar quantum fields in cosmological backgrounds under modified dispersion relations, specifically focusing on how ultraviolet asymptotics influence field quantization. We establish the conditions for both the validity of the adiabatic approximation and the unitary eq",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21995v1"
+            }
+          ],
+          "categories": [
+            "gr-qc",
+            "hep-th"
+          ]
+        },
+        {
+          "name": "Rita B. Neves",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Adiabatic renormalization for modified dispersion relations in cosmology",
+              "summary": "We investigate the behavior of scalar quantum fields in cosmological backgrounds under modified dispersion relations, specifically focusing on how ultraviolet asymptotics influence field quantization. We establish the conditions for both the validity of the adiabatic approximation and the unitary eq",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21995v1"
+            },
+            {
+              "title": "Adiabatic renormalization for modified dispersion relations in cosmology",
+              "summary": "We investigate the behavior of scalar quantum fields in cosmological backgrounds under modified dispersion relations, specifically focusing on how ultraviolet asymptotics influence field quantization. We establish the conditions for both the validity of the adiabatic approximation and the unitary eq",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21995v1"
+            }
+          ],
+          "categories": [
+            "gr-qc",
+            "hep-th"
+          ]
+        },
+        {
+          "name": "P. D. Alvarez",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Variations on a theme of MacDowell-Mansouri",
+              "summary": "Inspired by the MacDowell-Mansouri formulation of four-dimensional General Relativity, we study a class of four-dimensional gauge-theoretic functionals obtained from the Pontryagin density of a G-connection by inserting, under the trace, a matrix that breaks the gauge group G to a subgroup H. Concre",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21930v1"
+            },
+            {
+              "title": "Variations on a theme of MacDowell-Mansouri",
+              "summary": "Inspired by the MacDowell-Mansouri formulation of four-dimensional General Relativity, we study a class of four-dimensional gauge-theoretic functionals obtained from the Pontryagin density of a G-connection by inserting, under the trace, a matrix that breaks the gauge group G to a subgroup H. Concre",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21930v1"
+            }
+          ],
+          "categories": [
+            "gr-qc",
+            "hep-th"
+          ]
+        },
+        {
+          "name": "K. Krasnov",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Variations on a theme of MacDowell-Mansouri",
+              "summary": "Inspired by the MacDowell-Mansouri formulation of four-dimensional General Relativity, we study a class of four-dimensional gauge-theoretic functionals obtained from the Pontryagin density of a G-connection by inserting, under the trace, a matrix that breaks the gauge group G to a subgroup H. Concre",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21930v1"
+            },
+            {
+              "title": "Variations on a theme of MacDowell-Mansouri",
+              "summary": "Inspired by the MacDowell-Mansouri formulation of four-dimensional General Relativity, we study a class of four-dimensional gauge-theoretic functionals obtained from the Pontryagin density of a G-connection by inserting, under the trace, a matrix that breaks the gauge group G to a subgroup H. Concre",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21930v1"
+            }
+          ],
+          "categories": [
+            "gr-qc",
+            "hep-th"
+          ]
+        },
+        {
+          "name": "Orlando Luongo",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "Entanglement degradation in regular and singular spacetimes",
+              "summary": "We study entanglement degradation near the horizons of regular, Reissner-Nordström, and Schwarzschild-de Sitter black holes, considering the Bardeen, Hayward, and generalized Hayward metrics as regular black holes. To this end, we compute the entanglement negativity, $\\mathcal{N}$, for two Unruh-lik",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21857v1"
+            },
+            {
+              "title": "Entanglement degradation in regular and singular spacetimes",
+              "summary": "We study entanglement degradation near the horizons of regular, Reissner-Nordström, and Schwarzschild-de Sitter black holes, considering the Bardeen, Hayward, and generalized Hayward metrics as regular black holes. To this end, we compute the entanglement negativity, $\\mathcal{N}$, for two Unruh-lik",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21857v1"
+            }
+          ],
+          "categories": [
+            "gr-qc",
+            "hep-th"
+          ]
+        }
+      ],
+      "last_refresh": "2026-03-24",
+      "next_refresh": "2026-03-31"
+    },
+    "intelligence": {
+      "experts": [
+        {
+          "name": "Kai-Wei Chang",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "TiCo: Time-Controllable Training for Spoken Dialogue Models",
+              "summary": "We propose TiCo, a simple post-training method for enabling spoken dialogue models (SDMs) to follow time-constrained instructions and generate responses with controllable duration. This capability is valuable for real-world spoken language systems such as voice assistants and interactive agents, whe",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22267v1"
+            },
+            {
+              "title": "TiCo: Time-Controllable Training for Spoken Dialogue Models",
+              "summary": "We propose TiCo, a simple post-training method for enabling spoken dialogue models (SDMs) to follow time-constrained instructions and generate responses with controllable duration. This capability is valuable for real-world spoken language systems such as voice assistants and interactive agents, whe",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22267v1"
+            },
+            {
+              "title": "TaigiSpeech: A Low-Resource Real-World Speech Intent Dataset and Preliminary Results with Scalable Data Mining In-the-Wild",
+              "summary": "Speech technologies have advanced rapidly and serve diverse populations worldwide. However, many languages remain underrepresented due to limited resources. In this paper, we introduce \\textbf{TaigiSpeech}, a real-world speech intent dataset in Taiwanese Taigi (aka Taiwanese Hokkien/Southern Min), w",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21478v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Hung-yi Lee",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "TiCo: Time-Controllable Training for Spoken Dialogue Models",
+              "summary": "We propose TiCo, a simple post-training method for enabling spoken dialogue models (SDMs) to follow time-constrained instructions and generate responses with controllable duration. This capability is valuable for real-world spoken language systems such as voice assistants and interactive agents, whe",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22267v1"
+            },
+            {
+              "title": "TiCo: Time-Controllable Training for Spoken Dialogue Models",
+              "summary": "We propose TiCo, a simple post-training method for enabling spoken dialogue models (SDMs) to follow time-constrained instructions and generate responses with controllable duration. This capability is valuable for real-world spoken language systems such as voice assistants and interactive agents, whe",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22267v1"
+            },
+            {
+              "title": "TaigiSpeech: A Low-Resource Real-World Speech Intent Dataset and Preliminary Results with Scalable Data Mining In-the-Wild",
+              "summary": "Speech technologies have advanced rapidly and serve diverse populations worldwide. However, many languages remain underrepresented due to limited resources. In this paper, we introduce \\textbf{TaigiSpeech}, a real-world speech intent dataset in Taiwanese Taigi (aka Taiwanese Hokkien/Southern Min), w",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21478v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "James Glass",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "TiCo: Time-Controllable Training for Spoken Dialogue Models",
+              "summary": "We propose TiCo, a simple post-training method for enabling spoken dialogue models (SDMs) to follow time-constrained instructions and generate responses with controllable duration. This capability is valuable for real-world spoken language systems such as voice assistants and interactive agents, whe",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22267v1"
+            },
+            {
+              "title": "TiCo: Time-Controllable Training for Spoken Dialogue Models",
+              "summary": "We propose TiCo, a simple post-training method for enabling spoken dialogue models (SDMs) to follow time-constrained instructions and generate responses with controllable duration. This capability is valuable for real-world spoken language systems such as voice assistants and interactive agents, whe",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22267v1"
+            },
+            {
+              "title": "TaigiSpeech: A Low-Resource Real-World Speech Intent Dataset and Preliminary Results with Scalable Data Mining In-the-Wild",
+              "summary": "Speech technologies have advanced rapidly and serve diverse populations worldwide. However, many languages remain underrepresented due to limited resources. In this paper, we introduce \\textbf{TaigiSpeech}, a real-world speech intent dataset in Taiwanese Taigi (aka Taiwanese Hokkien/Southern Min), w",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.21478v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Yanchen Jiang",
+          "affiliation": "",
+          "paper_count": 3,
+          "papers": [
+            {
+              "title": "One Model, Two Markets: Bid-Aware Generative Recommendation",
+              "summary": "Generative Recommender Systems using semantic ids, such as TIGER (Rajput et al., 2023), have emerged as a widely adopted competitive paradigm in sequential recommendation. However, existing architectures are designed solely for semantic retrieval and do not address concerns such as monetization via",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22231v1"
+            },
+            {
+              "title": "One Model, Two Markets: Bid-Aware Generative Recommendation",
+              "summary": "Generative Recommender Systems using semantic ids, such as TIGER (Rajput et al., 2023), have emerged as a widely adopted competitive paradigm in sequential recommendation. However, existing architectures are designed solely for semantic retrieval and do not address concerns such as monetization via",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22231v1"
+            },
+            {
+              "title": "The Prosocial Ranking Challenge: Reducing Polarization on Social Media without Sacrificing Engagement",
+              "summary": "We report the first direct comparisons of multiple alternative social media algorithms on multiple platforms on outcomes of societal interest. We used a browser extension to modify which posts were shown to desktop social media users, randomly assigning 9,386 users to a control group or one of five",
+              "published": "2026-03-20",
+              "url": "http://arxiv.org/abs/2603.19626v1"
+            }
+          ],
+          "categories": [
+            "cs.AI",
+            "cs.IR"
+          ]
+        },
+        {
+          "name": "Umair Nawaz",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            },
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Ahmed Heakl",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            },
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Ufaq Khan",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            },
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Abdelrahman Shaker",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            },
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Salman Khan",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            },
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        },
+        {
+          "name": "Fahad Shahbaz Khan",
+          "affiliation": "",
+          "paper_count": 2,
+          "papers": [
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            },
+            {
+              "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+              "summary": "Diffusion Transformers (DiTs) power high-fidelity video world models but remain computationally expensive due to sequential denoising and costly spatio-temporal attention. Training-free feature caching accelerates inference by reusing intermediate activations across denoising steps; however, existin",
+              "published": "2026-03-23",
+              "url": "http://arxiv.org/abs/2603.22286v1"
+            }
+          ],
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ]
+        }
+      ],
+      "last_refresh": "2026-03-24",
+      "next_refresh": "2026-03-31"
+    }
+  },
+  "init": true,
+  "last_full_refresh": "2026-03-24"
+}

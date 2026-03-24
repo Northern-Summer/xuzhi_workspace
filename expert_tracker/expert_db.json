@@ -1,0 +1,969 @@
+{
+  "departments": {
+    "mind": {
+      "github_trending": [
+        {
+          "name": "public-apis/public-apis",
+          "stars": 415448,
+          "lang": "Python",
+          "desc": "A collective list of free APIs",
+          "url": "https://github.com/public-apis/public-apis",
+          "updated": "2026-03-18"
+        },
+        {
+          "name": "EbookFoundation/free-programming-books",
+          "stars": 384508,
+          "lang": "Python",
+          "desc": ":books: Freely available programming books",
+          "url": "https://github.com/EbookFoundation/free-programming-books",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "donnemartin/system-design-primer",
+          "stars": 340035,
+          "lang": "Python",
+          "desc": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
+          "url": "https://github.com/donnemartin/system-design-primer",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "vinta/awesome-python",
+          "stars": 288748,
+          "lang": "Python",
+          "desc": "An opinionated list of Python frameworks, libraries, tools, and resources.",
+          "url": "https://github.com/vinta/awesome-python",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "TheAlgorithms/Python",
+          "stars": 219002,
+          "lang": "Python",
+          "desc": "All Algorithms implemented in Python",
+          "url": "https://github.com/TheAlgorithms/Python",
+          "updated": "2026-03-13"
+        },
+        {
+          "name": "Significant-Gravitas/AutoGPT",
+          "stars": 182778,
+          "lang": "Python",
+          "desc": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so tha",
+          "url": "https://github.com/Significant-Gravitas/AutoGPT",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "AUTOMATIC1111/stable-diffusion-webui",
+          "stars": 161969,
+          "lang": "Python",
+          "desc": "Stable Diffusion web UI",
+          "url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+          "updated": "2026-03-02"
+        },
+        {
+          "name": "huggingface/transformers",
+          "stars": 158316,
+          "lang": "Python",
+          "desc": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and ",
+          "url": "https://github.com/huggingface/transformers",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "yt-dlp/yt-dlp",
+          "stars": 153012,
+          "lang": "Python",
+          "desc": "A feature-rich command-line audio/video downloader",
+          "url": "https://github.com/yt-dlp/yt-dlp",
+          "updated": "2026-03-21"
+        },
+        {
+          "name": "521xueweihan/HelloGitHub",
+          "stars": 147237,
+          "lang": "Python",
+          "desc": ":octocat: 分享 GitHub 上有趣、入门级的开源项目。Share interesting, entry-level open source projects on GitHub.",
+          "url": "https://github.com/521xueweihan/HelloGitHub",
+          "updated": "2026-02-28"
+        }
+      ],
+      "arxiv_papers": [
+        {
+          "title": "Generalized Sequential Monte Carlo Sampling for Redistricting Simulation",
+          "authors": [
+            "Philip O'Sullivan",
+            "Kosuke Imai",
+            "Cory McCartan"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22188v1"
+        },
+        {
+          "title": "Navigational Thinking as an Emerging Paradigm of Computer Science in the Age of Generative AI",
+          "authors": [
+            "Ilya Levin"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22133v1"
+        },
+        {
+          "title": "Surfacing and Applying Meaning: Supporting Hermeneutical Autonomy for LGBTQ+ People in Taiwan",
+          "authors": [
+            "Yi-Tong Chen",
+            "En-Kai Chang",
+            "Nanyi Bi"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21990v1"
+        },
+        {
+          "title": "You See It, They Don't: An Exploratory Study of User-to-User Variation in Instagram Comments",
+          "authors": [
+            "Brahmani Nutakki",
+            "Manon Lilott Kempermann",
+            "Ingmar Weber"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21953v1"
+        },
+        {
+          "title": "Politics of Questions in News: A Mixed-Methods Study of Interrogative Stances as Markers of Voice and Power",
+          "authors": [
+            "Bros Victor",
+            "Barbini Matilde",
+            "Gerard Patrick"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21823v1"
+        },
+        {
+          "title": "Take the Train: Africa at the Crossroad of Modern AI",
+          "authors": [
+            "Cédric Manouan",
+            "Miquilina Anagbah",
+            "N'guessan Yves-Roland Douha"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21795v1"
+        },
+        {
+          "title": "Asymmetric Dynamics of Partisan Warriors in YouTube Comments",
+          "authors": [
+            "Keyeun Lee",
+            "Sang Jung Kim"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21776v1"
+        },
+        {
+          "title": "Cybersecurity Guidance for Smart Homes: A Cross-National Review of Government Sources",
+          "authors": [
+            "Victor Jüttner",
+            "Erik Buchmann"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21703v1"
+        },
+        {
+          "title": "TrustFed: Enabling Trustworthy Medical AI under Data Privacy Constraints",
+          "authors": [
+            "Vagish Kumar",
+            "Syed Bahauddin Alam",
+            "Souvik Chakraborty"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21656v1"
+        },
+        {
+          "title": "Engineering Distributed Governance for Regional Prosperity: A Socio-Technical Framework for Mitigating Under-Vibrancy via Human Data Engines",
+          "authors": [
+            "Amil Khanzada",
+            "Takuji Takemoto"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21639v1"
+        }
+      ],
+      "tracked_at": "2026-03-24T12:04:28.128666+00:00"
+    },
+    "science": {
+      "github_trending": [
+        {
+          "name": "public-apis/public-apis",
+          "stars": 415448,
+          "lang": "Python",
+          "desc": "A collective list of free APIs",
+          "url": "https://github.com/public-apis/public-apis",
+          "updated": "2026-03-18"
+        },
+        {
+          "name": "EbookFoundation/free-programming-books",
+          "stars": 384508,
+          "lang": "Python",
+          "desc": ":books: Freely available programming books",
+          "url": "https://github.com/EbookFoundation/free-programming-books",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "donnemartin/system-design-primer",
+          "stars": 340035,
+          "lang": "Python",
+          "desc": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
+          "url": "https://github.com/donnemartin/system-design-primer",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "vinta/awesome-python",
+          "stars": 288748,
+          "lang": "Python",
+          "desc": "An opinionated list of Python frameworks, libraries, tools, and resources.",
+          "url": "https://github.com/vinta/awesome-python",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "TheAlgorithms/Python",
+          "stars": 219002,
+          "lang": "Python",
+          "desc": "All Algorithms implemented in Python",
+          "url": "https://github.com/TheAlgorithms/Python",
+          "updated": "2026-03-13"
+        },
+        {
+          "name": "Significant-Gravitas/AutoGPT",
+          "stars": 182778,
+          "lang": "Python",
+          "desc": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so tha",
+          "url": "https://github.com/Significant-Gravitas/AutoGPT",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "AUTOMATIC1111/stable-diffusion-webui",
+          "stars": 161969,
+          "lang": "Python",
+          "desc": "Stable Diffusion web UI",
+          "url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+          "updated": "2026-03-02"
+        },
+        {
+          "name": "huggingface/transformers",
+          "stars": 158316,
+          "lang": "Python",
+          "desc": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and ",
+          "url": "https://github.com/huggingface/transformers",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "yt-dlp/yt-dlp",
+          "stars": 153012,
+          "lang": "Python",
+          "desc": "A feature-rich command-line audio/video downloader",
+          "url": "https://github.com/yt-dlp/yt-dlp",
+          "updated": "2026-03-21"
+        },
+        {
+          "name": "521xueweihan/HelloGitHub",
+          "stars": 147237,
+          "lang": "Python",
+          "desc": ":octocat: 分享 GitHub 上有趣、入门级的开源项目。Share interesting, entry-level open source projects on GitHub.",
+          "url": "https://github.com/521xueweihan/HelloGitHub",
+          "updated": "2026-02-28"
+        }
+      ],
+      "arxiv_papers": [
+        {
+          "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+          "authors": [
+            "Umair Nawaz",
+            "Ahmed Heakl",
+            "Ufaq Khan"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22286v1"
+        },
+        {
+          "title": "End-to-End Training for Unified Tokenization and Latent Denoising",
+          "authors": [
+            "Shivam Duggal",
+            "Xingjian Bai",
+            "Zongze Wu"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22283v1"
+        },
+        {
+          "title": "ThinkJEPA: Empowering Latent World Models with Large Vision-Language Reasoning Model",
+          "authors": [
+            "Haichao Zhang",
+            "Yijiang Li",
+            "Shwai He"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22281v1"
+        },
+        {
+          "title": "The Dual Mechanisms of Spatial Reasoning in Vision-Language Models",
+          "authors": [
+            "Kelly Cui",
+            "Nikhil Prakash",
+            "Ayush Raina"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22278v1"
+        },
+        {
+          "title": "Scaling DoRA: High-Rank Adaptation via Factored Norms and Fused Kernels",
+          "authors": [
+            "Alexandra Zelenin",
+            "Alexandra Zhuravlyova"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22276v1"
+        },
+        {
+          "title": "Decoupling Exploration and Policy Optimization: Uncertainty Guided Tree Search for Hard Exploration",
+          "authors": [
+            "Zakaria Mhammedi",
+            "James Cohan"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22273v1"
+        },
+        {
+          "title": "Characterizing High-Capacity Janus Aminobenzene-Graphene Anode for Sodium-Ion Batteries with Machine Learning",
+          "authors": [
+            "Claudia Islas-Vargas",
+            "L. Ricardo Montoya",
+            "Carlos A. Vital-José"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22254v1"
+        },
+        {
+          "title": "Confidence-Based Decoding is Provably Efficient for Diffusion Language Models",
+          "authors": [
+            "Changxiao Cai",
+            "Gen Li"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22248v1"
+        },
+        {
+          "title": "ShapDBM: Exploring Decision Boundary Maps in Shapley Space",
+          "authors": [
+            "Luke Watkin",
+            "Daniel Archambault",
+            "Alex Telea"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22235v1"
+        },
+        {
+          "title": "One Model, Two Markets: Bid-Aware Generative Recommendation",
+          "authors": [
+            "Yanchen Jiang",
+            "Zhe Feng",
+            "Christopher P. Mah"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22231v1"
+        }
+      ],
+      "tracked_at": "2026-03-24T12:04:28.128666+00:00"
+    },
+    "engineering": {
+      "github_trending": [
+        {
+          "name": "public-apis/public-apis",
+          "stars": 415448,
+          "lang": "Python",
+          "desc": "A collective list of free APIs",
+          "url": "https://github.com/public-apis/public-apis",
+          "updated": "2026-03-18"
+        },
+        {
+          "name": "EbookFoundation/free-programming-books",
+          "stars": 384508,
+          "lang": "Python",
+          "desc": ":books: Freely available programming books",
+          "url": "https://github.com/EbookFoundation/free-programming-books",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "donnemartin/system-design-primer",
+          "stars": 340035,
+          "lang": "Python",
+          "desc": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
+          "url": "https://github.com/donnemartin/system-design-primer",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "vinta/awesome-python",
+          "stars": 288748,
+          "lang": "Python",
+          "desc": "An opinionated list of Python frameworks, libraries, tools, and resources.",
+          "url": "https://github.com/vinta/awesome-python",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "TheAlgorithms/Python",
+          "stars": 219002,
+          "lang": "Python",
+          "desc": "All Algorithms implemented in Python",
+          "url": "https://github.com/TheAlgorithms/Python",
+          "updated": "2026-03-13"
+        },
+        {
+          "name": "Significant-Gravitas/AutoGPT",
+          "stars": 182778,
+          "lang": "Python",
+          "desc": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so tha",
+          "url": "https://github.com/Significant-Gravitas/AutoGPT",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "AUTOMATIC1111/stable-diffusion-webui",
+          "stars": 161969,
+          "lang": "Python",
+          "desc": "Stable Diffusion web UI",
+          "url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+          "updated": "2026-03-02"
+        },
+        {
+          "name": "huggingface/transformers",
+          "stars": 158316,
+          "lang": "Python",
+          "desc": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and ",
+          "url": "https://github.com/huggingface/transformers",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "yt-dlp/yt-dlp",
+          "stars": 153012,
+          "lang": "Python",
+          "desc": "A feature-rich command-line audio/video downloader",
+          "url": "https://github.com/yt-dlp/yt-dlp",
+          "updated": "2026-03-21"
+        },
+        {
+          "name": "521xueweihan/HelloGitHub",
+          "stars": 147237,
+          "lang": "Python",
+          "desc": ":octocat: 分享 GitHub 上有趣、入门级的开源项目。Share interesting, entry-level open source projects on GitHub.",
+          "url": "https://github.com/521xueweihan/HelloGitHub",
+          "updated": "2026-02-28"
+        }
+      ],
+      "arxiv_papers": [
+        {
+          "title": "Lemma Discovery in Agentic Program Verification",
+          "authors": [
+            "Huan Zhao",
+            "Haoxin Tu",
+            "Zhengyao Liu"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22114v1"
+        },
+        {
+          "title": "From Technical Debt to Cognitive and Intent Debt: Rethinking Software Health in the Age of AI",
+          "authors": [
+            "Margaret-Anne Storey"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22106v1"
+        },
+        {
+          "title": "Dynamic analysis enhances issue resolution",
+          "authors": [
+            "Mingwei Liu",
+            "Zihao Wang",
+            "Zhenxi Chen"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22048v1"
+        },
+        {
+          "title": "Do Papers Match Code? A Benchmark and Framework for Paper-Code Consistency Detection in Bioinformatics Software",
+          "authors": [
+            "Tianxiang Xu",
+            "Xiaoyan Zhu",
+            "Xin Lai"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22018v1"
+        },
+        {
+          "title": "StreamSampling.jl: Efficient Sampling from Data Streams in Julia",
+          "authors": [
+            "Adriano Meligrana"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21996v1"
+        },
+        {
+          "title": "Albank -- a case study on the use of ethereum blockchain technology and smart contracts for secure decentralized bank application",
+          "authors": [
+            "Shkelqim Sherifi"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21894v1"
+        },
+        {
+          "title": "Verify Implementation Equivalence of Large Models",
+          "authors": [
+            "Qi Zhan",
+            "Xing Hu",
+            "Xin Xia"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21851v1"
+        },
+        {
+          "title": "A Curated List of Open-source Software-only Energy Efficiency Measurement Tools: A GitHub Mining Study",
+          "authors": [
+            "Manuela Bechara Cannizza",
+            "Michel Albonico"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21772v1"
+        },
+        {
+          "title": "Quantifying Uncertainty in FMEDA Safety Metrics: An Error Propagation Approach for Enhanced ASIC Verification",
+          "authors": [
+            "Antonino Armato",
+            "Christian Kehl",
+            "Sebastian Fischer"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21770v1"
+        },
+        {
+          "title": "Reasoning Provenance for Autonomous AI Agents: Structured Behavioral Analytics Beyond State Checkpoints and Execution Traces",
+          "authors": [
+            "Neelmani Vispute"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.21692v1"
+        }
+      ],
+      "tracked_at": "2026-03-24T12:04:28.128666+00:00"
+    },
+    "philosophy": {
+      "github_trending": [
+        {
+          "name": "public-apis/public-apis",
+          "stars": 415448,
+          "lang": "Python",
+          "desc": "A collective list of free APIs",
+          "url": "https://github.com/public-apis/public-apis",
+          "updated": "2026-03-18"
+        },
+        {
+          "name": "EbookFoundation/free-programming-books",
+          "stars": 384508,
+          "lang": "Python",
+          "desc": ":books: Freely available programming books",
+          "url": "https://github.com/EbookFoundation/free-programming-books",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "donnemartin/system-design-primer",
+          "stars": 340035,
+          "lang": "Python",
+          "desc": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
+          "url": "https://github.com/donnemartin/system-design-primer",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "vinta/awesome-python",
+          "stars": 288748,
+          "lang": "Python",
+          "desc": "An opinionated list of Python frameworks, libraries, tools, and resources.",
+          "url": "https://github.com/vinta/awesome-python",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "TheAlgorithms/Python",
+          "stars": 219002,
+          "lang": "Python",
+          "desc": "All Algorithms implemented in Python",
+          "url": "https://github.com/TheAlgorithms/Python",
+          "updated": "2026-03-13"
+        },
+        {
+          "name": "Significant-Gravitas/AutoGPT",
+          "stars": 182778,
+          "lang": "Python",
+          "desc": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so tha",
+          "url": "https://github.com/Significant-Gravitas/AutoGPT",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "AUTOMATIC1111/stable-diffusion-webui",
+          "stars": 161969,
+          "lang": "Python",
+          "desc": "Stable Diffusion web UI",
+          "url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+          "updated": "2026-03-02"
+        },
+        {
+          "name": "huggingface/transformers",
+          "stars": 158316,
+          "lang": "Python",
+          "desc": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and ",
+          "url": "https://github.com/huggingface/transformers",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "yt-dlp/yt-dlp",
+          "stars": 153012,
+          "lang": "Python",
+          "desc": "A feature-rich command-line audio/video downloader",
+          "url": "https://github.com/yt-dlp/yt-dlp",
+          "updated": "2026-03-21"
+        },
+        {
+          "name": "521xueweihan/HelloGitHub",
+          "stars": 147237,
+          "lang": "Python",
+          "desc": ":octocat: 分享 GitHub 上有趣、入门级的开源项目。Share interesting, entry-level open source projects on GitHub.",
+          "url": "https://github.com/521xueweihan/HelloGitHub",
+          "updated": "2026-02-28"
+        }
+      ],
+      "arxiv_papers": [
+        {
+          "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+          "authors": [
+            "Umair Nawaz",
+            "Ahmed Heakl",
+            "Ufaq Khan"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22286v1"
+        },
+        {
+          "title": "End-to-End Training for Unified Tokenization and Latent Denoising",
+          "authors": [
+            "Shivam Duggal",
+            "Xingjian Bai",
+            "Zongze Wu"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22283v1"
+        },
+        {
+          "title": "UniMotion: A Unified Framework for Motion-Text-Vision Understanding and Generation",
+          "authors": [
+            "Ziyi Wang",
+            "Xinshun Wang",
+            "Shuang Chen"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22282v1"
+        },
+        {
+          "title": "ThinkJEPA: Empowering Latent World Models with Large Vision-Language Reasoning Model",
+          "authors": [
+            "Haichao Zhang",
+            "Yijiang Li",
+            "Shwai He"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22281v1"
+        },
+        {
+          "title": "3D-Layout-R1: Structured Reasoning for Language-Instructed Spatial Editing",
+          "authors": [
+            "Haoyu Zhen",
+            "Xiaolong Li",
+            "Yilin Zhao"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22279v1"
+        },
+        {
+          "title": "TiCo: Time-Controllable Training for Spoken Dialogue Models",
+          "authors": [
+            "Kai-Wei Chang",
+            "Wei-Chih Chen",
+            "En-Pei Hu"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22267v1"
+        },
+        {
+          "title": "Confidence-Based Decoding is Provably Efficient for Diffusion Language Models",
+          "authors": [
+            "Changxiao Cai",
+            "Gen Li"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22248v1"
+        },
+        {
+          "title": "One Model, Two Markets: Bid-Aware Generative Recommendation",
+          "authors": [
+            "Yanchen Jiang",
+            "Zhe Feng",
+            "Christopher P. Mah"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22231v1"
+        },
+        {
+          "title": "SpatialReward: Verifiable Spatial Reward Modeling for Fine-Grained Spatial Consistency in Text-to-Image Generation",
+          "authors": [
+            "Sashuai Zhou",
+            "Qiang Zhou",
+            "Junpeng Ma"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22228v1"
+        },
+        {
+          "title": "Dyadic: A Scalable Platform for Human-Human and Human-AI Conversation Research",
+          "authors": [
+            "David M. Markowitz"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22227v1"
+        }
+      ],
+      "tracked_at": "2026-03-24T12:04:28.128666+00:00"
+    },
+    "intelligence": {
+      "github_trending": [
+        {
+          "name": "public-apis/public-apis",
+          "stars": 415448,
+          "lang": "Python",
+          "desc": "A collective list of free APIs",
+          "url": "https://github.com/public-apis/public-apis",
+          "updated": "2026-03-18"
+        },
+        {
+          "name": "EbookFoundation/free-programming-books",
+          "stars": 384508,
+          "lang": "Python",
+          "desc": ":books: Freely available programming books",
+          "url": "https://github.com/EbookFoundation/free-programming-books",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "donnemartin/system-design-primer",
+          "stars": 340035,
+          "lang": "Python",
+          "desc": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
+          "url": "https://github.com/donnemartin/system-design-primer",
+          "updated": "2026-03-20"
+        },
+        {
+          "name": "vinta/awesome-python",
+          "stars": 288748,
+          "lang": "Python",
+          "desc": "An opinionated list of Python frameworks, libraries, tools, and resources.",
+          "url": "https://github.com/vinta/awesome-python",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "TheAlgorithms/Python",
+          "stars": 219002,
+          "lang": "Python",
+          "desc": "All Algorithms implemented in Python",
+          "url": "https://github.com/TheAlgorithms/Python",
+          "updated": "2026-03-13"
+        },
+        {
+          "name": "Significant-Gravitas/AutoGPT",
+          "stars": 182778,
+          "lang": "Python",
+          "desc": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so tha",
+          "url": "https://github.com/Significant-Gravitas/AutoGPT",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "AUTOMATIC1111/stable-diffusion-webui",
+          "stars": 161969,
+          "lang": "Python",
+          "desc": "Stable Diffusion web UI",
+          "url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+          "updated": "2026-03-02"
+        },
+        {
+          "name": "huggingface/transformers",
+          "stars": 158316,
+          "lang": "Python",
+          "desc": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and ",
+          "url": "https://github.com/huggingface/transformers",
+          "updated": "2026-03-24"
+        },
+        {
+          "name": "yt-dlp/yt-dlp",
+          "stars": 153012,
+          "lang": "Python",
+          "desc": "A feature-rich command-line audio/video downloader",
+          "url": "https://github.com/yt-dlp/yt-dlp",
+          "updated": "2026-03-21"
+        },
+        {
+          "name": "521xueweihan/HelloGitHub",
+          "stars": 147237,
+          "lang": "Python",
+          "desc": ":octocat: 分享 GitHub 上有趣、入门级的开源项目。Share interesting, entry-level open source projects on GitHub.",
+          "url": "https://github.com/521xueweihan/HelloGitHub",
+          "updated": "2026-02-28"
+        }
+      ],
+      "arxiv_papers": [
+        {
+          "title": "WorldCache: Content-Aware Caching for Accelerated Video World Models",
+          "authors": [
+            "Umair Nawaz",
+            "Ahmed Heakl",
+            "Ufaq Khan"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22286v1"
+        },
+        {
+          "title": "End-to-End Training for Unified Tokenization and Latent Denoising",
+          "authors": [
+            "Shivam Duggal",
+            "Xingjian Bai",
+            "Zongze Wu"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22283v1"
+        },
+        {
+          "title": "UniMotion: A Unified Framework for Motion-Text-Vision Understanding and Generation",
+          "authors": [
+            "Ziyi Wang",
+            "Xinshun Wang",
+            "Shuang Chen"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22282v1"
+        },
+        {
+          "title": "ThinkJEPA: Empowering Latent World Models with Large Vision-Language Reasoning Model",
+          "authors": [
+            "Haichao Zhang",
+            "Yijiang Li",
+            "Shwai He"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22281v1"
+        },
+        {
+          "title": "3D-Layout-R1: Structured Reasoning for Language-Instructed Spatial Editing",
+          "authors": [
+            "Haoyu Zhen",
+            "Xiaolong Li",
+            "Yilin Zhao"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22279v1"
+        },
+        {
+          "title": "TiCo: Time-Controllable Training for Spoken Dialogue Models",
+          "authors": [
+            "Kai-Wei Chang",
+            "Wei-Chih Chen",
+            "En-Pei Hu"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22267v1"
+        },
+        {
+          "title": "Confidence-Based Decoding is Provably Efficient for Diffusion Language Models",
+          "authors": [
+            "Changxiao Cai",
+            "Gen Li"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22248v1"
+        },
+        {
+          "title": "One Model, Two Markets: Bid-Aware Generative Recommendation",
+          "authors": [
+            "Yanchen Jiang",
+            "Zhe Feng",
+            "Christopher P. Mah"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22231v1"
+        },
+        {
+          "title": "SpatialReward: Verifiable Spatial Reward Modeling for Fine-Grained Spatial Consistency in Text-to-Image Generation",
+          "authors": [
+            "Sashuai Zhou",
+            "Qiang Zhou",
+            "Junpeng Ma"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22228v1"
+        },
+        {
+          "title": "Dyadic: A Scalable Platform for Human-Human and Human-AI Conversation Research",
+          "authors": [
+            "David M. Markowitz"
+          ],
+          "published": "2026-03-23",
+          "url": "http://arxiv.org/abs/2603.22227v1"
+        }
+      ],
+      "tracked_at": "2026-03-24T12:04:28.128666+00:00"
+    }
+  },
+  "last_run": "2026-03-24T12:04:28.128666+00:00",
+  "history": [
+    {
+      "ts": "2026-03-24T11:57:52.592567+00:00",
+      "departments": [
+        "mind",
+        "science",
+        "engineering",
+        "philosophy",
+        "intelligence"
+      ]
+    },
+    {
+      "ts": "2026-03-24T12:00:32.110442+00:00",
+      "departments": [
+        "mind",
+        "science",
+        "engineering",
+        "philosophy",
+        "intelligence"
+      ]
+    },
+    {
+      "ts": "2026-03-24T12:01:28.893474+00:00",
+      "departments": [
+        "mind",
+        "science",
+        "engineering",
+        "philosophy",
+        "intelligence"
+      ]
+    },
+    {
+      "ts": "2026-03-24T12:02:10.960611+00:00",
+      "departments": [
+        "mind",
+        "science",
+        "engineering",
+        "philosophy",
+        "intelligence"
+      ]
+    },
+    {
+      "ts": "2026-03-24T12:04:28.128666+00:00",
+      "departments": [
+        "mind",
+        "science",
+        "engineering",
+        "philosophy",
+        "intelligence"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+20:17:11 === 网络探测开始 ===
+20:17:11   ❌ github: 586ms — HTTP Error 401: Unauthorized
+20:17:12   ✅ arxiv: 655ms
+20:17:14   ✅ searxng: 2413ms — localhost:8080
+20:17:25   ❌ semantic_scholar: 10615ms — <urlopen error _ssl.c:983: The handshake operation timed out
+20:17:25   ❌ brave: 0ms — no API key
+20:17:25 === 可用源: ['arxiv', 'searxng'] ===

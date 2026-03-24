@@ -1,0 +1,151 @@
+19:57:52 === Expert Tracker 开始 ===
+19:57:52 [mind]
+19:57:52   追踪 mind: 学习科学、认知科学、神经科学、社会科学
+19:57:53   ⚠️ GitHub API 失败: HTTP Error 422: Unprocessable Entity
+19:57:53 [science]
+19:57:53   追踪 science: AI4S、复杂系统、宇宙学、可计算物质
+19:57:54   ⚠️ GitHub API 失败: HTTP Error 422: Unprocessable Entity
+19:57:55 [engineering]
+19:57:55   追踪 engineering: WSL/Linux、安全、数据科学、上下文工程
+19:57:55   ⚠️ GitHub API 失败: HTTP Error 422: Unprocessable Entity
+19:57:55 [philosophy]
+19:57:55   追踪 philosophy: 加速主义、技术哲学、后人类、思辨实在论、心灵哲学
+19:57:56   ⚠️ GitHub API 失败: HTTP Error 422: Unprocessable Entity
+19:57:57 [intelligence]
+19:57:57   追踪 intelligence: 动态源采集、种子提炼、知识图谱
+19:57:57   ⚠️ GitHub API 失败: HTTP Error 422: Unprocessable Entity
+19:57:57 === 完成: 5 部门, 0 GitHub, 50 arXiv ===
+20:00:32 === Expert Tracker 开始 ===
+20:00:32 [mind]
+20:00:32   追踪 mind: 学习科学、认知科学、神经科学、社会科学
+20:00:32   ❌ 失败: invalid literal for int() with base 10: 'daily'
+20:00:32 [science]
+20:00:32   追踪 science: AI4S、复杂系统、宇宙学、可计算物质
+20:00:32   ❌ 失败: invalid literal for int() with base 10: 'daily'
+20:00:32 [engineering]
+20:00:32   追踪 engineering: WSL/Linux、安全、数据科学、上下文工程
+20:00:32   ❌ 失败: invalid literal for int() with base 10: 'daily'
+20:00:32 [philosophy]
+20:00:32   追踪 philosophy: 加速主义、技术哲学、后人类、思辨实在论、心灵哲学
+20:00:32   ❌ 失败: invalid literal for int() with base 10: 'daily'
+20:00:32 [intelligence]
+20:00:32   追踪 intelligence: 动态源采集、种子提炼、知识图谱
+20:00:32   ❌ 失败: invalid literal for int() with base 10: 'daily'
+20:00:32 === 完成: 5 部门, 0 GitHub, 50 arXiv ===
+20:01:28 === Expert Tracker 开始 ===
+20:01:28 [engineering]
+20:01:28     ⚠️ GitHub 失败: URL can't contain control characters. '/search/repositories?q=stars:>500+language:python+WSL Linux systems programming&sort=stars&order=desc&per_page=10' (found at least ' ')
+20:01:28   GitHub: 0 条
+20:01:29   arXiv: 10 条
+20:01:30 [science]
+20:01:30     ⚠️ GitHub 失败: URL can't contain control characters. '/search/repositories?q=stars:>500+language:python+machine learning physics&sort=stars&order=desc&per_page=10' (found at least ' ')
+20:01:30   GitHub: 0 条
+20:01:30   arXiv: 10 条
+20:01:31 [mind]
+20:01:31     ⚠️ GitHub 失败: URL can't contain control characters. '/search/repositories?q=stars:>200+language:javascript+cognitive science neural&sort=stars&order=desc&per_page=10' (found at least ' ')
+20:01:31   GitHub: 0 条
+20:01:32   arXiv: 10 条
+20:01:33 [philosophy]
+20:01:33     ⚠️ GitHub 失败: URL can't contain control characters. '/search/repositories?q=stars:>100+language:markdown+technology philosophy&sort=stars&order=desc&per_page=10' (found at least ' ')
+20:01:33   GitHub: 0 条
+20:01:33   arXiv: 10 条
+20:01:34 [intelligence]
+20:01:34     ⚠️ GitHub 失败: URL can't contain control characters. '/search/repositories?q=stars:>500+language:python+knowledge graph AI&sort=stars&order=desc&per_page=10' (found at least ' ')
+20:01:34   GitHub: 0 条
+20:01:35   arXiv: 10 条
+20:01:36 === 完成: 5 部门, 0 GitHub, 50 arXiv ===
+20:02:10 === Expert Tracker 开始 ===
+20:02:10 [engineering]
+20:02:11     ⚠️ GitHub HTTP 422: {"message":"Validation Failed","errors":[{"message":"\"500+language:python+WSL\"
+20:02:11   GitHub: 0 条
+20:02:11   arXiv: 10 条
+20:02:12 [science]
+20:02:13     ⚠️ GitHub HTTP 422: {"message":"Validation Failed","errors":[{"message":"\"500+language:python+machi
+20:02:13   GitHub: 0 条
+20:02:13   arXiv: 10 条
+20:02:14 [mind]
+20:02:15     ⚠️ GitHub HTTP 422: {"message":"Validation Failed","errors":[{"message":"\"200+language:javascript+c
+20:02:15   GitHub: 0 条
+20:02:16   arXiv: 10 条
+20:02:17 [philosophy]
+20:02:18     ⚠️ GitHub HTTP 422: {"message":"Validation Failed","errors":[{"message":"\"100+language:markdown+tec
+20:02:18   GitHub: 0 条
+20:02:18   arXiv: 10 条
+20:02:19 [intelligence]
+20:02:20     ⚠️ GitHub HTTP 422: {"message":"Validation Failed","errors":[{"message":"\"500+language:python+knowl
+20:02:20   GitHub: 0 条
+20:02:21   arXiv: 10 条
+20:02:22 === 完成: 5 部门, 0 GitHub, 50 arXiv ===
+20:04:28 === Expert Tracker 开始 ===
+20:04:28 [engineering] lang=python stars>500 arxiv=cs.SE
+20:04:29   GitHub: 10 条
+20:04:29   arXiv: 10 条
+20:04:30 [science] lang=python stars>500 arxiv=cs.LG
+20:04:30   GitHub: 10 条
+20:04:31   arXiv: 10 条
+20:04:32 [mind] lang=python stars>200 arxiv=cs.CY
+20:04:33   GitHub: 10 条
+20:04:34   arXiv: 10 条
+20:04:35 [philosophy] lang=python stars>100 arxiv=cs.AI
+20:04:36   GitHub: 10 条
+20:04:37   arXiv: 10 条
+20:04:38 [intelligence] lang=python stars>500 arxiv=cs.AI
+20:04:38   GitHub: 10 条
+20:04:39   arXiv: 10 条
+20:04:40 === 完成: 5 部门, 50 GitHub, 50 arXiv ===
+20:11:24 === Expert Tracker v2 开始 ===
+20:11:31 [engineering] 初始化 TOP50: 27 experts
+20:11:36 [science] 初始化 TOP50: 30 experts
+20:11:40 [mind] 初始化 TOP50: 29 experts
+20:11:44 [philosophy] 初始化 TOP50: 30 experts
+20:11:47 [intelligence] 初始化 TOP50: 30 experts
+20:11:47 [engineering] 追踪 27 位专家...
+20:11:47 [science] 追踪 30 位专家...
+20:11:47 [mind] 追踪 29 位专家...
+20:11:47 [philosophy] 追踪 30 位专家...
+20:11:47 [intelligence] 追踪 30 位专家...
+20:11:47 === 完成: 0 条新动态 ===
+20:18:51 === Expert Tracker v3 开始 ===
+20:18:51 [engineering] 重新发现TOP专家...
+20:18:51   [engineering] 采集 cs.SE...
+20:18:53   [engineering] 采集 cs.LG...
+20:18:56   [engineering] 采集 cs.OS...
+20:19:13 === Expert Tracker v3 开始 ===
+20:19:13 [engineering] 重新发现TOP专家...
+20:19:13   [engineering] 采集 cs.SE...
+20:19:14   [engineering] 采集 cs.LG...
+20:19:15   [engineering] 采集 cs.OS...
+20:19:50 === Expert Tracker v3 开始 ===
+20:19:50 [engineering] 重新发现TOP专家...
+20:19:50   [engineering] 采集 cs.SE...
+20:19:51   [engineering] 采集 cs.LG...
+20:19:52   [engineering] 采集 cs.OS...
+20:19:53   [engineering] TOP 10 experts: Tong Jia, Ying Li, Yusheng Zheng
+20:19:54 [science] 重新发现TOP专家...
+20:19:54   [science] 采集 physics.comp-ph...
+20:19:56   [science] 采集 astro-ph.CO...
+20:19:58   [science] 采集 quant-ph...
+20:20:00   [science] TOP 10 experts: Elka Rusta, Stefania Salvadori, Roberto Maiolino
+20:20:01 [mind] 重新发现TOP专家...
+20:20:01   [mind] 采集 cs.CY...
+20:20:03   [mind] 采集 q-bio.OT...
+20:20:04   [mind] 采集 cs.AI...
+20:20:06   [mind] TOP 10 experts: Arturo Tozzi, Bros Victor, Gatica-Perez Daniel
+20:20:07 [philosophy] 重新发现TOP专家...
+20:20:07   [philosophy] 采集 hep-th...
+20:20:08   [philosophy] 采集 gr-qc...
+20:20:13   [philosophy] 采集 physics.hist-ph...
+20:20:15   [philosophy] TOP 10 experts: Jacob A. Barandes, Harry Sticker, Paul Borrill
+20:20:16 [intelligence] 重新发现TOP专家...
+20:20:16   [intelligence] 采集 cs.AI...
+20:20:17   [intelligence] 采集 cs.IR...
+20:20:18   [intelligence] 采集 cs.CL...
+20:20:19   [intelligence] TOP 10 experts: Kai-Wei Chang, Hung-yi Lee, James Glass
+20:20:34 === Expert Tracker v3 开始 ===
+20:20:56 === Expert Tracker v3 开始 ===
+20:20:56 [engineering] 追踪 10 位TOP专家...
+20:21:08 [science] 追踪 10 位TOP专家...
+20:21:18 [mind] 追踪 10 位TOP专家...
+20:21:27 [philosophy] 追踪 10 位TOP专家...
+20:21:36 [intelligence] 追踪 10 位TOP专家...
+20:21:43 === 完成: 5 部门, 20 条新发现 ===

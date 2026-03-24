@@ -50,4 +50,22 @@ if [[ "$CYCLE" == "0" ]]; then
         || log "执行层: 异常"
 fi
 
+# ── 5. Expert Tracker（每36次=6小时）────────────────
+EXPERT_CYCLE_FILE="$HOME/.xuzhi_memory/task_center/.expert_cycle"
+EXPERT_CYCLE=$(python3 -c "
+import json, os
+f='$EXPERT_CYCLE_FILE'
+d = json.load(open(f)) if os.path.exists(f) else {}
+c = (d.get('count', 0) + 1) % 36
+d['count'] = c
+json.dump(d, open(f,'w'))
+print(c)
+" 2>/dev/null)
+if [[ "$EXPERT_CYCLE" == "0" ]]; then
+    log "Expert Tracker: 触发"
+    python3 "$HOME/.xuzhi_memory/task_center/expert_tracker.py" \
+        >> "$HOME/.xuzhi_memory/expert_tracker/tracker.log" 2>&1 \
+        || log "Expert Tracker: 异常"
+fi
+
 log "=== 完成 ==="
