@@ -9,7 +9,7 @@ import base64, json, os, subprocess, sys, urllib.request as ur, shutil
 from pathlib import Path
 
 TOKEN_FILE = Path.home() / ".xuzhi_memory" / ".github_token"
-REPO = "Northern-Summer/xuzhi_openclaw_backup"
+REPO = "Northern-Summer/xuzhi_workspace"
 API = f"https://api.github.com/repos/{REPO}"
 OPENCLAW = Path.home() / ".openclaw"
 BACKUP_DIR = Path("/tmp/openclaw_backup_push")
