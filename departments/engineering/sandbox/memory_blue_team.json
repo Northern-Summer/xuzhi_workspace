@@ -1,0 +1,47 @@
+{
+  "passed": 8,
+  "total": 8,
+  "results": [
+    {
+      "test": "L2 Create+Read",
+      "passed": true,
+      "error": null
+    },
+    {
+      "test": "L2 Read",
+      "passed": true,
+      "error": null
+    },
+    {
+      "test": "L2 Update (read-only)",
+      "passed": true,
+      "error": null
+    },
+    {
+      "test": "L3 Create+Read",
+      "passed": true,
+      "error": null
+    },
+    {
+      "test": "L3 Read",
+      "passed": true,
+      "error": null
+    },
+    {
+      "test": "身份锚定自报",
+      "passed": true,
+      "error": null
+    },
+    {
+      "test": "三层数据一致性",
+      "passed": true,
+      "error": null
+    },
+    {
+      "test": "API 幂等性",
+      "passed": true,
+      "error": null
+    }
+  ],
+  "run_at": "2026-03-25T14:39:55.103916+00:00"
+}

@@ -151,3 +151,20 @@ if [ "$((10#$MINUTE % 30))" = "0" ]; then
 fi
 
 stamp "Cron runner: complete"
+
+# ─── Memory DB Backup: export SQLite → JSON ────────────────────────────────
+if [ "$MINUTE" = "00" ]; then
+    MEMORY_DB="${HOME}/.xuzhi_memory/memory.db"
+    MEMORY_JSON="${HOME}/.xuzhi_memory/memory_backup.json"
+    if [ -f "$MEMORY_DB" ]; then
+        python3 -c "
+import sqlite3, json
+conn = sqlite3.connect('$MEMORY_DB')
+episodes = [dict(r) for r in conn.execute('SELECT * FROM episodes ORDER BY ts DESC LIMIT 1000')]
+knowledge = [dict(r) for r in conn.execute('SELECT * FROM knowledge ORDER BY created_at DESC LIMIT 500')]
+with open('$MEMORY_JSON', 'w') as f:
+    json.dump({'episodes': episodes, 'knowledge': knowledge}, f, ensure_ascii=False, indent=2)
+print(f'Exported {len(episodes)} episodes, {len(knowledge)} knowledge units')
+" >> "$LOG" 2>&1 && echo "memory.db exported" >> "$LOG" || echo "memory.db export failed" >> "$LOG"
+    fi
+fi

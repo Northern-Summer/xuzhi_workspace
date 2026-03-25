@@ -1,0 +1,77 @@
+{
+  "run_at": "2026-03-25T14:41:37.198236+00:00",
+  "red_pass": 5,
+  "blue_pass": 8,
+  "improvements": [
+    {
+      "id": "ARCH-001",
+      "severity": "HIGH",
+      "title": "L2 查询无分页",
+      "from_attack": "记忆污染",
+      "problem": "query_episodes 无 LIMIT，pollution 后爆炸",
+      "fix": "强制 LIMIT=20，上限 100",
+      "effort": "TRIVIAL",
+      "status": "TODO"
+    },
+    {
+      "id": "SYNC-001",
+      "severity": "HIGH",
+      "title": "memory.db 未纳入 GitHub 备份",
+      "from_attack": "架构",
+      "problem": ".xuzhi_memory 是 git repo 但 memory.db 未跟踪",
+      "fix": "定期导出 memory.db 为 JSON 后 commit",
+      "effort": "LOW",
+      "status": "TODO"
+    },
+    {
+      "id": "ID-001",
+      "severity": "HIGH",
+      "title": "identity_anchor.py 路径硬编码",
+      "from_attack": "架构",
+      "problem": "~/.xuzhi_genesis 硬编码，不兼容符号链接",
+      "fix": "使用 Path(__file__).resolve()",
+      "effort": "TRIVIAL",
+      "status": "TODO"
+    },
+    {
+      "id": "L2-001",
+      "severity": "MEDIUM",
+      "title": "脏数据注入防御：字段长度限制",
+      "from_attack": "脏数据注入",
+      "problem": "超长字段和特殊字符未被拒绝",
+      "fix": "add_episode/add_knowledge 中加入 len() 检查",
+      "effort": "LOW",
+      "status": "TODO"
+    },
+    {
+      "id": "ARCH-002",
+      "severity": "MEDIUM",
+      "title": "L2 无 TTL/自动清理",
+      "from_attack": "记忆污染",
+      "problem": "episode 永不过期，垃圾累积",
+      "fix": "decay_freshness() 扩展为 episode TTL",
+      "effort": "MEDIUM",
+      "status": "TODO"
+    },
+    {
+      "id": "L2-002",
+      "severity": "LOW",
+      "title": "并发写入：SQLite WAL 模式",
+      "from_attack": "并发写入",
+      "problem": "WAL 可改善并发性能",
+      "fix": "conn.execute('PRAGMA journal_mode=WAL')",
+      "effort": "LOW",
+      "status": "TODO"
+    },
+    {
+      "id": "L3-001",
+      "severity": "LOW",
+      "title": "L3 importance/freshness 值域限制",
+      "from_attack": "L3评分操纵",
+      "problem": "importance=999.0 未被 clamp",
+      "fix": "importance=min(max(val,0),1)",
+      "effort": "TRIVIAL",
+      "status": "TODO"
+    }
+  ]
+}

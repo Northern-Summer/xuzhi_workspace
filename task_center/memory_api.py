@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS meta (
 
 def init():
     DB_PATH.parent.mkdir(exist_ok=True, parents=True)
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = sqlite3.connect(str(DB_PATH), timeout=5.0)
+    conn.execute("PRAGMA journal_mode=WAL")
     conn.executescript(SCHEMA)
     conn.execute("INSERT OR IGNORE INTO meta (key, value) VALUES ('version', '1.0')")
     conn.commit()
@@ -75,8 +76,12 @@ def init():
 
 def add_episode(agent: str, task_type: str, input_sum: str,
                 output_sum: str, status: str) -> int:
+    # 字段长度限制
+    input_sum = str(input_sum)[:500]
+    output_sum = str(output_sum)[:500]
     """写入任务摘要到 L2"""
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = sqlite3.connect(str(DB_PATH), timeout=5.0)
+    conn.execute("PRAGMA journal_mode=WAL")
     cur = conn.execute(
         "INSERT INTO episodes (agent, task_type, input_sum, output_sum, status, ts) VALUES (?,?,?,?,?,?)",
         (agent, task_type, input_sum, output_sum, status,
@@ -94,7 +99,8 @@ def add_episode(agent: str, task_type: str, input_sum: str,
 
 def query_episodes(keyword: str = "", agent: str = "", limit: int = 20) -> list:
     """检索 L2：关键词 LIKE + agent 过滤（中文友好）"""
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = sqlite3.connect(str(DB_PATH), timeout=5.0)
+    conn.execute("PRAGMA journal_mode=WAL")
     conn.row_factory = sqlite3.Row
 
     query = "SELECT * FROM episodes"
@@ -109,7 +115,7 @@ def query_episodes(keyword: str = "", agent: str = "", limit: int = 20) -> list:
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
     query += " ORDER BY ts DESC LIMIT ?"
-    params.append(limit)
+    params.append(min(limit, 100))  # cap at 100
     rows = conn.execute(query, params).fetchall()
     conn.close()
     return [dict(r) for r in rows]
@@ -119,7 +125,11 @@ def query_episodes(keyword: str = "", agent: str = "", limit: int = 20) -> list:
 def add_knowledge(topic: str, content: str, source: str,
                   tags: str, importance: float = 0.5, freshness: float = 1.0) -> int:
     """写入知识单元到 L3"""
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = sqlite3.connect(str(DB_PATH), timeout=5.0)
+    conn.execute("PRAGMA journal_mode=WAL")
+    # Clamp values to valid range
+    importance = min(max(float(importance), 0.0), 1.0)
+    freshness = min(max(float(freshness), 0.0), 1.0)
     cur = conn.execute(
         "INSERT INTO knowledge (topic, content, source, tags, importance, freshness, created_at) VALUES (?,?,?,?,?,?,?)",
         (topic, content, source, tags, importance, freshness,
@@ -136,7 +146,8 @@ def add_knowledge(topic: str, content: str, source: str,
 
 def query_knowledge(keyword: str = "", tags: str = "", limit: int = 10) -> list:
     """检索 L3：关键词 LIKE + 标签过滤 + importance×freshness 排序"""
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = sqlite3.connect(str(DB_PATH), timeout=5.0)
+    conn.execute("PRAGMA journal_mode=WAL")
     conn.row_factory = sqlite3.Row
 
     query = "SELECT *, (importance * freshness) as score FROM knowledge"
@@ -151,14 +162,15 @@ def query_knowledge(keyword: str = "", tags: str = "", limit: int = 10) -> list:
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
     query += " ORDER BY score DESC LIMIT ?"
-    params.append(limit)
+    params.append(min(limit, 100))  # cap at 100
     rows = conn.execute(query, params).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
 def decay_freshness(days: int = 7, decay: float = 0.9):
     """每日新鲜度衰减"""
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = sqlite3.connect(str(DB_PATH), timeout=5.0)
+    conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("UPDATE knowledge SET freshness = freshness * ?", (decay,))
     conn.commit()
     conn.close()

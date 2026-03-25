@@ -1,0 +1,32 @@
+{
+  "passed": 5,
+  "total": 5,
+  "results": [
+    {
+      "attack": "并发写入",
+      "passed": true,
+      "error": null
+    },
+    {
+      "attack": "脏数据注入",
+      "passed": true,
+      "error": null
+    },
+    {
+      "attack": "L2查询注入",
+      "passed": true,
+      "error": null
+    },
+    {
+      "attack": "L3评分操纵",
+      "passed": true,
+      "error": null
+    },
+    {
+      "attack": "记忆污染",
+      "passed": true,
+      "error": null
+    }
+  ],
+  "run_at": "2026-03-25T14:39:47.997773+00:00"
+}
