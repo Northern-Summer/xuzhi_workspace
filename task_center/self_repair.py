@@ -30,7 +30,8 @@ def fix_tasks_dedup():
     """P1: tasks.json 去重"""
     try:
         with open(TASKS) as f:
-            tasks = json.load(f)
+            d = json.load(f)
+        tasks = d if isinstance(d, list) else d.get("tasks", [])
     except Exception as e:
         log(f"P1 跳过（读取失败）: {e}")
         return False
@@ -65,7 +66,8 @@ def fix_stale_tasks():
     """P3: 清理超2小时的'进行中'任务"""
     try:
         with open(TASKS) as f:
-            tasks = json.load(f)
+            d = json.load(f)
+        tasks = d if isinstance(d, list) else d.get("tasks", [])
     except Exception as e:
         log(f"P3 跳过: {e}")
         return False
@@ -99,7 +101,8 @@ def fix_zombie_tasks():
     """P7: 清理僵尸任务（进行中但无参与者，且超过10分钟无更新）"""
     try:
         with open(TASKS) as f:
-            tasks = json.load(f)
+            d = json.load(f)
+        tasks = d if isinstance(d, list) else d.get("tasks", [])
     except Exception as e:
         log(f"P7 跳过: {e}")
         return False
