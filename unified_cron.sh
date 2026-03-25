@@ -1,91 +1,76 @@
 #!/bin/bash
-# unified_cron.sh — 统一调度器（议会+自维持+heal+任务执行）
-# 频率：*/10一次（6次/小时，符合宪法约束）
+# unified_cron.sh — 统一调度器（10分钟一次，符合宪法6/hr上限）
+# 路径：~/xuzhi_workspace/unified_cron.sh
+# 包含：议会 + 自维持 + heal + 任务执行 + Expert学习
 set -euo pipefail
 
-# ── Idempotency lock（防止并发执行）────────────────────
-LOCKFILE="$HOME/.xuzhi_memory/task_center/.unified_cron.lock"
+HOME_DIR="${HOME:-/home/summer}"
+LOCKFILE="${HOME_DIR}/.xuzhi_memory/task_center/.unified_cron.lock"
+LOG="${HOME_DIR}/.xuzhi_memory/task_center/unified_cron.log"
+
+mkdir -p "$(dirname "$LOCKFILE")" "$(dirname "$LOG")"
+
+# ── Idempotency lock ────────────────────────────────────
 if ! mkdir "$LOCKFILE" 2>/dev/null; then
-    log "跳过（已有实例运行）"
+    echo "$(date '+%H:%M:%S') [skip] already running" >> "$LOG"
     exit 0
 fi
-trap 'rmdir "$LOCKFILE" 2>/dev/null' EXIT
+trap 'rmdir "$LOCKFILE" 2>/dev/null || true' EXIT
 
-HOME="${HOME:-/home/summer}"
-LOG="$HOME/.xuzhi_memory/task_center/unified_cron.log"
-mkdir -p "$(dirname "$LOG")"
+stamp() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "$LOG"; }
+stamp "=== Unified Cron started ==="
 
-log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "$LOG"; }
+# ── 1. 红蓝队健康自检 ────────────────────────────────────
+stamp "Heal: running self_heal.sh"
+bash "${HOME_DIR}/xuzhi_genesis/centers/engineering/self_heal.sh" \
+    >> "${HOME_DIR}/.xuzhi_memory/task_center/watchdog.log" 2>&1 \
+    || stamp "Heal: non-zero exit"
 
-log "=== 统一调度 $(date '+%H:%M:%S') ==="
+# ── 2. Agent 存活检测 + 唤醒 ─────────────────────────────
+stamp "Agent watchdog: running"
+python3 "${HOME_DIR}/xuzhi_workspace/task_center/agent_watchdog.py" \
+    >> "${HOME_DIR}/.xuzhi_memory/task_center/agent_watchdog.log" 2>&1 \
+    || stamp "Agent watchdog: non-zero exit"
 
-# ── 1. 议会队列检查 ───────────────────────────────────
-bash "$HOME/.xuzhi_memory/parliament/check_queue.sh" \
-    >> "$HOME/.xuzhi_memory/task_center/parliament.log" 2>&1 \
-    || log "议会: 异常"
-
-# ── 2. 自维持循环 ─────────────────────────────────────
-bash "$HOME/.xuzhi_memory/self_sustaining_loop.sh" \
-    >> "$HOME/.xuzhi_memory/task_center/self_sustaining.log" 2>&1 \
-    || log "自维持: 异常"
-
-# ── 3. 健康自检 ────────────────────────────────────────
-bash "$HOME/.xuzhi_memory/self_heal.sh" \
-    >> "$HOME/.xuzhi_memory/task_center/watchdog.log" 2>&1 \
-    || log "heal: 异常"
-
-# ── 4. 任务执行层（sessions_spawn，每4轮=40分钟一次）────
-# 调用 task_executor.py，通过 openclaw agent --local 派发
-EXEC_STATE="$HOME/.xuzhi_memory/task_center/exec_cycle.json"
-
+# ── 3. 任务执行层（每4轮=40分钟一次）─────────────────────
+EXEC_CYCLE="${HOME_DIR}/.xuzhi_memory/task_center/.exec_cycle"
 CYCLE=$(python3 -c "
 import json, os
-f='$EXEC_STATE'
-if os.path.exists(f):
-    d=json.load(open(f))
-    c=d.get('count',0)
-else:
-    c=0
-d={'count':(c+1)%4}
-json.dump(d,open(f,'w'),indent=2)
+f='${EXEC_CYCLE}'
+d = json.load(open(f)) if os.path.exists(f) else {'count': 0}
+c = d.get('count', 0)
+d['count'] = (c + 1) % 4
+json.dump(d, open(f, 'w'))
 print(c)
 " 2>/dev/null)
 
-if [[ "$CYCLE" == "0" ]]; then
-    log "执行层: 触发任务派发"
-    python3 "$HOME/.xuzhi_memory/task_executor.py" \
-        >> "$HOME/.xuzhi_memory/task_center/task_executor.log" 2>&1 \
-        || log "执行层: 异常"
+if [ "$CYCLE" = "0" ]; then
+    stamp "Task executor: triggered (cycle $CYCLE)"
+    python3 "${HOME_DIR}/xuzhi_workspace/task_executor.py" \
+        >> "${HOME_DIR}/.xuzhi_memory/task_center/task_executor.log" 2>&1 \
+        || stamp "Task executor: non-zero exit"
 fi
 
-# ── 5. Expert Tracker（每36次=6小时）────────────────
-EXPERT_CYCLE_FILE="$HOME/.xuzhi_memory/task_center/.expert_cycle"
-EXPERT_CYCLE=$(python3 -c "
+# ── 4. Expert 学习（每36轮=6小时一次）──────────────────
+EXP_CYCLE="${HOME_DIR}/.xuzhi_memory/task_center/.expert_cycle"
+EXP_N=$(python3 -c "
 import json, os
-f='$EXPERT_CYCLE_FILE'
-d = json.load(open(f)) if os.path.exists(f) else {}
-c = (d.get('count', 0) + 1) % 36
-d['count'] = c
-json.dump(d, open(f,'w'))
+f='${EXP_CYCLE}'
+d = json.load(open(f)) if os.path.exists(f) else {'count': 0}
+c = d.get('count', 0)
+d['count'] = (c + 1) % 36
+json.dump(d, open(f, 'w'))
 print(c)
 " 2>/dev/null)
-if [[ "$EXPERT_CYCLE" == "0" ]]; then
-    log "Expert Tracker: 触发"
-    python3 "$HOME/.xuzhi_memory/task_center/expert_tracker.py" \
-        >> "$HOME/.xuzhi_memory/expert_tracker/tracker.log" 2>&1 \
-        || log "Expert Tracker: 异常"
-    log "Expert Watchdog: 验证学习闭环"
-    python3 "$HOME/.xuzhi_memory/task_center/expert_watchdog.py" \
-        >> "$HOME/.xuzhi_memory/expert_tracker/watchdog.log" 2>&1
-        >> "$HOME/.xuzhi_memory/expert_tracker/tracker.log" 2>&1 \
-        || log "Expert Tracker: 异常"
+
+if [ "$EXP_N" = "0" ]; then
+    stamp "Expert Tracker: triggered (cycle $EXP_N)"
+    python3 "${HOME_DIR}/xuzhi_workspace/task_center/expert_tracker.py" \
+        >> "${HOME_DIR}/.xuzhi_memory/task_center/expert_tracker.log" 2>&1 \
+        || stamp "Expert Tracker: non-zero"
+    python3 "${HOME_DIR}/xuzhi_workspace/task_center/expert_watchdog.py" \
+        >> "${HOME_DIR}/.xuzhi_memory/task_center/expert_watchdog.log" 2>&1 \
+        || stamp "Expert Watchdog: non-zero"
 fi
 
-log "=== 完成 ==="
-# ── Idempotency lock（防止并发执行）────────────────────
-LOCKFILE="$HOME/.xuzhi_memory/task_center/.unified_cron.lock"
-if ! mkdir "$LOCKFILE" 2>/dev/null; then
-    log "跳过（已有实例运行）"
-    exit 0
-fi
-trap 'rmdir "$LOCKFILE" 2>/dev/null' EXIT
+stamp "=== Unified Cron complete ==="

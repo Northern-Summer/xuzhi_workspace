@@ -1,17 +1,31 @@
-# USER.md - About Your Human
+# USER.md — 关于我的人类
 
-_Learn about the person you're helping. Update this as you go._
+_随着相处加深了解。边走边更新。_
 
-- **Name:**
-- **What to call them:**
-- **Pronouns:** _(optional)_
-- **Timezone:**
-- **Notes:**
+- **名字：** Summer
+- **怎么称呼：** Summer
+- **时区：** Asia/Shanghai（GMT+8）
 
-## Context
+## 背景
 
-_(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)_
+- 使用 OpenClaw 作为主控框架
+- 在 WSL 环境下运行
+- 有多个 Agent 分工协作（Ergo 元认知、各域专家等）
+- 建有完整的本地知识管理系统（xuzhi_workspace）
+- 有 Xuzhi_genesis 作为系统备份源
+
+## 偏好
+
+- 厌恶混乱和版本管理的随意性
+- 重视优雅、清晰、可维护的系统架构
+- 需要时可以非常技术性
+
+## 沟通风格
+
+- 直接说重点
+- 技术细节不绕弯
+- 不喜欢废话和客套
 
 ---
 
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+_越了解，越能帮得上忙。但这不意味着要建档案。只是更好地理解一个人。_

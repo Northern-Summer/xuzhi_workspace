@@ -1,0 +1,30 @@
+members:
+  - id: summer
+    name: Summer
+    role: 主席
+    soul: ../agents/summer/SOUL.md
+    status: active
+
+  - id: ergo
+    name: Ergo
+    role: 记录官
+    soul: ../agents/Ergo/SOUL.md
+    status: active
+
+  - id: research
+    name: 研究部
+    role: 参议员
+    soul: ../departments/research/SOUL.md
+    status: pending
+
+  - id: engineering
+    name: 工程部
+    role: 参议员
+    soul: ../departments/engineering/SOUL.md
+    status: pending
+
+  - id: strategy
+    name: 战略部
+    role: 参议员
+    soul: ../departments/strategy/SOUL.md
+    status: pending
