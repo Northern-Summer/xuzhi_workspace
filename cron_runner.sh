@@ -113,11 +113,10 @@ if ! ssh-add -l >/dev/null 2>&1; then
 fi
 
 
-# Memory Forge (hourly at :30)
-if [ "$MINUTE" = "30" ]; then
-    stamp "Memory forge: archiving sessions"
-    python3 "${HOME_DIR}/xuzhi_genesis/centers/engineering/memory_forge.py" >> "$LOG" 2>&1 || stamp "Memory forge: FAILED"
-fi
+# Memory Forge: DISABLED — Broken Concept (sessions.json.bak never existed)
+# Future: if sessions archive is needed, implement with correct path
+
+
 
 # Expert Tracker + Memory Window + GitHub push (hourly at :00)
 if [ "$MINUTE" = "00" ]; then
