@@ -76,32 +76,52 @@ def is_recently_activated(last_activated_str):
         return False
 
 def activate_agent(agent_symbol, agent_id):
-    """派发 isolated agentTurn"""
+    """
+    用文件信号激活 agent（零新 session，零递归 spawn）。
+    直接 sessions_send 到目标 agent，main session 处理唤醒逻辑。
+    """
+    # Map agent_symbol to session key
+    session_map = {
+        "Φ": "agent:phi:main",
+        "Δ": "agent:delta:main",
+        "Θ": "agent:theta:main",
+        "Γ": "agent:gamma:main",
+        "Ω": "agent:omega:main",
+        "Ψ": "agent:psi:main",
+    }
+    session_key = session_map.get(agent_symbol)
+    if not session_key:
+        log(f"未知 agent: {agent_symbol}")
+        return False
+
     prompt = (
-        f"你是 Xuzhi 系统的 {agent_symbol}。\n"
-        f"你的 main session 被 watchdog 检测到异常并重新激活。\n"
-        f"立即执行以下完整激活流程：\n\n"
-        f"1. python3 ~/.xuzhi_memory/task_center/agent_push.py {agent_symbol}\n"
-        f"   → 将你的状态 push 到共享广播层\n\n"
-        f"2. python3 ~/.xuzhi_memory/task_center/health_scan.py\n"
-        f"   → 快速扫描系统状态\n\n"
-        f"3. 检查 ~/.xuzhi_memory/task_center/QUEUE.txt 是否有你的待处理任务\n"
-        f"   → 如有则处理\n\n"
-        f"4. 输出【{agent_symbol} 已就绪】即完成\n"
-        f"不要做其他任何事。"
+        f"【{agent_symbol} 唤醒信号】
+"
+        f"执行激活流程：
+"
+        f"1. 检查 ~/.xuzhi_watchdog/wake_signals/wake_{agent_symbol}.json
+"
+        f"2. 运行 health_scan 或等效检查
+"
+        f"3. 更新 ratings.json 的 last_active 时间戳
+"
+        f"4. 输出【{agent_symbol} 已就绪】
+"
+        f"不要 spawn 新的 agent，不要调用 cron add。"
     )
     r = subprocess.run(
-        [
-            "openclaw", "cron", "add",
-            "--name", f"agent-wake-{agent_symbol}-{int(time.time())}",
-            "--session", "isolated",
-            "--no-deliver",
-            "--at", "1m",
-            "--message", prompt,
-        ],
-        capture_output=True, text=True, timeout=20, cwd=str(HOME)
+        ["openclaw", "sessions", "send",
+         "--session", session_key,
+         "--message", prompt,
+         "--timeout", "30"],
+        capture_output=True, text=True, timeout=30, cwd=str(HOME)
     )
-    return r.returncode == 0
+    if r.returncode == 0:
+        log(f"✅ {agent_symbol} 唤醒信号已发送")
+        return True
+    else:
+        log(f"❌ {agent_symbol} 唤醒失败: {r.stderr[:100]}")
+        return False
 
 def update_ratings():
     try:

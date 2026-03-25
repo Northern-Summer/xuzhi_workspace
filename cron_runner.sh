@@ -93,6 +93,15 @@ if [ -f "$MARKER" ]; then
     fi
 fi
 
+
+# ─── Parliament bell: 击鼓传花流动笔记 ─────────────────────────────────────
+PARLIAMENT_RING="${HOME_DIR}/xuzhi_genesis/centers/mind/parliament/parliament_ring.py"
+FLOW_FILE="${HOME_DIR}/xuzhi_genesis/centers/mind/parliament/flow.json"
+if [ -f "$FLOW_FILE" ] && [ -f "$PARLIAMENT_RING" ]; then
+    RESULT=$(python3 "$PARLIAMENT_RING" --bell 2>/dev/null || true)
+    [ -n "$RESULT" ] && stamp "BELL: $RESULT"
+fi
+
 # ─── Regular task dispatch ────────────────────────────────────────────────────
 MINUTE=$(date '+%M')
 
@@ -103,10 +112,20 @@ if ! ssh-add -l >/dev/null 2>&1; then
     ssh-add ~/.ssh/xuzhi_github >/dev/null 2>&1 || true
 fi
 
+
+# Memory Forge (hourly at :30)
+if [ "$MINUTE" = "30" ]; then
+    stamp "Memory forge: archiving sessions"
+    python3 "${HOME_DIR}/xuzhi_genesis/centers/engineering/memory_forge.py" >> "$LOG" 2>&1 || stamp "Memory forge: FAILED"
+fi
+
+# Expert Tracker + Memory Window + GitHub push (hourly at :00)
 if [ "$MINUTE" = "00" ]; then
+    stamp "Memory window: running daily trim"
+    bash "${HOME_DIR}/xuzhi_genesis/memory_window.sh" >> "$LOG" 2>&1 || stamp "Memory window: FAILED"
+
     stamp "Expert Tracker: hourly run"
     cd "${HOME_DIR}/xuzhi_workspace"
-    python3 expert_tracker.py >> "$LOG" 2>&1 || stamp "Expert Tracker: FAILED"
 
     # GitHub push: xuzhi_workspace (SSH) + xuzhi_memory (HTTPS)
     stamp "GitHub push: xuzhi_workspace"

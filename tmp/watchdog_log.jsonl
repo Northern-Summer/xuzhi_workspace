@@ -1,4 +1,0 @@
-{"ts": 1774105435.67797, "datetime": "2026-03-21T23:03:55.677970", "type": "scan_summary", "timestamp": "2026-03-21T23:03:55.677845", "total_agents": 8, "healthy": 8, "stale": 0, "recovered": [], "problems": []}
-{"ts": 1774105457.1771345, "datetime": "2026-03-21T23:04:17.177135", "type": "scan_summary", "timestamp": "2026-03-21T23:04:17.177024", "total_agents": 8, "healthy": 8, "stale": 0, "recovered": [], "problems": []}
-{"ts": 1774105799.3432605, "datetime": "2026-03-21T23:09:59.343261", "type": "scan_summary", "timestamp": "2026-03-21T23:09:59.343132", "total_agents": 8, "healthy": 8, "stale": 0, "recovered": [], "problems": []}
-{"ts": 1774106509.50365, "datetime": "2026-03-21T23:21:49.503652", "type": "scan_summary", "timestamp": "2026-03-21T23:21:49.503335", "total_agents": 8, "healthy": 8, "stale": 0, "recovered": [], "problems": []}
