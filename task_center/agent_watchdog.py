@@ -77,51 +77,26 @@ def is_recently_activated(last_activated_str):
 
 def activate_agent(agent_symbol, agent_id):
     """
-    用文件信号激活 agent（零新 session，零递归 spawn）。
-    直接 sessions_send 到目标 agent，main session 处理唤醒逻辑。
-    """
-    # Map agent_symbol to session key
-    session_map = {
-        "Φ": "agent:phi:main",
-        "Δ": "agent:delta:main",
-        "Θ": "agent:theta:main",
-        "Γ": "agent:gamma:main",
-        "Ω": "agent:omega:main",
-        "Ψ": "agent:psi:main",
-    }
-    session_key = session_map.get(agent_symbol)
-    if not session_key:
-        log(f"未知 agent: {agent_symbol}")
-        return False
+    用文件信号激活 agent（幂等，零新 session，零递归 spawn）。
 
-    prompt = (
-        f"【{agent_symbol} 唤醒信号】
-"
-        f"执行激活流程：
-"
-        f"1. 检查 ~/.xuzhi_watchdog/wake_signals/wake_{agent_symbol}.json
-"
-        f"2. 运行 health_scan 或等效检查
-"
-        f"3. 更新 ratings.json 的 last_active 时间戳
-"
-        f"4. 输出【{agent_symbol} 已就绪】
-"
-        f"不要 spawn 新的 agent，不要调用 cron add。"
-    )
-    r = subprocess.run(
-        ["openclaw", "sessions", "send",
-         "--session", session_key,
-         "--message", prompt,
-         "--timeout", "30"],
-        capture_output=True, text=True, timeout=30, cwd=str(HOME)
-    )
-    if r.returncode == 0:
-        log(f"✅ {agent_symbol} 唤醒信号已发送")
-        return True
-    else:
-        log(f"❌ {agent_symbol} 唤醒失败: {r.stderr[:100]}")
-        return False
+    原始设计：watchdog 只写文件，agent 自己的心跳去读。
+    不要 sessions_send（主 session 阻塞时消息丢失）。
+    不要 cron add（产生递归 spawn 链）。
+    """
+    SIGNAL_DIR = Path(str(HOME)) / ".xuzhi_watchdog" / "wake_signals"
+    SIGNAL_DIR.mkdir(exist_ok=True, parents=True)
+    signal_file = SIGNAL_DIR / f"wake_{agent_symbol}.json"
+
+    from datetime import datetime, timezone
+    with open(signal_file, 'w') as f:
+        json.dump({
+            "agent": agent_symbol,
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "reason": "watchdog_activate",
+            "status": "pending"
+        }, f)
+    log(f"信号写入: {signal_file}（幂等，N次写=1次效果）")
+    return True
 
 def update_ratings():
     try:
