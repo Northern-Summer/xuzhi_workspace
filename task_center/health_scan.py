@@ -8,6 +8,7 @@ Xuzhi 全局健康扫描仪 — 精确模式
 """
 import re
 import sys
+import json
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
@@ -160,5 +161,44 @@ def run():
     return 1 if total_crit > 0 else 0
 
 
+def brief_scan() -> dict:
+    """极简模式：只输出 {healthy: bool, crit_count: int, warn_count: int, top_issues: []}"""
+    all_results = {}
+    for log_dir in LOG_DIRS:
+        if not log_dir.exists():
+            continue
+        for fp in sorted(log_dir.glob("*.log")):
+            crit, warn = scan_file(fp, max_lines=200)
+            if crit or warn:
+                all_results[fp.name] = {
+                    "crit": len(crit),
+                    "warn": len(warn),
+                    "top": [c[1] for c in crit[-3:]],
+                }
+    total_crit = sum(d["crit"] for d in all_results.values())
+    total_warn = sum(d["warn"] for d in all_results.values())
+    top_issues = []
+    for name, d in sorted(all_results.items(), key=lambda x: x[1]["crit"], reverse=True):
+        for issue in d["top"]:
+            top_issues.append(f"{name}:{issue[:80]}")
+    return {
+        "healthy": total_crit == 0,
+        "crit": total_crit,
+        "warn": total_warn,
+        "top_issues": top_issues[:5],
+    }
+
+
 if __name__ == "__main__":
-    sys.exit(run())
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--brief", action="store_true", help="极简JSON输出")
+    parser.add_argument("--json-only", action="store_true", help="纯JSON输出")
+    args = parser.parse_args()
+
+    if args.brief or args.json_only:
+        result = brief_scan()
+        print(json.dumps(result, ensure_ascii=False), flush=True)
+        sys.exit(0 if result["healthy"] else 1)
+    else:
+        sys.exit(run())
