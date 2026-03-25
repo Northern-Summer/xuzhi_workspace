@@ -95,10 +95,29 @@ fi
 
 # ─── Regular task dispatch ────────────────────────────────────────────────────
 MINUTE=$(date '+%M')
+
+# SSH agent for GitHub (cron non-interactive shell needs explicit startup)
+if ! ssh-add -l >/dev/null 2>&1; then
+    eval "$(ssh-agent -s)"
+    SSH_AUTH_SOCK=$(git config --get socket 2>/dev/null || echo "/tmp/ssh-agent.sock")
+    ssh-add ~/.ssh/xuzhi_github >/dev/null 2>&1 || true
+fi
+
 if [ "$MINUTE" = "00" ]; then
     stamp "Expert Tracker: hourly run"
     cd "${HOME_DIR}/xuzhi_workspace"
     python3 expert_tracker.py >> "$LOG" 2>&1 || stamp "Expert Tracker: FAILED"
+
+    # GitHub push: xuzhi_workspace (SSH) + xuzhi_memory (HTTPS)
+    stamp "GitHub push: xuzhi_workspace"
+    git push origin master >> "$LOG" 2>&1 || stamp "GitHub push xuzhi_workspace: FAILED"
+
+    stamp "GitHub push: xuzhi_memory"
+    git -C "${HOME_DIR}/.xuzhi_memory" push origin master >> "$LOG" 2>&1 || stamp "GitHub push xuzhi_memory: FAILED"
+
+    # .openclaw backup via Contents API (HTTPS, bypasses git protocol)
+    stamp "GitHub push: .openclaw backup"
+    python3 "${HOME_DIR}/xuzhi_workspace/bin/push_openclaw.py" >> "$LOG" 2>&1 || stamp "GitHub push .openclaw: FAILED"
 fi
 
 if [ "$((10#$MINUTE % 15))" = "0" ]; then
