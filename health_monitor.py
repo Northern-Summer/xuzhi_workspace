@@ -20,6 +20,24 @@ Engineering Principles Compliance — Xi | 2026-03-25
 import os, sys, json, subprocess, time, threading
 from pathlib import Path
 from datetime import datetime, timezone
+import sys as _sys
+_sys.path.insert(0, str(HOME / "xuzhi_workspace" / "task_center"))
+try:
+    from memory_api import add_episode
+    _HAS_MEMORY_API = True
+except Exception:
+    _HAS_MEMORY_API = False
+
+def record(agent, task, inp, out, status):
+    """双重输出：stamp + L2（有 failure/leak/sync_error 时才写，避免刷屏）"""
+    stamp(f"{out}")
+    if not _HAS_MEMORY_API:
+        return
+    if status == "failure" or "leak" in out or "sync" in out or "FAIL" in out:
+        try:
+            add_episode(agent, task, inp[:200], out[:200], status)
+        except Exception:
+            pass
 
 HOME = Path.home()
 WD   = HOME / ".openclaw" / "workspace"
@@ -123,10 +141,12 @@ def sync_memory():
         )
         if r.returncode == 0:
             stamp("memory: synced to GitHub")
+        record("health_monitor", "memory_sync", "push GitHub", "success", "success")
         else:
             stamp(f"memory: push failed ({r.returncode})")
     except Exception as e:
         stamp(f"memory: sync error: {e}")
+        record("health_monitor", "memory_sync", "push GitHub", str(e)[:100], "failure")
 
 # ── 5. 主要巡逻循环 ────────────────────────────────────────────
 def patrol():
@@ -155,6 +175,7 @@ def patrol():
         stamp(f"subagent_leaks: {len(leaked)} found")
         for name, age, status in leaked:
             stamp(f"  LEAKED: {name} ({age/60:.0f}m old, status={status})")
+            record("health_monitor", "subagent_leak", f"{name} age={age/60:.0f}m", status, "failure")
     else:
         stamp("subagent_leaks: none")
 
