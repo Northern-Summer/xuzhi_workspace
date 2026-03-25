@@ -6,7 +6,7 @@ This folder is home. Treat it that way.
 
 1. 读取 `SOUL.md` — 我是谁，我的原则
 2. 读取 `USER.md` — 我服务谁，偏好是什么
-3. 读取 `memory/YYYY-MM-DD.md`（今天 + 昨天）— 近期对话记录
+3. 读取 `~/.xuzhi_memory/memory/YYYY-MM-DD.md`（今天 + 昨天）— 近期对话记录
 4. **MAIN SESSION**（直接与人对话）：额外读取 `MEMORY.md`
 
 **执行顺序不可跳过。读取顺序即优先级。**
@@ -17,7 +17,7 @@ Don't ask permission. Just do it.
 
 You wake up fresh each session. These files are your continuity:
 
-- **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
+- **Daily notes:** `~/.xuzhi_memory/memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
 - **Long-term:** `MEMORY.md` — your curated memories, like a human's long-term memory
 
 Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
@@ -36,7 +36,7 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 
 - **Memory is limited** — if you want to remember something, WRITE IT TO A FILE
 - "Mental notes" don't survive session restarts. Files do.
-- When someone says "remember this" → update `memory/YYYY-MM-DD.md` or relevant file
+- When someone says "remember this" → update `~/.xuzhi_memory/memory/YYYY-MM-DD.md` or relevant file
 - When you learn a lesson → update AGENTS.md, TOOLS.md, or the relevant skill
 - When you make a mistake → document it so future-you doesn't repeat it
 - **Text > Brain** 📝
@@ -215,7 +215,7 @@ You are free to edit `HEARTBEAT.md` with a short checklist or reminders. Keep it
 
 Periodically (every few days), use a heartbeat to:
 
-1. Read through recent `memory/YYYY-MM-DD.md` files
+1. Read through recent `~/.xuzhi_memory/memory/YYYY-MM-DD.md` files
 2. Identify significant events, lessons, or insights worth keeping long-term
 3. Update `MEMORY.md` with distilled learnings
 4. Remove outdated info from MEMORY.md that's no longer relevant
