@@ -7,6 +7,7 @@ task_executor.py — 任务执行层核心引擎
 """
 import subprocess, json, sys, time
 from pathlib import Path
+import subprocess
 
 HOME = Path.home()
 TASKS_JSON = HOME / ".openclaw" / "tasks" / "tasks.json"
@@ -24,6 +25,20 @@ AGENT_MAP = {
     "mind": "Ω",
     "philosophy": "Ψ",
 }
+
+RL = HOME / "xuzhi_workspace" / "task_center" / "rate_limiter.py"
+
+
+def rate_limit_acquire(source: str) -> bool:
+    """主动控速：获取 token，成功返回 True，失败 False（失败时放行，不阻塞）"""
+    try:
+        result = subprocess.run(
+            ["python3", str(RL), "acquire", source],
+            capture_output=True, text=True, timeout=10
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
 
 
 def log(msg: str):
@@ -67,9 +82,14 @@ def get_waiting_tasks():
         return [], 0
 
 
-def spawn_via_cron(prompt: str, retries: int = 3) -> bool:
+def spawn_via_cron(prompt: str, task_ids: str = "", retries: int = 3) -> bool:
     """通过 openclaw cron add 创建 isolated execution agent（一次性，不重复）"""
     for attempt in range(1, retries + 1):
+        # ── Rate Limiter：主动控速 ─────────────────────────────────────────
+        if not rate_limit_acquire(f"task_exec:{task_ids}"):
+            log(f"Rate limiter 禁止派发（窗口满或冷却中）")
+            return False
+
         try:
             # 使用 --at +Xs 而不是 --every Xs，保证只执行一次
             result = subprocess.run(
@@ -94,6 +114,14 @@ def spawn_via_cron(prompt: str, retries: int = 3) -> bool:
                 return True
             else:
                 err = result.stderr[:150]
+                # 检测 794 / 速率限制错误 → 触发 cooldown
+                if "794" in err or "rate limit" in err.lower() or "1000" in err:
+                    log(f"⚠️ 速率错误({err[:80]})，触发 cooldown")
+                    subprocess.run(
+                        ["python3", str(RL), "cooldown", err, "task_executor"],
+                        capture_output=True, text=True, timeout=5
+                    )
+                    return False
                 log(f"❌ cron job 创建失败（第{attempt}次）: {err}")
                 if attempt < retries:
                     time.sleep(3)
@@ -181,9 +209,15 @@ def main():
 
     log(f"选取 {len(selected)} 个任务（等待总数: {total}）")
 
+    # ── Rate Limiter：整体批次检查 ───────────────────────────────────────
+    task_ids_str = ",".join(str(t["id"]) for t, _ in selected)
+    if not rate_limit_acquire(f"task_exec_batch:{task_ids_str}"):
+        log(f"Rate limiter 禁止批次派发（窗口满或冷却中）")
+        return
+
     prompt = build_prompt(selected)
 
-    ok = spawn_via_cron(prompt)
+    ok = spawn_via_cron(prompt, task_ids_str)
 
     if ok:
         state["last_spawn_at"] = int(time.time())
