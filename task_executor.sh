@@ -131,7 +131,7 @@ try:
     total = len(waiting)
     
     # 部门多样本：每批尽量覆盖不同部门
-    agents = {'engineering': 'Λ', 'intelligence': 'Θ', 'mind': 'Ω', 'philosophy': 'Ψ'}
+    agents = {'engineering': 'Ξ', 'intelligence': 'Θ', 'mind': 'Ω', 'philosophy': 'Ψ'}
     # 优先从不同部门选取任务
     by_dept = {}
     for t in waiting:

@@ -32,8 +32,8 @@ restore_loop_state() {
 import json
 from datetime import datetime, timezone
 d = {
-    'current': 'Λ',
-    'prev': 'Λ',
+    'current': 'Ξ',
+    'prev': 'Ξ',
     'dept': 'engineering',
     'last_run': datetime.now(timezone.utc).isoformat().replace('+00:00','Z')
 }
