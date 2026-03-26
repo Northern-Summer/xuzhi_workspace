@@ -65,12 +65,15 @@ def create_tasks_from_changes():
     tasks = load_tasks()
     now = datetime.now(timezone.utc).isoformat()
 
+    # 兼容：tasks 可能是 list 或 dict{"tasks": [...]}
+    if isinstance(tasks, dict):
+        tasks = tasks.get("tasks", [])
+
     # 已有的学习任务（按 change_key 去重）
     existing_keys = set()
-    for t in tasks.get("tasks", []):  # tasks 是 dict {"tasks": [...]}
+    for t in tasks:
         ref = t.get("completion_report", "") or ""
         if "expert_learn:" in ref:
-            # 提取 change key
             key = ref.split("expert_learn:")[-1].split()[0]
             existing_keys.add(key)
 
@@ -89,7 +92,7 @@ def create_tasks_from_changes():
         agent = next((a for a, d in AGENT_DEPT.items() if d == dept), "Ξ")
 
         new_task = {
-            "id": max((t["id"] for t in tasks.get("tasks", []) if isinstance(t["id"], int)), default=0) + 1,
+            "id": max((t["id"] for t in tasks if isinstance(t["id"], int)), default=0) + 1,
             "title": task_title,
             "type": "简单",
             "department": dept,
@@ -120,7 +123,7 @@ def create_tasks_from_changes():
             "last_updated": now,
         }
 
-        tasks["tasks"].append(new_task)
+        tasks.append(new_task)
         new_task_ids.append(new_task["id"])
         created += 1
 
