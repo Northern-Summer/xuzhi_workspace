@@ -14,17 +14,17 @@ TRACKER = HOME / ".xuzhi_memory" / "expert_tracker"
 EXPERTS = TRACKER / "experts.json"
 CHANGES = TRACKER / "changes.json"
 TASKS   = HOME  / ".openclaw" / "tasks" / "tasks.json"
-AGENTS  = ["Λ", "Δ", "Φ", "Ω", "Γ", "Θ", "Ψ"]
+AGENTS  = ["Ξ", "Φ", "Δ", "Θ", "Γ", "Ω", "Ψ"]
 
 # Agent → 对应部门
 AGENT_DEPT = {
-    "Λ": "engineering", "Δ": "engineering", "Φ": "engineering", "Ω": "mind",
-    "Γ": "intelligence", "Θ": "science", "Psi": "philosophy", "Ψ": "philosophy",
+    "Ξ": "engineering", "Φ": "engineering", "Δ": "engineering", "Ω": "mind",
+    "Γ": "intelligence", "Θ": "intelligence", "Ψ": "philosophy",
 }
 
 # Agent → memory 文件
 AGENT_MEMORY = {
-    "Λ": HOME / ".xuzhi_memory" / "memory" / "lambda.md",
+    "Ξ": HOME / ".xuzhi_memory" / "memory" / "xi.md",
     "Δ": HOME / ".xuzhi_memory" / "memory" / "delta.md",
     "Φ": HOME / ".xuzhi_memory" / "memory" / "phi.md",
     "Ω": HOME / ".xuzhi_memory" / "memory" / "omega.md",
@@ -67,7 +67,7 @@ def create_tasks_from_changes():
 
     # 已有的学习任务（按 change_key 去重）
     existing_keys = set()
-    for t in tasks:
+    for t in tasks.get("tasks", []):  # tasks 是 dict {"tasks": [...]}
         ref = t.get("completion_report", "") or ""
         if "expert_learn:" in ref:
             # 提取 change key
@@ -86,10 +86,10 @@ def create_tasks_from_changes():
 
         # 找对应的 agent
         dept = change.get("dept", "")
-        agent = next((a for a, d in AGENT_DEPT.items() if d == dept), "Λ")
+        agent = next((a for a, d in AGENT_DEPT.items() if d == dept), "Ξ")
 
         new_task = {
-            "id": max((t["id"] for t in tasks if isinstance(t["id"], int)), default=0) + 1,
+            "id": max((t["id"] for t in tasks.get("tasks", []) if isinstance(t["id"], int)), default=0) + 1,
             "title": task_title,
             "type": "简单",
             "department": dept,
@@ -120,7 +120,7 @@ def create_tasks_from_changes():
             "last_updated": now,
         }
 
-        tasks.append(new_task)
+        tasks["tasks"].append(new_task)
         new_task_ids.append(new_task["id"])
         created += 1
 

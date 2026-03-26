@@ -111,13 +111,19 @@ def trim_content(text: str) -> str:
     tail_errors = extract_tail_errors(lines)
     # 中间丢弃计数
     kept = len(header) + len(tail_errors)
-    discarded = total_lines - kept
 
+    # 安全地板：header 和 tail_errors 均为空时，至少保留前 HEAD_LINES 行
+    if kept == 0:
+        header = lines[:HEAD_LINES]
+        kept = HEAD_LINES
+        log(f"安全地板：保留前 {HEAD_LINES} 行作为兜底（无header+无error）")
+
+    discarded = total_lines - kept
     log(f"截断: {total_lines}→{kept}行（丢弃 {discarded} 行中间噪音）")
 
     marker = f"\n{DISCARD_TAG.format(discarded)}\n"
     result_lines = header
-    if header and tail_errors:
+    if len(header) > 0 and len(tail_errors) > 0:
         result_lines.append(marker)
     result_lines.extend(tail_errors)
 

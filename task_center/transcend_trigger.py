@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 HOME = Path.home()
-QUOTA_STATUS = HOME / ".openclaw" / "workspace" / "quota_status.json"
+QUOTA_STATUS = HOME / ".openclaw" / "centers" / "engineering" / "crown" / "quota_usage.json"
 TASKS_JSON   = HOME / ".openclaw" / "tasks" / "tasks.json"
 QUOTA_GUARD = HOME / ".xuzhi_watchdog" / "quota_exhausted"
 QUORUM_FILE = HOME / ".xuzhi_memory" / "task_center" / "transcend_quorum.json"

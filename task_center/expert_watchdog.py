@@ -14,8 +14,8 @@ STATE_FILE = HOME / ".xuzhi_watchdog" / "expert_wd_state.json"
 LOG_FILE   = HOME / ".xuzhi_watchdog" / "expert_watchdog.log"
 TASKS      = HOME / ".xuzhi_memory" / "expert_tracker" / "activity.json"
 CHANGES    = HOME / ".xuzhi_memory" / "expert_tracker" / "changes.json"
-LEARNER    = HOME / ".xuzhi_workspace" / "bin" / "expert_learner.py"
-EXECUTOR   = HOME / ".xuzhi_workspace" / "task_center" / "task_executor.py"
+LEARNER    = HOME / "xuzhi_workspace" / "task_center" / "expert_learner.py"
+EXECUTOR   = HOME / "xuzhi_workspace" / "task_executor.py"
 MEM_DIR    = HOME / ".xuzhi_memory" / "memory"
 
 import sys

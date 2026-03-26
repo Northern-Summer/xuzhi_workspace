@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 HOME = Path.home()
 RATINGS = HOME / "xuzhi_genesis/centers/mind/society/ratings.json"
 AGENTS = {
-    "Λ": "xuzhi-lambda-ergo",
+    "Ξ": "xuzhi-xi-prime",
     "Δ": "xuzhi-delta-forge",
     "Φ": "xuzhi-phi-sentinel",
     "Ω": "xuzhi-omega-chenxi",

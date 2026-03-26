@@ -87,6 +87,8 @@ def search(query, engines=None, timeout=30, max_results=10, toon=False):
                 "snippet": r.get("content", ""),
             })
 
+        # SearXNG JSON 返回的 results 中每个 result 有 engine 字段
+        actual_engines = sorted(set(r.get("engine","") for r in data.get("results",[]) if r.get("engine")))
         unresponsive = data.get("unresponsive_engines", [])
 
         payload = {
@@ -94,7 +96,7 @@ def search(query, engines=None, timeout=30, max_results=10, toon=False):
             "count": len(results),
             "query": query,
             "unresponsive": [u[0] for u in unresponsive] if unresponsive else [],
-            "engines_used": [e for e in (engines or []) if e not in (unresponsive or [])],
+            "engines_used": actual_engines,  # 从实际返回结果推断，而非依赖参数
         }
 
         if toon:

@@ -58,7 +58,7 @@ HIGH_RISK_FILES = [
 # ── 上下文验证 ──────────────────────────────────────────────────────────────
 
 VALID_CHANNELS = ["webchat", "telegram", "signal", "discord", "whatsapp"]
-VALID_SENDER_LABELS = ["openclaw-control-ui", "main", "phi", "delta", "theta", "gamma", "omega", "psi"]
+VALID_SENDER_LABELS = ["openclaw-control-ui", "main", "phi", "delta", "theta", "gamma", "omega", "psi", "human"]
 
 
 def log_judgment(cmd: str, result: str, reason: str, metadata: dict = None):
