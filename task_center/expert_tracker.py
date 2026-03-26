@@ -5,9 +5,10 @@ expert_tracker.py v3 — arXiv TOP专家追踪
 不是找50个随便什么人，是找各领域真正 leading edge 的研究团队。
 采集 → 发现TOP专家 → 更新动态 → 供Agent学习
 """
-import json, urllib.request, urllib.error, time, xml.etree.ElementTree
+import json, urllib.request, urllib.error, time, xml.etree.ElementTree, signal
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 
 HOME = Path.home()
 TRACKER = HOME / ".xuzhi_memory" / "expert_tracker"
@@ -239,11 +240,26 @@ def update_activity(db):
     save(CHANGES, changes_db)
     return new_changes
 
+# ── 全局超时守护（60秒）──────────────────────────────
+class TimeoutError(Exception):
+    pass
+
+def timeout_handler(signum, frame):
+    raise TimeoutError("执行超时（60s），强制退出")
+
 def main():
-    log("=== Expert Tracker v3 开始 ===")
-    db = build_expert_db()
-    new = update_activity(db)
-    log(f"=== 完成: {len(db['departments'])} 部门, {new} 条新发现 ===")
+    # 注册60秒超时守护
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(60)
+    try:
+        log("=== Expert Tracker v3 开始 ===")
+        db = build_expert_db()
+        new = update_activity(db)
+        log(f"=== 完成: {len(db['departments'])} 部门, {new} 条新发现 ===")
+    except TimeoutError:
+        log("⚠️ 执行超时（60s），强制退出")
+    finally:
+        signal.alarm(0)
 
 if __name__ == "__main__":
     main()
