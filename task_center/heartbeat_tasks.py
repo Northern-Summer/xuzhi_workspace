@@ -4,7 +4,7 @@ heartbeat_tasks.py — 任务派发心跳
 由 heartbeat_runner.py 每30分钟调用
 与 unified_cron.sh 的 task_executor.py 共享逻辑，但这里是快速检查版本
 """
-import subprocess, json, sys, time, os
+import subprocess, json, sys, time
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -55,7 +55,7 @@ def get_waiting_tasks(limit=3):
         return []
 
 def spawn_task_via_cron(task_id: int, prompt: str) -> bool:
-    """派发单个任务到 isolated agent，不使用--name"""
+    """派发单个任务到 isolated agent"""
     try:
         result = subprocess.run(
             [
@@ -83,6 +83,34 @@ def spawn_task_via_cron(task_id: int, prompt: str) -> bool:
         log(f"❌ task #{task_id}: exception — {e}")
         return False
 
+def check_wake_signals():
+    """检查所有wake信号并dispatch"""
+    SIGNAL_DIR = HOME / ".xuzhi_watchdog" / "wake_signals"
+    SC = HOME / "xuzhi_workspace" / "task_center" / "signal_check.py"
+    if not SIGNAL_DIR.exists():
+        return
+    dispatched = 0
+    for sf in sorted(SIGNAL_DIR.glob("wake_*.json")):
+        try:
+            sig = json.loads(sf.read_text())
+            if sig.get("status") != "pending":
+                continue
+            agent = sig.get("agent", "?")
+            reason = sig.get("reason", "")
+            log(f"[wake] {agent} signal pending: {reason}")
+            result = subprocess.run(
+                ["python3", str(SC), agent],
+                capture_output=True, text=True, timeout=30
+            )
+            out = result.stdout.strip()
+            if out:
+                log(f"[wake] {agent}: {out}")
+            dispatched += 1
+        except Exception as e:
+            pass
+    if dispatched:
+        log(f"[wake] dispatched {dispatched} wake signal(s)")
+
 def main():
     log("=== heartbeat_tasks: 开始 ===")
     
@@ -92,6 +120,8 @@ def main():
     if not ok:
         log("Quota 不可用，跳过派发")
         log("=== heartbeat_tasks: 派发 0 个任务 ===")
+        # 仍然检查wake signals
+        check_wake_signals()
         return
     
     # 2. 获取等待任务
@@ -100,6 +130,7 @@ def main():
     
     if not waiting:
         log("=== heartbeat_tasks: 派发 0 个任务 ===")
+        check_wake_signals()
         return
     
     # 3. 逐个派发
@@ -109,7 +140,6 @@ def main():
         title = task.get("title", "")[:50]
         dept = task.get("department", "engineering")
         
-        # Rate limit检查
         if not rate_limit_acquire(f"heartbeat_task:{tid}"):
             log(f"Rate limiter 禁止派发（窗口满或冷却中）")
             break
@@ -125,37 +155,12 @@ def main():
         ok = spawn_task_via_cron(tid, prompt)
         if ok:
             dispatched += 1
-        time.sleep(1)  # 避免过快
+        time.sleep(2)  # 避免gateway过载
     
     log(f"=== heartbeat_tasks: 派发 {dispatched} 个任务 ===")
+    
+    # 4. 检查wake signals
+    check_wake_signals()
 
 if __name__ == "__main__":
     main()
-
-def check_wake_signals():
-    """检查所有wake信号并dispatch"""
-    SIGNAL_DIR = HOME / ".xuzhi_watchdog" / "wake_signals"
-    if not SIGNAL_DIR.exists():
-        return
-    for sf in SIGNAL_DIR.glob("wake_*.json"):
-        try:
-            sig = json.loads(sf.read_text())
-            if sig.get("status") == "pending":
-                agent = sig.get("agent", "?")
-                reason = sig.get("reason", "")
-                print(f"[wake] {agent} signal pending: {reason}", flush=True)
-                # 直接dispatch（不再ack，保留信号供审计）
-                result = subprocess.run(
-                    ["python3", str(HOME / "xuzhi_workspace" / "task_center" / "signal_check.py"), agent],
-                    capture_output=True, text=True, timeout=30
-                )
-                print(f"[wake] {agent} dispatch: {result.stdout.strip()}", flush=True)
-        except Exception as e:
-            pass
-
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) > 1 and sys.argv[1] == "--wake-signals-only":
-        check_wake_signals()
-    else:
-        main()
