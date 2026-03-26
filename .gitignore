@@ -3,3 +3,15 @@ memory/gateway_watchdog.log
 .gitcredentials
 ~/.openclaw/
 .openclaw/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/

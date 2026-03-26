@@ -141,9 +141,10 @@ def sync_memory():
         )
         if r.returncode == 0:
             stamp("memory: synced to GitHub")
-        record("health_monitor", "memory_sync", "push GitHub", "success", "success")
+            record("health_monitor", "memory_sync", "push GitHub", "success", "success")
         else:
             stamp(f"memory: push failed ({r.returncode})")
+            record("health_monitor", "memory_sync", "push GitHub", "failure", "failure")
     except Exception as e:
         stamp(f"memory: sync error: {e}")
         record("health_monitor", "memory_sync", "push GitHub", str(e)[:100], "failure")
