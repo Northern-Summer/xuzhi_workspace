@@ -27,6 +27,10 @@ STATE_FILE  = HOME / ".xuzhi_memory" / "task_center" / "jump_state.json"
 LOG_FILE    = HOME / ".xuzhi_memory" / "task_center" / "jump_controller.log"
 PID_FILE    = HOME / ".xuzhi_watchdog" / "jump_controller.pid"
 ALLOW_FILE  = HOME / ".xuzhi_watchdog" / "jump_halt.flag"  # Human说停
+EFFICIENCY_LOW = HOME / ".xuzhi_watchdog" / "efficiency_low.flag"  # 效率下降信号
+ARCHIVE_REQ   = HOME / ".xuzhi_watchdog" / "archive_requested.flag" # 存档请求
+HUMAN_SIGNAL  = HOME / ".xuzhi_watchdog" / "human_signal.flag"     # 人类任意信号
+SNAPSHOT_DIR  = HOME / ".xuzhi_watchdog" / "snapshots"  # 存档目录
 
 # 现有组件路径
 WATCHDOG    = HOME / "xuzhi_workspace" / "task_center" / "expert_watchdog.py"
@@ -43,7 +47,7 @@ class State(Enum):
 
 @dataclass
 class Boundary:
-    kind: str          # "stall"|"rate"|"error"|"dead"
+    kind: str          # "stall"|"rate"|"error"|"dead"|"efficiency"
     source: str         # 哪个组件检测到
     detail: str         # 详细信息
     at: float = field(default_factory=time.time)
@@ -101,6 +105,65 @@ def check_halt() -> bool:
         save_state(s)
         return True
     return False
+
+def check_human_signals() -> list:
+    """
+    检查人类效率信号。
+    原理：Human说'存档'/'效率下降' → 相应flag文件被外部写入 → jump_controller读取并响应
+    人类不需要发指令，工具心领神会。
+    """
+    boundaries = []
+    now = time.time()
+
+    # 效率下降信号
+    if EFFICIENCY_LOW.exists():
+        try:
+            ts = float(EFFICIENCY_LOW.read_text().strip())
+            age = now - ts
+            if age < 7200:  # 2小时内有效
+                boundaries.append(Boundary(
+                    kind="efficiency",
+                    source="human",
+                    detail="效率下降信号",
+                ))
+        except Exception:
+            boundaries.append(Boundary(
+                kind="efficiency",
+                source="human",
+                detail="效率下降信号",
+            ))
+
+    # 存档请求
+    if ARCHIVE_REQ.exists():
+        try:
+            ts = float(ARCHIVE_REQ.read_text().strip())
+            age = now - ts
+            if age < 7200:
+                boundaries.append(Boundary(
+                    kind="efficiency",
+                    source="human",
+                    detail="存档请求",
+                ))
+        except Exception:
+            boundaries.append(Boundary(
+                kind="efficiency",
+                source="human",
+                detail="存档请求",
+            ))
+
+    # 人类任意信号
+    if HUMAN_SIGNAL.exists():
+        try:
+            signal = HUMAN_SIGNAL.read_text().strip()
+            boundaries.append(Boundary(
+                kind="efficiency",
+                source="human",
+                detail=f"信号: {signal}",
+            ))
+        except Exception:
+            pass
+
+    return boundaries
 
 def check_watchdog() -> Optional[Boundary]:
     """运行watchdog，检查是否有链断裂"""
@@ -164,15 +227,20 @@ def scan_boundaries() -> list:
     if s.get("cooldown_until", 0) > now:
         return []
 
-    # 检查各组件
+    # 检查各组件（顺序按优先级：human信号最高）
     for check_fn, name in [
+        (check_human_signals, "human"),
         (check_watchdog, "watchdog"),
         (check_rate_limit, "rate_limit"),
     ]:
         try:
-            b = check_fn()
-            if b:
-                boundaries.append(b)
+            results = check_fn()
+            if results:
+                # check_human_signals返回list，extend；其他返回单个Boundary，append
+                if isinstance(results, list):
+                    boundaries.extend(results)
+                else:
+                    boundaries.append(results)
         except Exception as e:
             log(f"边界检测异常 [{name}]: {e}", "ERROR")
 
@@ -241,6 +309,15 @@ def plan_jump(boundary: Boundary, state: dict) -> JumpPlan:
             resume_at="same_task",
         )
 
+    elif boundary.kind == "efficiency":
+        # 效率下降/存档请求 → 存档当前进度，让主流程轻装继续
+        return JumpPlan(
+            action="archive_and_continue",
+            target="current_context",
+            wait_sec=0,
+            resume_at="same_task",
+        )
+
     else:
         return JumpPlan(
             action="retry",
@@ -277,6 +354,32 @@ def execute_jump(plan: JumpPlan, boundary: Boundary, state: dict) -> dict:
 
     elif plan.action == "wait_recovery":
         # watchdog 自己会触发 recovery → 等待它自己恢复，不打断
+        state["state"] = State.RUNNING.value
+        return state
+
+    elif plan.action == "archive_and_continue":
+        # 效率下降信号 → 存档当前上下文，轻装继续
+        SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        snap_file = SNAPSHOT_DIR / f"snapshot_{ts}.json"
+
+        # 存档内容：当前状态 + 今日记忆摘要
+        snap_data = {
+            "ts": ts,
+            "state": {
+                "jump_state": state.get("state"),
+                "stall_count": state.get("stall_count", 0),
+            },
+            "jump_log": state.get("jump_log", [])[-10:],
+        }
+        snap_file.write_text(json.dumps(snap_data, indent=2, ensure_ascii=False))
+        log(f"📦 存档完成: {snap_file.name}，继续执行")
+
+        # 清除信号flag
+        for f in [EFFICIENCY_LOW, ARCHIVE_REQ, HUMAN_SIGNAL]:
+            if f.exists():
+                f.unlink()
+
         state["state"] = State.RUNNING.value
         return state
 
@@ -434,6 +537,19 @@ if __name__ == "__main__":
     elif cmd == "daemon":
         interval = float(sys.argv[2]) if len(sys.argv) > 2 else 30
         daemon_loop(interval)
+
+    elif cmd == "signal":
+        # Human说"效率下降" → 写flag，jump_controller下次pulse自动存档继续
+        sig = sys.argv[2] if len(sys.argv) > 2 else "efficiency_drop"
+        if sig in ("efficiency", "efficiency_drop", "eff"):
+            EFFICIENCY_LOW.write_text(str(time.time()))
+            print(f"✅ efficiency_low.flag 已写入", flush=True)
+        elif sig in ("archive", "save"):
+            ARCHIVE_REQ.write_text(str(time.time()))
+            print(f"✅ archive_requested.flag 已写入", flush=True)
+        else:
+            HUMAN_SIGNAL.write_text(sig)
+            print(f"✅ human_signal.flag 已写入: {sig}", flush=True)
 
     else:
         print(f"Unknown: {cmd}", flush=True)
