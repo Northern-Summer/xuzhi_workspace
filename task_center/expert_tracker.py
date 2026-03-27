@@ -120,7 +120,89 @@ def load(path, default):
 def save(path, data):
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
 
-# ── 各部门的 arXiv 分类 ────────────────────────────────────
+# ── 论文归属分类器（按内容，不按发现者的部门）───────────────
+# WildWorld教训：数据层问题 > 架构问题
+# 来源可靠性：expert发现论文，但论文归属由内容决定，不由发现者决定
+import re
+
+DEPT_KEYWORDS = None  # 懒加载
+
+def load_dept_keywords():
+    """
+    论文归属关键词：按 departments.json 的领域描述提取，
+    补充 arXiv category codes，确保覆盖英文论文标题。
+    WildWorld教训：数据层干净，分类才可靠。
+    """
+    global DEPT_KEYWORDS
+    if DEPT_KEYWORDS is not None:
+        return DEPT_KEYWORDS
+
+    # departments.json description 对应的领域关键词（英文 + arXiv categories）
+    DEPT_KEYWORDS = {
+        "mind": [
+            "learning", "cognitive", "neuroscience", "social science", "psychology",
+            "behavior", "cognition", "brain", "consciousness", "emotion",
+            "cs.CY", "q-bio", "cognitive", "psychology", "sociology",
+        ],
+        "science": [
+            "physics", "cosmology", "astrophysics", "quantum", "particle",
+            "computational", "simulation", "complex system", "matter", "energy",
+            "physics.comp-ph", "astro-ph", "quant-ph", "cond-mat",
+        ],
+        "engineering": [
+            "system", "security", "linux", "wsl", "software", "data engineering",
+            "infrastructure", "distributed", "reliability", "performance",
+            "cs.SE", "cs.OS", "cs.DC", "cs.NI",
+        ],
+        "philosophy": [
+            "philosophy", "ethics", "existential", "metaphysics", "realism",
+            "posthuman", "acceleration", "transhuman", "speculative", "ethics",
+            "phenomenology", "ontology",
+        ],
+        "intelligence": [
+            # 情报中心本身追踪的论文：知识图谱、采集、LLM/NLP
+            "knowledge graph", "knowledge base", "information extraction",
+            "language model", "nlp", "llm", "embedding", "retrieval",
+            "cs.IR", "cs.CL", "cs.AI", "cs.CV",
+        ],
+    }
+    return DEPT_KEYWORDS
+
+def classify_by_content(title: str, source_dept: str = None) -> str:
+    """
+    论文部门归属：内容分类为主，发现者dept为锚。
+    WildWorld原则：数据层要干净，但不要over-confident。
+    策略：
+    - 高置信（>=2个关键词）→ 内容分类优先
+    - 低置信（=1）：只有source_dept本身也得1分才用它，否则用best_dept
+    - 无匹配：source_dept非零分则用它，否则mind兜底
+    """
+    keywords = load_dept_keywords()
+    title_lower = title.lower()
+    scores = {}
+    for dept_id, dept_words in keywords.items():
+        score = sum(1 for w in dept_words if w in title_lower)
+        if score > 0:
+            scores[dept_id] = score
+
+    if not scores:
+        return source_dept if source_dept else "mind"
+
+    best_dept = max(scores, key=lambda d: scores[d])
+    best_score = scores[best_dept]
+
+    # 高置信 → 内容分类
+    if best_score >= 2:
+        return best_dept
+
+    # 低置信（=1）：只有source_dept本身也得1分才用它，否则用best_dept
+    # 防止：cosmology→science 1分，system→engineering 1分，但mind靠优先级赢
+    if source_dept and scores.get(source_dept, 0) >= best_score:
+        return source_dept
+
+    return best_dept
+
+# ── 各部门的 arXiv 分类（用于发现专家，不用于论文归属）────────
 DEPT_CATS = {
     "engineering": ["cs.SE", "cs.LG", "cs.OS"],      # 软件工程+机器学习+系统
     "science":     ["physics.comp-ph", "astro-ph.CO", "quant-ph"],  # 计算物理+宇宙学
@@ -211,15 +293,19 @@ def update_activity(db):
             prev_latest = prev.get("latest_title", "")
 
             # 有新论文 → 记录变化
+            # WildWorld原则：按内容分类，高置信时覆盖发现者dept
             if latest and latest[0]["title"] != prev_latest:
+                paper_title = latest[0]["title"]
+                paper_dept = classify_by_content(paper_title, source_dept=dept_id)
                 changes_db["changes"].append({
-                    "dept": dept_id,
+                    "dept": paper_dept,
                     "expert": name,
                     "affiliation": expert.get("affiliation", ""),
-                    "new_title": latest[0]["title"],
+                    "new_title": paper_title,
                     "new_url": latest[0]["url"],
                     "discovered_at": today,
                     "categories": expert.get("categories", []),
+                    "_source_dept": dept_id,  # 内部参考：发现者部门（不用于展示）
                 })
                 changes_db["changes"] = changes_db["changes"][-50:]  # 保留最近50条变化
                 new_changes += 1
