@@ -104,12 +104,8 @@ def push_to_wechat(synthesis):
 {chr(10).join(hyp_lines[:3])}
 
 ✅ 综合完成"""
-    # 写消息文件，agent心跳检测到后通过sessions_send发送
-    PENDING = HOME / ".xuzhi_watchdog" / "pending_research_msg.txt"
-    PENDING.parent.mkdir(parents=True, exist_ok=True)
-    PENDING.write_text(msg, encoding="utf-8")
-    log("✅ 消息已写入pending，agent心跳会检测并发送")
-        log(f"⚠️ 推送异常: {e}")
+    # 推送由 research_pulse.sh 统一处理（openclaw message send）
+    log("✅ 综合完成，等待research_pulse推送")
 
 def run(force=False):
     log("=== 研究循环引擎启动 ===")
