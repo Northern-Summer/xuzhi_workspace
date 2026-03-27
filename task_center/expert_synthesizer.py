@@ -90,30 +90,90 @@ def filter_relevant(findings, keywords):
                 break
     return relevant
 
+def arxiv_to_method(categories):
+    """
+    将arXiv category codes映射为方法论标签。
+    这是WildWorld原则的应用：使用数据源本身的标注，而非从标题推断。
+    arXiv categories是作者自标注的方法域，比标题推断可靠。
+    """
+    if not categories:
+        return "unknown"
+
+    # arXiv category → method mapping
+    CAT_MAP = {
+        # 机器学习 / AI
+        "cs.LG": "machine_learning",
+        "cs.AI": "artificial_intelligence",
+        "cs.CL": "computational_linguistics",
+        "cs.IR": "information_retrieval",
+        "cs.CV": "computer_vision",
+        "cs.NE": "neural_evolution",
+        "stat.ML": "statistical_learning",
+        # 控制系统 / 机器人
+        "cs.RO": "robotics",
+        "cs.SY": "control_systems",
+        # 复杂系统 / 物理
+        "physics.comp-ph": "computational_physics",
+        "astro-ph.CO": "cosmology",
+        "hep-th": "high_energy_physics",
+        "gr-qc": "general_relativity",
+        "quant-ph": "quantum_physics",
+        "cond-mat": "condensed_matter",
+        "physics": "general_physics",
+        # 科学哲学 / 伦理
+        "cs.CY": "cybernetics",
+        "q-bio": "quantitative_biology",
+        "physics.hist-ph": "history_philosophy_of_science",
+        # 软件工程 / 系统
+        "cs.SE": "software_engineering",
+        "cs.OS": "operating_systems",
+        "cs.DC": "distributed_systems",
+        "cs.NI": "network_systems",
+    }
+
+    methods = set()
+    for cat in categories:
+        cat = cat.strip()
+        if cat in CAT_MAP:
+            methods.add(CAT_MAP[cat])
+        # 泛化：cs.* → computer_science, q-bio.* → biology
+        if cat.startswith("cs."):
+            methods.add("computer_science")
+        if cat.startswith("q-bio"):
+            methods.add("biology")
+
+    if not methods:
+        return "unknown"
+    if len(methods) == 1:
+        return list(methods)[0]
+    # 多方法：标注主要类别
+    return list(methods)[0]
+
 def extract_finding(record, idx):
     """将原始changes.json记录转为FINDING_SCHEMA"""
     title = record.get("new_title", "")
     dept = record.get("dept", "unknown")
-    
-    # 关键词判断方法论
-    method = "unknown"
-    if any(k in title.lower() for k in ["latent", "world model", "embedding"]):
-        method = "latent_representation"
-    elif any(k in title.lower() for k in ["autonomous", "driving", "vehicle"]):
-        method = "control_theory"
-    elif any(k in title.lower() for k in ["cascading", "failure", "infrastructure"]):
-        method = "complex_systems"
-    elif any(k in title.lower() for k in ["quantum", "physics", "cosmology"]):
-        method = "theoretical_physics"
-    elif any(k in title.lower() for k in ["dynamical system", "complexity"]):
-        method = "dynamical_systems"
-    elif any(k in title.lower() for k in ["agent", "multi-agent", "rl", "reinforcement"]):
-        method = "reinforcement_learning"
-    elif any(k in title.lower() for k in ["language model", "nlp", "llm"]):
-        method = "language_modeling"
-    elif any(k in title.lower() for k in ["ethics", "philosophy", "governance"]):
-        method = "philosophy"
-    
+
+    # PRIMARY: 使用arXiv categories作为方法论标注（数据源本身）
+    categories = record.get("categories", [])
+    method = arxiv_to_method(categories)
+
+    # FALLBACK: 标题关键词辅助判断（当arXiv category不足时）
+    if method == "unknown":
+        title_lower = title.lower()
+        if any(k in title_lower for k in ["latent", "world model", "embedding", "representation"]):
+            method = "latent_representation"
+        elif any(k in title_lower for k in ["cascading", "failure", "infrastructure"]):
+            method = "complex_systems"
+        elif any(k in title_lower for k in ["quantum", "cosmology", "physics"]):
+            method = "general_physics"
+        elif any(k in title_lower for k in ["agent", "multi-agent", "rl", "reinforcement learning"]):
+            method = "reinforcement_learning"
+        elif any(k in title_lower for k in ["language model", "nlp", "llm", "transformer"]):
+            method = "language_modeling"
+        elif any(k in title_lower for k in ["ethics", "philosophy", "governance"]):
+            method = "philosophy"
+
     # 判断可信度（来源质量代理）
     confidence = 0.5
     if dept in ("science", "engineering"):
@@ -175,48 +235,64 @@ def _open_problem(title, method):
 def generate_hypotheses(findings):
     """从发现列表生成可验证假设（基于数据，不是臆想）"""
     relevant = [f for f in findings if f["relevance_to_question"] >= 0.3]
-    
+
     hypotheses = []
-    
-    # 假设1：latent representation 的粒度决定自主性边界
-    latent_findings = [f for f in relevant if f["method"] == "latent_representation"]
-    if latent_findings:
+    seen_methods = set()
+
+    # 假设1：世界模型/表征 → 自主性边界
+    world_model_findings = [f for f in relevant if f["method"] in (
+        "latent_representation", "machine_learning", "artificial_intelligence",
+        "reinforcement_learning", "robotics", "control_systems"
+    )]
+    if world_model_findings and "world_model" not in seen_methods:
+        seen_methods.add("world_model")
         hypotheses.append({
             "id": "hyp_1",
             "hypothesis": "当内部模型的预测粒度足够细（压缩损失<阈值），系统从'被驱动'转变为'主动驱动'",
-            "based_on": [f["id"] for f in latent_findings[:3]],
-            "confidence": 0.5,
-            "assumption": "latent model 的粒度和系统自主性存在单调关系",
+            "based_on": [f["id"] for f in world_model_findings[:3]],
+            "confidence": sum(f["confidence"] for f in world_model_findings[:3]) / min(len(world_model_findings[:3]), 1) * 0.7,
+            "assumption": "内部模型粒度和系统自主性存在单调关系",
             "testable": True,
             "validation_criteria": "对比不同压缩率下的系统行为转变点",
         })
-    
-    # 假设2：cascading failure 的临界点是信息传递延迟
-    cascade_findings = [f for f in relevant if f["method"] == "complex_systems"]
-    if cascade_findings:
+
+    # 假设2：复杂系统/物理 → 驱动模式切换
+    complex_findings = [f for f in relevant if f["method"] in (
+        "complex_systems", "cosmology", "general_physics", "quantum_physics",
+        "general_relativity", "computational_physics"
+    )]
+    if complex_findings and "complex" not in seen_methods:
+        seen_methods.add("complex")
         hypotheses.append({
             "id": "hyp_2",
-            "hypothesis": "复杂系统从'被驱动'转向'主动驱动'的临界点 = 信息传递延迟超过内部模型更新频率",
-            "based_on": [f["id"] for f in cascade_findings[:2]],
-            "confidence": 0.4,
-            "assumption": "信息延迟是驱动模式切换的唯一瓶颈",
+            "hypothesis": "系统从'被驱动'转向'主动驱动'的临界点 = 信息传递延迟超过内部模型更新频率",
+            "based_on": [f["id"] for f in complex_findings[:3]],
+            "confidence": sum(f["confidence"] for f in complex_findings[:3]) / min(len(complex_findings[:3]), 1) * 0.6,
+            "assumption": "信息延迟是驱动模式切换的核心瓶颈",
             "testable": True,
-            "validation_criteria": "实验测量信息延迟 vs 系统行为模式转变",
+            "validation_criteria": "测量信息延迟 vs 系统行为模式转变",
         })
-    
-    # 假设3：多尺度表征的跨层一致性是自主性涌现的前提
-    multi_findings = [f for f in relevant if f["method"] in ("dynamical_systems", "theoretical_physics")]
-    if multi_findings:
+
+    # 假设3：控制论/系统科学 → 自主性涌现
+    cyber_findings = [f for f in relevant if f["method"] in (
+        "cybernetics", "control_systems", "dynamical_systems", "distributed_systems"
+    )]
+    if cyber_findings and "cyber" not in seen_methods:
+        seen_methods.add("cyber")
         hypotheses.append({
             "id": "hyp_3",
             "hypothesis": "当系统内部存在多个不同分辨率的表征层，且跨层一致性>阈值，自主性才涌现",
-            "based_on": [f["id"] for f in multi_findings[:3]],
-            "confidence": 0.35,
+            "based_on": [f["id"] for f in cyber_findings[:3]],
+            "confidence": sum(f["confidence"] for f in cyber_findings[:3]) / min(len(cyber_findings[:3]), 1) * 0.5,
             "assumption": "多尺度一致性是自主性的充分条件",
             "testable": True,
             "validation_criteria": "测量跨层一致性指标与系统自主行为的相关性",
         })
-    
+
+    # 归一化置信度到0-1
+    for h in hypotheses:
+        h["confidence"] = min(max(h["confidence"], 0.1), 0.8)
+
     return hypotheses
 
 # ── 核心综合 ───────────────────────────────────────────────
