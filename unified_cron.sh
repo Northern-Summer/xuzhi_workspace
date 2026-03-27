@@ -58,7 +58,7 @@ import json, os
 f='${EXP_CYCLE}'
 d = json.load(open(f)) if os.path.exists(f) else {'count': 0}
 c = d.get('count', 0)
-d['count'] = (c + 1) % 36
+d['count'] = (c + 1) % 6   # 6×10分钟=1小时（从36改为6）
 json.dump(d, open(f, 'w'))
 print(c)
 " 2>/dev/null)
@@ -71,6 +71,32 @@ if [ "$EXP_N" = "0" ]; then
     python3 "${HOME_DIR}/xuzhi_workspace/task_center/expert_watchdog.py" \
         >> "${HOME_DIR}/.xuzhi_memory/task_center/expert_watchdog.log" 2>&1 \
         || stamp "Expert Watchdog: non-zero"
-fi
+
+    # ── 自动推送Expert结果到WeChat ───────────────────────
+    # 用 openclaw message send，稳定方案
+    python3 << 'PUSH_EOF' >> "${HOME_DIR}/.xuzhi_memory/task_center/expert_push.log" 2>&1
+import subprocess, json
+from pathlib import Path
+
+changes = Path('${HOME_DIR}/.xuzhi_memory/expert_tracker/changes.json')
+if changes.exists():
+    d = json.load(open(changes))
+    changes_list = d.get('changes', [])
+    recent = changes_list[-10:] if len(changes_list) >= 10 else changes_list
+    lines = [f'[{c["dept"]}] {c["expert"]}: {c["new_title"][:40]}' for c in recent]
+    body = '\n'.join(lines) if lines else '无新发现'
+    msg = f'📚 Expert学习（自动推送）\n累计{len(changes_list)}条\n\n{body}'
+else:
+    msg = '📚 Expert学习：无新数据'
+
+# openclaw message send 是稳定方案，不依赖sessions_send
+result = subprocess.run([
+    'openclaw', 'message', 'send',
+    '--channel', 'openclaw-weixin',
+    '--target', 'o9cq80z9eorqjasg6hb1w-cc4-po@im.wechat',
+    '--message', msg
+], capture_output=True, text=True, timeout=15)
+print(result.stdout[-200:] if result.stdout else '', result.stderr[-200:] if result.stderr else '', file=open('${HOME_DIR}/.xuzhi_memory/task_center/expert_push.log', 'a'))
+PUSH_EOF
 
 stamp "=== Unified Cron complete ==="
