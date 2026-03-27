@@ -104,18 +104,11 @@ def push_to_wechat(synthesis):
 {chr(10).join(hyp_lines[:3])}
 
 ✅ 综合完成"""
-    try:
-        result = subprocess.run([
-            "openclaw", "message", "send",
-            "--channel", "openclaw-weixin",
-            "--target", WE_CHAT_ID,
-            "--message", msg
-        ], capture_output=True, text=True, timeout=15)
-        if result.returncode == 0:
-            log("✅ 推送WeChat成功")
-        else:
-            log(f"⚠️ 推送WeChat失败: {result.stderr[-100:]}")
-    except Exception as e:
+    # 写消息文件，agent心跳检测到后通过sessions_send发送
+    PENDING = HOME / ".xuzhi_watchdog" / "pending_research_msg.txt"
+    PENDING.parent.mkdir(parents=True, exist_ok=True)
+    PENDING.write_text(msg, encoding="utf-8")
+    log("✅ 消息已写入pending，agent心跳会检测并发送")
         log(f"⚠️ 推送异常: {e}")
 
 def run(force=False):
