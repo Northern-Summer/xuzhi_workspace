@@ -149,7 +149,21 @@ def arxiv_to_method(categories):
     # 多方法：标注主要类别
     return list(methods)[0]
 
-def extract_finding(record, idx):
+def load_abstracts():
+    """加载本地缓存的abstracts.json"""
+    abstracts_file = HOME / ".xuzhi_memory" / "expert_tracker" / "abstracts.json"
+    if not abstracts_file.exists():
+        return {}
+    try:
+        data = json.loads(abstracts_file.read_text())
+        # 建立 arxiv_id -> abstract 映射
+        if isinstance(data, list):
+            return {item["arxiv_id"]: item.get("abstract", "") for item in data}
+        return data
+    except Exception:
+        return {}
+
+def extract_finding(record, idx, abstracts_cache=None):
     """将原始changes.json记录转为FINDING_SCHEMA"""
     title = record.get("new_title", "")
     dept = record.get("dept", "unknown")
@@ -174,6 +188,15 @@ def extract_finding(record, idx):
         elif any(k in title_lower for k in ["ethics", "philosophy", "governance"]):
             method = "philosophy"
 
+    # 尝试从本地缓存获取摘要
+    abstract = None
+    if abstracts_cache:
+        import re
+        url = record.get("new_url", "")
+        match = re.search(r'(\d+\.\d+)', url)
+        if match:
+            abstract = abstracts_cache.get(match.group(1))
+
     # 判断可信度（来源质量代理）
     confidence = 0.5
     if dept in ("science", "engineering"):
@@ -186,7 +209,7 @@ def extract_finding(record, idx):
         "source_title": title,
         "source_url": record.get("new_url", ""),
         "source_dept": dept,
-        "finding": _summarize(title, method),
+        "finding": _summarize(title, method, abstract),
         "method": method,
         "confidence": confidence,
         "relevance_to_question": _relevance(title),
@@ -195,9 +218,11 @@ def extract_finding(record, idx):
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
-def _summarize(title, method):
-    """从标题提取核心发现（不自行发挥）"""
-    # 截取标题作为发现陈述，不添加额外解释
+def _summarize(title, method, abstract=None):
+    """从标题+摘要提取核心发现（基于真实内容，不自行发挥）"""
+    if abstract:
+        # 取摘要前200字符（作者自述的核心贡献）
+        return abstract[:200].strip()
     return title[:150]
 
 def _relevance(title):
@@ -299,9 +324,10 @@ def generate_hypotheses(findings):
 
 def synthesize():
     findings_data = load_findings()
+    abstracts_cache = load_abstracts()
     
-    # 提取所有发现
-    all_findings = [extract_finding(r, i) for i, r in enumerate(findings_data)]
+    # 提取所有发现（注入abstracts）
+    all_findings = [extract_finding(r, i, abstracts_cache) for i, r in enumerate(findings_data)]
     
     # 按相关性筛选（top 20）
     relevant = sorted(all_findings, key=lambda f: f["relevance_to_question"], reverse=True)[:20]

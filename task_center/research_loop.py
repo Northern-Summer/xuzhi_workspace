@@ -2,41 +2,53 @@
 """
 research_loop.py — 研究循环引擎
 工程改进铁律合规 — Ξ | 2026-03-27
-自问：此操作是否让系统更安全/准确/优雅/高效？答案：YES
 
-设计原则：
-- 信息不枯竭：expert_tracker持续供数据
-- 信息不爆炸：上限截旧，进出平衡
-- 流程不阻塞：每步独立，错了只影响当前轮
-- 推送自动化：综合完成后主动推WeChat
+流程: expert_tracker → peer_review → expert_synthesizer
 
-循环：
-  expert_tracker（采集）→ changes.json（max 50）→ expert_synthesizer（综合）→ WeChat推送
-
-触发条件（满足任一）：
-  1. 距离上次综合 > 3小时
-  2. 自上次综合后新增 >= 15条发现
+触发条件:
+  1. 自上次综合后新增 >= 15条发现
+  2. 距离上次综合 > 3小时
 """
-import json, subprocess, time
+import json, subprocess, sys
 from pathlib import Path
 from datetime import datetime, timezone
 
 HOME = Path.home()
 CHANGES    = HOME / ".xuzhi_memory" / "expert_tracker" / "changes.json"
-SYNTHESIS  = HOME / ".xuzhi_memory" / "expert_tracker" / "synthesis.json"
-SYN_LOCK   = HOME / ".xuzhi_memory" / "expert_tracker" / ".synthesis.lock"
-LOG        = HOME / ".xuzhi_memory" / "expert_tracker" / "research_loop.log"
-WE_CHAT_ID = "o9cq80z9eorqjasg6hb1w-cc4-po@im.wechat"
+REVIEWED  = HOME / ".xuzhi_memory" / "expert_tracker" / "reviewed_changes.json"
+SYNTHESIS = HOME / ".xuzhi_memory" / "expert_tracker" / "synthesis.json"
+LOOP_LOCK = HOME / ".xuzhi_memory" / "expert_tracker" / ".loop.lock"
+LOG       = HOME / ".xuzhi_memory" / "expert_tracker" / "research_loop.log"
+PEER      = HOME / "xuzhi_workspace" / "task_center" / "peer_review.py"
+SYNTH     = HOME / "xuzhi_workspace" / "task_center" / "expert_synthesizer.py"
+TRIGGER_NEW  = 15
+TRIGGER_HOURS = 3
 
-TRIGGER_NEW_COUNT = 15  # 新增15条触发
-TRIGGER_HOURS     = 3  # 超过3小时触发
-
-def log(msg):
+def _log(msg):
     ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
     line = f"[{ts}] {msg}"
     print(line)
-    with open(LOG, "a") as f:
-        f.write(line + "\n")
+    try:
+        with open(LOG, "a") as f:
+            f.write(line + "\n")
+    except Exception:
+        pass
+
+def _check_stale_lock():
+    """清理超过1小时的stale lock（防止进程崩溃后永久卡死）"""
+    if LOOP_LOCK.exists():
+        try:
+            lock_age = (datetime.now(timezone.utc) - datetime.fromisoformat(
+                LOOP_LOCK.read_text().strip().replace("Z", "+00:00")
+            )).total_seconds()
+            if lock_age > 3600:  # 超过1小时
+                _log(f"⚠️ 发现 stale lock ({lock_age/3600:.1f}h)，自动清理")
+                LOOP_LOCK.unlink()
+        except Exception:
+            try:
+                LOOP_LOCK.unlink()  # 读不出就删
+            except Exception:
+                pass
 
 def load_json(path, fallback=None):
     try:
@@ -44,107 +56,77 @@ def load_json(path, fallback=None):
     except Exception:
         return fallback
 
-def should_synthesize():
-    """检查是否需要运行综合"""
-    synthesis = load_json(SYNTHESIS, {})
-    changes   = load_json(CHANGES, [])
+def should_run():
+    syn = load_json(SYNTHESIS, {})
+    chg = load_json(CHANGES, [])
+    changes = chg if isinstance(chg, list) else (chg.get("changes", []) if isinstance(chg, dict) else [])
+    total = len(changes)
+    last_at = syn.get("generated_at", "")
 
-    total   = len(changes.get("changes", []))
-    last_at = synthesis.get("generated_at", "")
-
-    # 上次综合后新增多少条
+    new_count = 0
     if last_at:
-        try:
-            last_dt = datetime.fromisoformat(last_at.replace("Z", "+00:00"))
-            new_count = sum(
-                1 for c in changes.get("changes", [])
-                if c.get("discovered_at", "") > last_at[:10]
-            )
-        except Exception:
-            new_count = total
+        cutoff = last_at[:10]
+        new_count = sum(1 for c in changes if c.get("discovered_at", "") > cutoff)
     else:
         new_count = total
 
-    # 时间触发
+    time_triggered = False
     if last_at:
         try:
             last_dt = datetime.fromisoformat(last_at.replace("Z", "+00:00"))
-            hours_since = (datetime.now(timezone.utc) - last_dt).total_seconds() / 3600
-            time_triggered = hours_since >= TRIGGER_HOURS
+            hours = (datetime.now(timezone.utc) - last_dt).total_seconds() / 3600
+            time_triggered = hours >= TRIGGER_HOURS
         except Exception:
             time_triggered = True
     else:
         time_triggered = True
 
-    log(f"检查: total={total} new_since_last={new_count} time_triggered={time_triggered}")
-    return new_count >= TRIGGER_NEW_COUNT or time_triggered
-
-def push_to_wechat(synthesis):
-    """综合完成后推送到WeChat"""
-    round_n   = synthesis.get("round", "?")
-    conf      = synthesis.get("confidence", 0)
-    hyps      = synthesis.get("hypotheses", [])
-    rq        = synthesis.get("research_question", "")
-    methods   = synthesis.get("methods_summary", {})
-    total     = synthesis.get("total_findings", 0)
-    relevant  = synthesis.get("relevant_findings", 0)
-
-    hyp_lines = []
-    for h in hyps:
-        hyp_lines.append(f"• {h['hypothesis'][:60]} (置信{h['confidence']:.0%})")
-
-    msg = f"""📊 研究 Round {round_n} | {datetime.now(timezone.utc).strftime('%m-%d %H:%M')}
-
-❓ {rq[:60]}{'…' if len(rq)>60 else ''}
-
-📐 方法分布: {methods}
-🔬 相关: {relevant}/{total}条 | 置信度: {conf:.0%}
-
-🎯 假设:
-{chr(10).join(hyp_lines[:3])}
-
-✅ 综合完成"""
-    # 推送由 research_pulse.sh 统一处理（openclaw message send）
-    log("✅ 综合完成，等待research_pulse推送")
+    _log(f"检查: new={new_count}/{TRIGGER_NEW} time={time_triggered}")
+    return new_count >= TRIGGER_NEW or time_triggered
 
 def run(force=False):
-    log("=== 研究循环引擎启动 ===")
+    _log("=== research_loop 开始 ===")
 
-    if SYN_LOCK.exists():
-        log("跳过：上次运行尚未结束")
+    _check_stale_lock()  # 先检查并清理 stale lock
+
+    if LOOP_LOCK.exists():
+        _log("跳过：上次运行尚未结束")
         return
-
-    if not force and not should_synthesize():
-        log("无需综合：数据量或时间未达触发阈值")
-        return
-
-    if force:
-        log("force模式：强制综合")
-
-    SYN_LOCK.write_text(datetime.now(timezone.utc).isoformat())
-
+    LOOP_LOCK.write_text(datetime.now(timezone.utc).isoformat())
     try:
-        log("运行synthesizer...")
-        result = subprocess.run(
-            ["python3", str(HOME / "xuzhi_workspace" / "task_center" / "expert_synthesizer.py")],
-            capture_output=True, text=True, timeout=60
-        )
-        if result.returncode != 0:
-            log(f"⚠️ synthesizer失败: {result.stderr[-200:]}")
+        if not force and not should_run():
+            _log("无需运行")
             return
 
-        synthesis = load_json(SYNTHESIS)
-        if synthesis:
-            push_to_wechat(synthesis)
-            log(f"✅ 循环完成: round {synthesis.get('round')} conf={synthesis.get('confidence',0):.2f}")
-        else:
-            log("⚠️ 综合结果为空")
+        # 0. peer_review
+        if PEER.exists():
+            _log("0. peer_review...")
+            r = subprocess.run(["python3", str(PEER)], capture_output=True, text=True, timeout=90)
+            if r.returncode == 0:
+                _log("✅ peer_review 完成")
+            else:
+                _log(f"⚠️ peer_review 失败")
 
+        # 1. expert_synthesizer
+        if SYNTH.exists():
+            _log("1. expert_synthesizer...")
+            r = subprocess.run(["python3", str(SYNTH)], capture_output=True, text=True, timeout=60)
+            if r.returncode == 0:
+                _log("✅ synthesizer 完成")
+            else:
+                _log(f"⚠️ synthesizer 失败")
+
+        syn_data = load_json(SYNTHESIS)
+        if syn_data:
+            _log(f"✅ 循环完成: round {syn_data.get('round')} conf={syn_data.get('confidence',0):.2f}")
+        else:
+            _log("⚠️ 无综合结果")
     finally:
-        if SYN_LOCK.exists():
-            SYN_LOCK.unlink()
+        if LOOP_LOCK.exists():
+            LOOP_LOCK.unlink()
 
 if __name__ == "__main__":
-    import sys
     force = "--force" in sys.argv
+    if force:
+        _log("force 模式")
     run(force=force)
