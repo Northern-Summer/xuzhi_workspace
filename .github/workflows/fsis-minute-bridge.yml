@@ -36,7 +36,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          BRANCH: master
+          BRANCH: fsis-data
         run: |
           python3 - <<'PY'
           import base64
@@ -56,7 +56,7 @@ jobs:
                   "Authorization": f"Bearer {token}",
                   "Accept": "application/vnd.github+json",
                   "X-GitHub-Api-Version": "2022-11-28",
-                  "User-Agent": "FSIS-Minute-Bridge/1.1",
+                  "User-Agent": "FSIS-Minute-Bridge/1.2",
               }
               body = None
               if payload is not None:
