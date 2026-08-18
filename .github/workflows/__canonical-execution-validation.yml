@@ -3,8 +3,6 @@ name: Canonical Execution Validation (ephemeral)
 on:
   push:
     branches: [master]
-    paths:
-      - '.github/workflows/__canonical-execution-validation.yml'
   workflow_dispatch:
 
 permissions:
@@ -35,90 +33,27 @@ jobs:
           echo "- sha: $GITHUB_SHA" >> "$report"
           echo "- runner: $RUNNER_OS" >> "$report"
           echo >> "$report"
-
-          run_step() {
-            local name="$1"; shift
-            echo "## $name" | tee -a "$report"
-            if "$@" 2>&1 | tee -a "$report"; then
-              echo "RESULT: PASS" | tee -a "$report"
-            else
-              echo "RESULT: FAIL" | tee -a "$report"
-              rc=1
-            fi
-            echo | tee -a "$report"
-          }
-
+          run_step() { local name="$1"; shift; echo "## $name" | tee -a "$report"; if "$@" 2>&1 | tee -a "$report"; then echo "RESULT: PASS" | tee -a "$report"; else echo "RESULT: FAIL" | tee -a "$report"; rc=1; fi; echo | tee -a "$report"; }
           if [[ -f pyproject.toml || -f setup.py || -f requirements.txt ]]; then
-            python -m venv "$RUNNER_TEMP/venv"
-            source "$RUNNER_TEMP/venv/bin/activate"
-            python -m pip install --upgrade pip
-            if [[ -f uv.lock ]]; then
-              python -m pip install uv
-              run_step "Python dependency sync" uv sync --all-extras
-              if [[ -d tests ]]; then
-                run_step "Python test suite" uv run pytest -q
-              else
-                run_step "Python compile suite" bash -lc "git ls-files -z '*.py' | xargs -0 -r -n 1 python -m py_compile"
-              fi
+            python -m venv "$RUNNER_TEMP/venv"; source "$RUNNER_TEMP/venv/bin/activate"; python -m pip install --upgrade pip
+            if [[ -f uv.lock ]]; then python -m pip install uv; run_step "Python dependency sync" uv sync --all-extras; if [[ -d tests ]]; then run_step "Python test suite" uv run pytest -q; else run_step "Python compile suite" bash -lc "git ls-files -z '*.py' | xargs -0 -r -n 1 python -m py_compile"; fi
             else
-              if [[ -f requirements.txt ]]; then
-                run_step "Python requirements install" python -m pip install -r requirements.txt
-              fi
-              if [[ -f pyproject.toml || -f setup.py ]]; then
-                run_step "Python package install" python -m pip install -e .
-              fi
-              if [[ -d tests ]]; then
-                if python -c 'import pytest' >/dev/null 2>&1; then
-                  run_step "Python test suite" python -m pytest -q
-                else
-                  run_step "Python unittest suite" python -m unittest discover -v
-                fi
-              else
-                run_step "Python compile suite" bash -lc "git ls-files -z '*.py' | xargs -0 -r -n 1 python -m py_compile"
-              fi
+              if [[ -f requirements.txt ]]; then run_step "Python requirements install" python -m pip install -r requirements.txt; fi
+              if [[ -f pyproject.toml || -f setup.py ]]; then run_step "Python package install" python -m pip install -e .; fi
+              if [[ -d tests ]]; then if python -c 'import pytest' >/dev/null 2>&1; then run_step "Python test suite" python -m pytest -q; else run_step "Python unittest suite" python -m unittest discover -v; fi; else run_step "Python compile suite" bash -lc "git ls-files -z '*.py' | xargs -0 -r -n 1 python -m py_compile"; fi
             fi
           fi
-
           if [[ -f package.json ]]; then
-            if [[ -f package-lock.json ]]; then
-              run_step "Node dependency install" npm ci
-            else
-              run_step "Node dependency install" npm install
-            fi
-            if node -e 'const p=require("./package.json"); process.exit(p.scripts && p.scripts.test ? 0 : 1)' 2>/dev/null; then
-              run_step "Node test suite" npm test -- --runInBand
-            else
-              echo "## Node test suite" | tee -a "$report"
-              echo "RESULT: NO_TEST_SCRIPT" | tee -a "$report"
-              echo | tee -a "$report"
-            fi
+            if [[ -f package-lock.json ]]; then run_step "Node dependency install" npm ci; else run_step "Node dependency install" npm install; fi
+            if node -e 'const p=require("./package.json"); process.exit(p.scripts && p.scripts.test ? 0 : 1)' 2>/dev/null; then run_step "Node test suite" npm test -- --runInBand; else echo "## Node test suite" | tee -a "$report"; echo "RESULT: NO_TEST_SCRIPT" | tee -a "$report"; echo | tee -a "$report"; fi
           fi
-
-          if [[ -f go.mod ]]; then
-            run_step "Go test suite" go test ./...
-          fi
-
-          if [[ -f Cargo.toml ]]; then
-            run_step "Rust test suite" cargo test --all
-          fi
-
-          if [[ -f Makefile ]] && grep -Eq '^test([[:space:]]*):' Makefile; then
-            run_step "Make test suite" make test
-          fi
-
-          shell_files=( $(git ls-files '*.sh' '*.bash') )
-          if (( ${#shell_files[@]} > 0 )); then
-            run_step "Shell syntax suite" bash -lc 'set -e; for f in "$@"; do bash -n "$f"; done' _ "${shell_files[@]}"
-          fi
-
-          echo "## Final verdict" | tee -a "$report"
-          if [[ "$rc" -eq 0 ]]; then
-            echo "RESULT: PASS" | tee -a "$report"
-          else
-            echo "RESULT: FAIL" | tee -a "$report"
-          fi
-          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
-          exit "$rc"
+          if [[ -f go.mod ]]; then run_step "Go test suite" go test ./...; fi
+          if [[ -f Cargo.toml ]]; then run_step "Rust test suite" cargo test --all; fi
+          if [[ -f Makefile ]] && grep -Eq '^test([[:space:]]*):' Makefile; then run_step "Make test suite" make test; fi
+          mapfile -t shell_files < <(git ls-files '*.sh' '*.bash')
+          if (( ${#shell_files[@]} > 0 )); then run_step "Shell syntax suite" bash -lc 'set -e; for f in "$@"; do bash -n "$f"; done' _ "${shell_files[@]}"; fi
+          echo "## Final verdict" | tee -a "$report"; if [[ "$rc" -eq 0 ]]; then echo "RESULT: PASS" | tee -a "$report"; else echo "RESULT: FAIL" | tee -a "$report"; fi
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"; exit "$rc"
 
       - name: Upload validation evidence
         if: always()
@@ -128,13 +63,15 @@ jobs:
           path: ${{ runner.temp }}/canonical-validation.md
           retention-days: 14
 
-      - name: Remove ephemeral validator from canonical tree
+      - name: Remove ephemeral validator and bootstrap marker
         if: always()
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'Canonical Validation Bot'
           git config user.email 'canonical-validation-bot@users.noreply.github.com'
+          rm -f .canonical-validation-bootstrap
           git rm -f .github/workflows/__canonical-execution-validation.yml
+          git add -A
           git commit -m 'test: remove ephemeral canonical execution validator'
           git push origin HEAD:master
