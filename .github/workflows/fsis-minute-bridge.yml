@@ -2,20 +2,31 @@ name: FSIS minute bridge
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "fsis-bridge/**"
+      - ".github/workflows/fsis-minute-bridge.yml"
   schedule:
     - cron: "*/5 1-7 * * 1-5"
 
 permissions:
   contents: write
 
+concurrency:
+  group: fsis-minute-bridge
+  cancel-in-progress: true
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Fetch 1m market data
+        env:
+          PYTHONUNBUFFERED: "1"
         run: python3 fsis-bridge/fetch_minute.py
 
       - name: Commit latest bridge snapshot
