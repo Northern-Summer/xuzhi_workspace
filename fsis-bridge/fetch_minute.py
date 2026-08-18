@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import json
 import os
-import sys
 import time
 from datetime import datetime, timezone
 from urllib.parse import urlencode
@@ -14,11 +13,14 @@ KLINE_BASE = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
 UT = "7eea3edcaed734bea9cbfc24409ed989"
 
 DEFAULT_SYMBOLS = [
-    "1.510300", "1.510500", "1.510050", "0.159919", "0.159915",
-    "1.512480", "0.159995", "1.588000", "1.588200",
-    "1.515880", "1.562500", "0.159801", "0.159607",
-    "1.516110", "1.562600", "0.159667",
-    "1.588080", "1.588090",
+    "1.510300",  # 沪深300ETF
+    "0.159919",  # 沪深300ETF嘉实
+    "1.512480",  # 半导体ETF
+    "0.159995",  # 芯片ETF
+    "1.588200",  # 科创芯片ETF
+    "1.515880",  # 通信/AI基础设施代理
+    "0.159801",  # 芯片ETF
+    "1.516110",  # 机器人相关ETF代理
 ]
 
 TREND_FIELDS1 = "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"
@@ -27,43 +29,27 @@ KLINE_FIELDS2 = "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60"
 
 
 def http_json(url: str):
-    req = Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/1.1",
-            "Referer": "https://quote.eastmoney.com/",
-            "Accept": "application/json,text/plain,*/*",
-        },
-    )
     last = None
-    for attempt in range(3):
+    for attempt in range(4):
+        req = Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/1.2",
+                "Referer": "https://quote.eastmoney.com/",
+                "Accept": "application/json,text/plain,*/*",
+                "Connection": "close",
+            },
+        )
         try:
-            with urlopen(req, timeout=12) as r:
+            with urlopen(req, timeout=15) as r:
                 if r.status != 200:
                     raise RuntimeError(f"HTTP {r.status}")
                 return json.loads(r.read().decode("utf-8"))
         except Exception as e:
             last = e
-            if attempt < 2:
-                time.sleep(0.5 * (attempt + 1))
-    raise RuntimeError(f"request failed: {last!r}")
-
-
-def fetch_trends(secid: str):
-    params = {
-        "fields1": TREND_FIELDS1,
-        "fields2": TREND_FIELDS2,
-        "ut": UT,
-        "ndays": "5",
-        "iscr": "0",
-        "secid": secid,
-    }
-    payload = http_json(TREND_BASE + "?" + urlencode(params))
-    data = payload.get("data") or {}
-    rows = data.get("trends") or []
-    if not rows:
-        raise RuntimeError("trends2 returned empty trends")
-    return data.get("name"), data.get("code"), rows, TREND_BASE
+            if attempt < 3:
+                time.sleep(1.0 + attempt * 0.75)
+    raise RuntimeError(f"request failed after retries: {last!r}")
 
 
 def fetch_kline(secid: str, session_date: str):
@@ -83,7 +69,24 @@ def fetch_kline(secid: str, session_date: str):
     rows = data.get("klines") or []
     if not rows:
         raise RuntimeError("kline returned empty klines")
-    return data.get("name"), data.get("code"), rows, KLINE_BASE
+    return data.get("name"), data.get("code"), rows, "kline"
+
+
+def fetch_trends(secid: str):
+    params = {
+        "fields1": TREND_FIELDS1,
+        "fields2": TREND_FIELDS2,
+        "ut": UT,
+        "ndays": "1",
+        "iscr": "0",
+        "secid": secid,
+    }
+    payload = http_json(TREND_BASE + "?" + urlencode(params))
+    data = payload.get("data") or {}
+    rows = data.get("trends") or []
+    if not rows:
+        raise RuntimeError("trends2 returned empty trends")
+    return data.get("name"), data.get("code"), rows, "trends2"
 
 
 def normalize_trend(rows, fetched_at):
@@ -135,6 +138,16 @@ def normalize_kline(rows, fetched_at):
     return out
 
 
+def validate_bars(bars):
+    if not bars:
+        raise RuntimeError("zero parseable bars")
+    timestamps = [b["ts"] for b in bars]
+    if len(timestamps) != len(set(timestamps)):
+        raise RuntimeError("duplicate minute timestamps")
+    if timestamps != sorted(timestamps):
+        raise RuntimeError("minute timestamps not monotonic")
+
+
 def main():
     now = datetime.now(timezone.utc)
     fetched_at = now.isoformat()
@@ -146,20 +159,17 @@ def main():
     failures = []
     for i, secid in enumerate(symbols):
         if i:
-            time.sleep(0.15)
+            time.sleep(0.9)
         try:
             try:
-                name, code, rows, endpoint = fetch_trends(secid)
-                bars = normalize_trend(rows, fetched_at)
-                source_variant = "trends2"
-            except Exception as trend_error:
-                name, code, rows, endpoint = fetch_kline(secid, session_date)
+                name, code, rows, source_variant = fetch_kline(secid, session_date)
                 bars = normalize_kline(rows, fetched_at)
-                source_variant = "kline"
+            except Exception as kline_error:
+                name, code, rows, source_variant = fetch_trends(secid)
+                bars = normalize_trend(rows, fetched_at)
                 if not bars:
-                    raise RuntimeError(f"fallback kline empty after trends2 error: {trend_error!r}")
-            if not bars:
-                raise RuntimeError(f"{source_variant} produced zero parseable bars")
+                    raise RuntimeError(f"trends2 empty after kline error: {kline_error!r}")
+            validate_bars(bars)
             results.append({
                 "secid": secid,
                 "name": name,
@@ -175,8 +185,8 @@ def main():
     payload = {
         "schema": "FSIS.minute-bridge.v1",
         "provider": "eastmoney",
-        "provider_endpoint_primary": TREND_BASE,
-        "provider_endpoint_fallback": KLINE_BASE,
+        "provider_endpoint_primary": KLINE_BASE,
+        "provider_endpoint_fallback": TREND_BASE,
         "fetched_at_utc": fetched_at,
         "fetched_at_bj": bj_now.isoformat(),
         "session_date_bj": session_date,
@@ -189,9 +199,17 @@ def main():
         "failures": failures,
     }
 
-    os.makedirs("bridge", exist_ok=True)
+    import pathlib
+    pathlib.Path("bridge").mkdir(exist_ok=True)
     with open("bridge/latest.json", "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+
+    if not results:
+        status_code = "FAILED"
+    elif failures:
+        status_code = "PARTIAL_FAILURE"
+    else:
+        status_code = "OK"
 
     status = {
         "schema": "FSIS.minute-bridge.status.v1",
@@ -204,13 +222,13 @@ def main():
         "symbols_succeeded": len(results),
         "symbols_failed": len(failures),
         "latest_bar_max": max((x["latest_bar_ts"] or "" for x in results), default=None),
-        "status": "OK" if results else "FAILED",
+        "status": status_code,
+        "live_eligible": bool(results) and not failures,
     }
     with open("bridge/status.json", "w", encoding="utf-8") as f:
         json.dump(status, f, ensure_ascii=False, indent=2)
 
     print(json.dumps(status, ensure_ascii=False))
-    # Publishing code should still run on a failed data fetch; status.json carries the truth.
     return 0
 
 
