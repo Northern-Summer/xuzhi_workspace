@@ -1,0 +1,13 @@
+{
+  "schema": "FSIS.minute-bridge.status.v1",
+  "provider": "eastmoney",
+  "fetched_at_utc": "2026-08-18T04:02:07.302833+00:00",
+  "fetched_at_bj": "2026-08-18T12:02:07.302833+08:00",
+  "session_date_bj": "20260818",
+  "resolution": "1m",
+  "symbols_requested": 18,
+  "symbols_succeeded": 1,
+  "symbols_failed": 17,
+  "latest_bar_max": "2026-08-18 11:29",
+  "status": "OK"
+}
