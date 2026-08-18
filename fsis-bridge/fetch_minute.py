@@ -34,7 +34,7 @@ def http_json(url: str):
         req = Request(
             url,
             headers={
-                "User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/1.2",
+                "User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/1.3",
                 "Referer": "https://quote.eastmoney.com/",
                 "Accept": "application/json,text/plain,*/*",
                 "Connection": "close",
@@ -119,6 +119,8 @@ def normalize_kline(rows, fetched_at):
         if len(parts) < 6:
             continue
         try:
+            # East Money K-line order: date, open, close, high, low,
+            # volume, amount, amplitude, change_pct, change_amt, turnover.
             out.append({
                 "ts": parts[0],
                 "open": float(parts[1]),
@@ -154,6 +156,7 @@ def main():
     bj_now = now.astimezone(BJ)
     session_date = bj_now.strftime("%Y%m%d")
     symbols = [s.strip() for s in os.getenv("FSIS_SYMBOLS", ",".join(DEFAULT_SYMBOLS)).split(",") if s.strip()]
+    request_id = os.getenv("FSIS_REQUEST_ID", "default-core")
 
     results = []
     failures = []
@@ -192,6 +195,7 @@ def main():
         "session_date_bj": session_date,
         "resolution": "1m",
         "source_mode": "public_http",
+        "request_id": request_id,
         "symbols_requested": len(symbols),
         "symbols_succeeded": len(results),
         "symbols_failed": len(failures),
@@ -218,9 +222,11 @@ def main():
         "fetched_at_bj": bj_now.isoformat(),
         "session_date_bj": session_date,
         "resolution": "1m",
+        "request_id": request_id,
         "symbols_requested": len(symbols),
         "symbols_succeeded": len(results),
         "symbols_failed": len(failures),
+        "coverage_ratio": (len(results) / len(symbols)) if symbols else 0.0,
         "latest_bar_max": max((x["latest_bar_ts"] or "" for x in results), default=None),
         "status": status_code,
         "live_eligible": bool(results) and not failures,
