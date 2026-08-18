@@ -1,8 +1,8 @@
 {
   "schema": "FSIS.minute-bridge.status.v1",
   "provider": "eastmoney",
-  "fetched_at_utc": "2026-08-18T04:22:11.263164+00:00",
-  "fetched_at_bj": "2026-08-18T12:22:11.263164+08:00",
+  "fetched_at_utc": "2026-08-18T04:56:55.677394+00:00",
+  "fetched_at_bj": "2026-08-18T12:56:55.677394+08:00",
   "session_date_bj": "20260818",
   "resolution": "1m",
   "symbols_requested": 8,
