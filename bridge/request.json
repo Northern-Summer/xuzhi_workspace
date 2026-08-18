@@ -1,0 +1,17 @@
+{
+  "schema": "FSIS.minute-bridge.request.v1",
+  "request_id": "default-core",
+  "requested_at_bj": "2026-08-18T13:50:00+08:00",
+  "expires_at_bj": "2026-08-18T15:05:00+08:00",
+  "symbols": [
+    "1.510300",
+    "0.159919",
+    "1.512480",
+    "0.159995",
+    "1.588200",
+    "1.515880",
+    "0.159801",
+    "1.516110"
+  ],
+  "purpose": "FSIS default close-to-next-session validation universe"
+}
