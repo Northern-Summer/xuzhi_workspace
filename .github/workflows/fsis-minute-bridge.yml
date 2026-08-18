@@ -1,0 +1,28 @@
+name: FSIS minute bridge
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 1-7 * * 1-5"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch 1m market data
+        run: python3 fsis-bridge/fetch_minute.py
+
+      - name: Commit latest bridge snapshot
+        run: |
+          git config user.name "FSIS Minute Bridge"
+          git config user.email "actions@users.noreply.github.com"
+          git add bridge/latest.json bridge/status.json
+          git diff --cached --quiet && exit 0
+          git commit -m "FSIS bridge: refresh minute market snapshot"
+          git push
