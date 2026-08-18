@@ -56,7 +56,7 @@ jobs:
                   "Authorization": f"Bearer {token}",
                   "Accept": "application/vnd.github+json",
                   "X-GitHub-Api-Version": "2022-11-28",
-                  "User-Agent": "FSIS-Minute-Bridge/1.0",
+                  "User-Agent": "FSIS-Minute-Bridge/1.1",
               }
               body = None
               if payload is not None:
@@ -89,4 +89,15 @@ jobs:
 
           publish("bridge/latest.json", "FSIS bridge: refresh minute snapshot")
           publish("bridge/status.json", "FSIS bridge: refresh minute status")
+          PY
+
+      - name: Verify published bridge status
+        run: |
+          python3 - <<'PY'
+          import json
+          with open("bridge/status.json", "r", encoding="utf-8") as f:
+              status = json.load(f)
+          print(json.dumps(status, ensure_ascii=False, indent=2))
+          if status.get("status") != "OK":
+              raise SystemExit(1)
           PY
