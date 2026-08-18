@@ -3,6 +3,8 @@ name: FSIS minute bridge
 on:
   workflow_dispatch:
   push:
+    branches-ignore:
+      - fsis-data
     paths:
       - "fsis-bridge/**"
       - ".github/workflows/fsis-minute-bridge.yml"
@@ -15,7 +17,10 @@ permissions:
 
 concurrency:
   group: fsis-minute-bridge
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  DATA_BRANCH: fsis-data
 
 jobs:
   fetch:
@@ -32,6 +37,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
+          BRANCH: ${{ env.DATA_BRANCH }}
         run: |
           python3 - <<'PY'
           import base64, json, os, urllib.request
@@ -40,12 +46,13 @@ jobs:
 
           repo = os.environ["REPO"]
           token = os.environ["GH_TOKEN"]
-          url = f"https://api.github.com/repos/{repo}/contents/bridge/request.json?ref=fsis-data"
+          branch = os.environ["BRANCH"]
+          url = f"https://api.github.com/repos/{repo}/contents/bridge/request.json?ref={branch}"
           req = urllib.request.Request(url, headers={
               "Authorization": f"Bearer {token}",
               "Accept": "application/vnd.github+json",
               "X-GitHub-Api-Version": "2022-11-28",
-              "User-Agent": "FSIS-Minute-Bridge/1.4",
+              "User-Agent": "FSIS-Minute-Bridge/1.5",
           })
 
           DEFAULT_ID = "default-core"
@@ -82,13 +89,12 @@ jobs:
                       seen.add(value)
                       symbols.append(value)
 
-          # Guardrail: never allow an empty/oversized/expired request to erase the stable default universe.
           if symbols and not expired and len(symbols) <= 25:
               request_id = str(spec.get("request_id") or DEFAULT_ID)
               request_state = "REQUEST"
               reason = "valid runtime request"
           else:
-              symbols = []  # Empty env => fetcher falls back to DEFAULT_SYMBOLS.
+              symbols = []
               request_id = DEFAULT_ID
               request_state = "DEFAULT"
               if expired:
@@ -117,25 +123,23 @@ jobs:
           PYTHONUNBUFFERED: "1"
         run: python3 fetch_minute.py
 
-      - name: Publish bridge snapshot via GitHub Contents API
+      - name: Publish bridge snapshot safely
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          BRANCH: fsis-data
+          BRANCH: ${{ env.DATA_BRANCH }}
           REQUEST_STATE: ${{ env.FSIS_REQUEST_STATE }}
           REQUEST_REASON: ${{ env.FSIS_REQUEST_REASON }}
         run: |
           python3 - <<'PY'
-          import base64
-          import json
-          import os
-          import urllib.error
-          import urllib.parse
-          import urllib.request
+          import base64, json, os, urllib.error, urllib.parse, urllib.request
 
           repo = os.environ["REPO"]
           branch = os.environ["BRANCH"]
           token = os.environ["GH_TOKEN"]
+
+          with open("bridge/status.json", "r", encoding="utf-8") as f:
+              status = json.load(f)
 
           def api(method, path, payload=None):
               url = f"https://api.github.com/repos/{repo}/contents/{path}?ref={urllib.parse.quote(branch)}"
@@ -143,7 +147,7 @@ jobs:
                   "Authorization": f"Bearer {token}",
                   "Accept": "application/vnd.github+json",
                   "X-GitHub-Api-Version": "2022-11-28",
-                  "User-Agent": "FSIS-Minute-Bridge/1.4",
+                  "User-Agent": "FSIS-Minute-Bridge/1.5",
               }
               body = None
               if payload is not None:
@@ -170,19 +174,51 @@ jobs:
               result = api("PUT", path, payload)
               print(json.dumps({"path": path, "commit": result.get("commit", {}).get("sha")}, ensure_ascii=False))
 
-          publish("bridge/latest.json", "FSIS bridge: refresh minute snapshot")
-          publish("bridge/status.json", "FSIS bridge: refresh minute status")
+          status.update({
+              "request_state": os.environ.get("REQUEST_STATE"),
+              "request_reason": os.environ.get("REQUEST_REASON"),
+              "published_at_utc": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+              "last_good_snapshot_updated": False,
+          })
+
+          if status.get("status") == "OK" and status.get("live_eligible"):
+              publish("bridge/latest.json", "FSIS bridge: refresh verified minute snapshot")
+              status["last_good_snapshot_updated"] = True
+              with open("bridge/status.publish.json", "w", encoding="utf-8") as f:
+                  json.dump(status, f, ensure_ascii=False, indent=2)
+              publish("bridge/status.publish.json", "FSIS bridge: publish verified status")
+          else:
+              # Critical invariant: a failed/partial fetch MUST NOT overwrite the last-known-good latest.json.
+              # Publish diagnostic status only.
+              with open("bridge/status.publish.json", "w", encoding="utf-8") as f:
+                  json.dump(status, f, ensure_ascii=False, indent=2)
+              publish("bridge/status.publish.json", "FSIS bridge: publish failed or constrained status")
+              raise SystemExit(f"Bridge snapshot rejected for live publication: {status}")
           PY
 
       - name: Verify published bridge status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ env.DATA_BRANCH }}
         run: |
           python3 - <<'PY'
-          import json
-          with open("bridge/status.json", "r", encoding="utf-8") as f:
-              status = json.load(f)
-          print(json.dumps(status, ensure_ascii=False, indent=2))
-          if status.get("status") != "OK":
-              raise SystemExit(1)
-          if not status.get("live_eligible"):
+          import base64, json, os, urllib.request
+          repo=os.environ["REPO"]
+          branch=os.environ["BRANCH"]
+          token=os.environ["GH_TOKEN"]
+          url=f"https://api.github.com/repos/{repo}/contents/bridge/status.publish.json?ref={branch}"
+          req=urllib.request.Request(url,headers={
+              "Authorization":f"Bearer {token}",
+              "Accept":"application/vnd.github+json",
+              "X-GitHub-Api-Version":"2022-11-28",
+              "User-Agent":"FSIS-Minute-Bridge/1.5",
+          })
+          with urllib.request.urlopen(req,timeout=20) as r:
+              body=json.loads(r.read().decode("utf-8"))
+          raw=base64.b64decode(body["content"]).decode("utf-8")
+          status=json.loads(raw)
+          print(json.dumps(status,ensure_ascii=False,indent=2))
+          if status.get("status") != "OK" or not status.get("live_eligible") or not status.get("last_good_snapshot_updated"):
               raise SystemExit(1)
           PY
