@@ -1,0 +1,7 @@
+{
+  "schema": "FSIS.minute-bridge.request.v1",
+  "request_id": "default-core",
+  "symbols": ["1.510300","0.159919","1.512480","0.159995","1.588200","1.515880","0.159801","1.516110"],
+  "expires_at_bj": "2099-12-31T23:59:59+08:00",
+  "purpose": "default FSIS intraday bridge universe"
+}
