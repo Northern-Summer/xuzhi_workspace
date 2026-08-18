@@ -1,14 +1,14 @@
 {
   "schema": "FSIS.minute-bridge.status.v1",
   "provider": "eastmoney",
-  "fetched_at_utc": "2026-08-18T04:56:55.677394+00:00",
-  "fetched_at_bj": "2026-08-18T12:56:55.677394+08:00",
+  "fetched_at_utc": "2026-08-18T05:30:04.137416+00:00",
+  "fetched_at_bj": "2026-08-18T13:30:04.137416+08:00",
   "session_date_bj": "20260818",
   "resolution": "1m",
   "symbols_requested": 8,
-  "symbols_succeeded": 1,
-  "symbols_failed": 7,
-  "latest_bar_max": "2026-08-18 11:30",
-  "status": "PARTIAL_FAILURE",
-  "live_eligible": false
+  "symbols_succeeded": 8,
+  "symbols_failed": 0,
+  "latest_bar_max": "2026-08-18 13:31",
+  "status": "OK",
+  "live_eligible": true
 }
