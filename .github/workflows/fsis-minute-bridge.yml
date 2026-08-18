@@ -21,19 +21,72 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Download bridge fetcher
+        run: |
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/Northern-Summer/xuzhi_workspace/master/fsis-bridge/fetch_minute.py \
+            --output fetch_minute.py
 
       - name: Fetch 1m market data
         env:
           PYTHONUNBUFFERED: "1"
-        run: python3 fsis-bridge/fetch_minute.py
+        run: python3 fetch_minute.py
 
-      - name: Commit latest bridge snapshot
+      - name: Publish bridge snapshot via GitHub Contents API
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: master
         run: |
-          git config user.name "FSIS Minute Bridge"
-          git config user.email "actions@users.noreply.github.com"
-          git add bridge/latest.json bridge/status.json
-          git diff --cached --quiet && exit 0
-          git commit -m "FSIS bridge: refresh minute market snapshot"
-          git push
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          repo = os.environ["REPO"]
+          branch = os.environ["BRANCH"]
+          token = os.environ["GH_TOKEN"]
+
+          def api(method, path, payload=None):
+              url = f"https://api.github.com/repos/{repo}/contents/{path}?ref={urllib.parse.quote(branch)}"
+              headers = {
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                  "User-Agent": "FSIS-Minute-Bridge/1.0",
+              }
+              body = None
+              if payload is not None:
+                  body = json.dumps(payload).encode("utf-8")
+                  headers["Content-Type"] = "application/json"
+              req = urllib.request.Request(url, data=body, headers=headers, method=method)
+              try:
+                  with urllib.request.urlopen(req, timeout=20) as r:
+                      return json.loads(r.read().decode("utf-8"))
+              except urllib.error.HTTPError as e:
+                  if e.code == 404 and method == "GET":
+                      return None
+                  detail = e.read().decode("utf-8", errors="replace")
+                  raise RuntimeError(f"GitHub API {method} {path} -> {e.code}: {detail}")
+
+          def publish(path, message):
+              with open(path, "rb") as f:
+                  raw = f.read()
+              encoded = base64.b64encode(raw).decode("ascii")
+              current = api("GET", path)
+              payload = {
+                  "message": message,
+                  "content": encoded,
+                  "branch": branch,
+              }
+              if current and current.get("sha"):
+                  payload["sha"] = current["sha"]
+              result = api("PUT", path, payload)
+              print(json.dumps({"path": path, "commit": result.get("commit", {}).get("sha")}, ensure_ascii=False))
+
+          publish("bridge/latest.json", "FSIS bridge: refresh minute snapshot")
+          publish("bridge/status.json", "FSIS bridge: refresh minute status")
+          PY
