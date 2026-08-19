@@ -13,17 +13,9 @@ from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 BJ = ZoneInfo("Asia/Shanghai")
-TREND_HOSTS = [
-    os.getenv("FSIS_EM_HOST_PRIMARY", "push2.eastmoney.com"),
-    "82.push2.eastmoney.com",
-    "99.push2.eastmoney.com",
-]
-TREND_BASE_PATH = "/api/qt/stock/trends2/get"
-KLINE_HOSTS = [
-    os.getenv("FSIS_EM_HIS_HOST_PRIMARY", "push2his.eastmoney.com"),
-    "33.push2his.eastmoney.com",
-]
-KLINE_BASE_PATH = "/api/qt/stock/kline/get"
+TREND_HOSTS = [os.getenv("FSIS_EM_HOST_PRIMARY", "push2.eastmoney.com"), "82.push2.eastmoney.com", "99.push2.eastmoney.com"]
+KLINE_HOSTS = [os.getenv("FSIS_EM_HIS_HOST_PRIMARY", "push2his.eastmoney.com"), "33.push2his.eastmoney.com"]
+TENCENT_URL = "https://web.ifzq.gtimg.cn/appstock/app/minute/query"
 UT = os.getenv("FSIS_EASTMONEY_UT", "bd1d9ddb04089700cf9c27f6f7426281")
 DEFAULT_SYMBOLS = ["1.510300", "0.159919", "1.512480", "0.159995", "1.588200", "1.515880", "0.159801", "1.516110"]
 TREND_FIELDS1 = "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"
@@ -36,26 +28,25 @@ MAX_SYMBOLS = max(25, min(250, int(os.getenv("FSIS_MINUTE_MAX_SYMBOLS", "120")))
 LIVE_COVERAGE = float(os.getenv("FSIS_MINUTE_LIVE_COVERAGE", "0.80"))
 
 
-def http_json(host, path, params):
-    url = f"https://{host}{path}?{urlencode(params)}"
+def request_json(url, params=None, headers=None):
+    url = url if not params else f"{url}?{urlencode(params)}"
     last = None
     for attempt in range(RETRIES + 1):
-        req = Request(url, headers={
-            "User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/3.0",
-            "Referer": "https://quote.eastmoney.com/",
-            "Accept": "application/json,text/plain,*/*",
-            "Connection": "close",
-        })
+        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/3.1", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
         try:
             with urlopen(req, timeout=HTTP_TIMEOUT) as r:
                 if r.status != 200:
                     raise RuntimeError(f"HTTP {r.status}")
-                return json.loads(r.read().decode("utf-8"))
+                return json.loads(r.read().decode("utf-8", errors="strict"))
         except Exception as exc:
             last = exc
             if attempt < RETRIES:
                 time.sleep((0.45 * (2 ** attempt)) + random.uniform(0, 0.2))
-    raise RuntimeError(f"{host} failed after {RETRIES + 1} attempts: {last!r}")
+    raise RuntimeError(f"request failed after {RETRIES + 1} attempts: {last!r}")
+
+
+def em_json(host, path, params):
+    return request_json(f"https://{host}{path}", params, {"User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/3.1", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
 
 
 def fetch_kline(secid, session_date):
@@ -63,7 +54,7 @@ def fetch_kline(secid, session_date):
     errors = []
     for host in KLINE_HOSTS:
         try:
-            body = http_json(host, KLINE_BASE_PATH, params)
+            body = em_json(host, "/api/qt/stock/kline/get", params)
             data = (body.get("data") if isinstance(body, dict) else None) or {}
             rows = data.get("klines") or []
             if rows:
@@ -79,7 +70,7 @@ def fetch_trends(secid):
     errors = []
     for host in TREND_HOSTS:
         try:
-            body = http_json(host, TREND_BASE_PATH, params)
+            body = em_json(host, "/api/qt/stock/trends2/get", params)
             data = (body.get("data") if isinstance(body, dict) else None) or {}
             rows = data.get("trends") or []
             if rows:
@@ -88,6 +79,53 @@ def fetch_trends(secid):
         except Exception as exc:
             errors.append(f"{host}: {exc!r}")
     raise RuntimeError("trends2 failed: " + " | ".join(errors))
+
+
+def tencent_code(secid):
+    market, code = secid.split(".", 1)
+    if market == "1":
+        return "sh" + code
+    if market == "0":
+        return "sz" + code
+    return None
+
+
+def fetch_tencent(secid, session_date, fetched_at):
+    code = tencent_code(secid)
+    if not code:
+        raise RuntimeError("Tencent unsupported market")
+    body = request_json(TENCENT_URL, {"code": code}, {"User-Agent": "Mozilla/5.0 FSIS-Tencent-Fallback/1.0", "Referer": "https://gu.qq.com/", "Accept": "application/json,text/plain,*/*"})
+    if body.get("code") != 0:
+        raise RuntimeError(f"Tencent response code={body.get('code')}: {body.get('msg')}")
+    node = ((body.get("data") or {}).get(code) or {})
+    raw = node.get("data") or []
+    date = str(node.get("date") or "")
+    if date and date != session_date:
+        raise RuntimeError(f"Tencent wrong session date: {date} != {session_date}")
+    parsed = []
+    prev_vol = 0.0
+    prev_amt = 0.0
+    for item in raw:
+        if not isinstance(item, str):
+            continue
+        parts = item.split()
+        if len(parts) < 4:
+            continue
+        hhmm = parts[0]
+        try:
+            price = float(parts[1]); cum_vol = float(parts[2]); cum_amt = float(parts[3])
+        except (ValueError, TypeError):
+            continue
+        if len(hhmm) != 4 or not hhmm.isdigit():
+            continue
+        ts = f"{session_date[:4]}-{session_date[4:6]}-{session_date[6:8]} {hhmm[:2]}:{hhmm[2:]}"
+        dv = max(0.0, cum_vol - prev_vol)
+        da = max(0.0, cum_amt - prev_amt)
+        parsed.append({"ts": ts, "open": price, "close": price, "high": price, "low": price, "volume": dv, "amount": da, "avg_price": price, "fetched_at": fetched_at, "source_cumulative": True})
+        prev_vol, prev_amt = cum_vol, cum_amt
+    if not parsed:
+        raise RuntimeError("Tencent returned no parseable minute rows")
+    return node.get("qt", [None, None])[1] if isinstance(node.get("qt"), list) and len(node.get("qt")) > 1 else None, code, parsed, "tencent", "web.ifzq.gtimg.cn"
 
 
 def norm_trend(rows, fetched_at):
@@ -142,14 +180,22 @@ def validate_pit(bars, fetched_at_bj):
 
 def fetch_one(secid, session_date, fetched_at, bj_now):
     time.sleep(random.uniform(0.02, 0.18))
+    errors = []
     try:
         name, code, rows, variant, host = fetch_kline(secid, session_date)
         bars = norm_kline(rows, fetched_at)
-    except Exception as kline_error:
-        name, code, rows, variant, host = fetch_trends(secid)
-        bars = norm_trend(rows, fetched_at)
-        if not bars:
-            raise RuntimeError(f"trends2 empty after kline error: {kline_error!r}")
+    except Exception as exc:
+        errors.append(f"kline: {exc!r}")
+        try:
+            name, code, rows, variant, host = fetch_trends(secid)
+            bars = norm_trend(rows, fetched_at)
+        except Exception as exc2:
+            errors.append(f"trends2: {exc2!r}")
+            try:
+                name, code, bars, variant, host = fetch_tencent(secid, session_date, fetched_at)
+            except Exception as exc3:
+                errors.append(f"tencent: {exc3!r}")
+                raise RuntimeError("all minute providers failed: " + " | ".join(errors))
     bars, effective_cutoff, dropped = validate_pit(bars, bj_now)
     return {"secid": secid, "name": name, "code": code, "source_variant": variant, "source_host": host, "latest_bar_ts": bars[-1]["ts"], "bar_count": len(bars), "bars": bars, "pit_cutoff_bar": effective_cutoff, "future_or_open_bars_dropped": dropped}
 
@@ -179,20 +225,13 @@ def main():
     results.sort(key=lambda x: symbols.index(x["secid"]))
     import pathlib
     pathlib.Path("bridge").mkdir(exist_ok=True)
-
     coverage = round(len(results) / len(symbols), 4) if symbols else 0.0
     future_drops = sum(x.get("future_or_open_bars_dropped", 0) for x in results)
     effective_cutoffs = [x.get("pit_cutoff_bar") for x in results if x.get("pit_cutoff_bar")]
     effective_cutoff = min(effective_cutoffs) if effective_cutoffs else None
-    if not results:
-        status_code = "FAILED"
-    elif coverage < LIVE_COVERAGE:
-        status_code = "PARTIAL_FAILURE"
-    else:
-        status_code = "OK"
+    status_code = "FAILED" if not results else ("PARTIAL_FAILURE" if coverage < LIVE_COVERAGE else "OK")
     live_eligible = coverage >= LIVE_COVERAGE and future_drops == 0
-
-    payload = {"schema": "FSIS.minute-bridge.v3", "provider": "eastmoney", "fetched_at_utc": fetched_at, "fetched_at_bj": bj_now.isoformat(), "session_date_bj": session_date, "resolution": "1m", "source_mode": "public_http", "request_id": request_id, "symbols_requested": len(symbols), "symbols_succeeded": len(results), "symbols_failed": len(failures), "coverage_ratio": coverage, "pit_cutoff_bar": effective_cutoff, "future_or_open_bars_dropped": future_drops, "status": status_code, "live_eligible": live_eligible, "fetch_workers": WORKERS, "http_timeout_seconds": HTTP_TIMEOUT, "retry_count": RETRIES, "results": results, "failures": failures}
+    payload = {"schema": "FSIS.minute-bridge.v3", "provider": "heterogeneous: eastmoney+tencent", "fetched_at_utc": fetched_at, "fetched_at_bj": bj_now.isoformat(), "session_date_bj": session_date, "resolution": "1m", "source_mode": "public_http", "request_id": request_id, "symbols_requested": len(symbols), "symbols_succeeded": len(results), "symbols_failed": len(failures), "coverage_ratio": coverage, "pit_cutoff_bar": effective_cutoff, "future_or_open_bars_dropped": future_drops, "status": status_code, "live_eligible": live_eligible, "fetch_workers": WORKERS, "http_timeout_seconds": HTTP_TIMEOUT, "retry_count": RETRIES, "results": results, "failures": failures}
     with open("bridge/latest.json", "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
     with open("bridge/status.json", "w", encoding="utf-8") as f:
