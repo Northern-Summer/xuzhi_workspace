@@ -10,7 +10,7 @@ on:
       - ".github/workflows/fsis-minute-bridge.yml"
       - "bridge/request.json"
   schedule:
-    - cron: "*/5 1-7 * * 1-5"
+    - cron: "56 2 * * 1-5"
 
 permissions:
   contents: write
