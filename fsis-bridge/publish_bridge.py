@@ -22,12 +22,7 @@ REQUEST_REASON = os.environ.get("REQUEST_REASON", "")
 
 def api(method, path, payload=None):
     url = f"https://api.github.com/repos/{REPO}/contents/{path}?ref={urllib.parse.quote(BRANCH)}"
-    headers = {
-        "Authorization": f"Bearer {TOKEN}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "FSIS-Minute-Bridge/2.0",
-    }
+    headers = {"Authorization": f"Bearer {TOKEN}", "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "FSIS-Minute-Bridge/3.0"}
     body = None
     if payload is not None:
         body = json.dumps(payload).encode("utf-8")
@@ -59,11 +54,7 @@ def read_json(path):
 
 def publish_json(path, document, message):
     raw = json.dumps(document, ensure_ascii=False, indent=2).encode("utf-8")
-    payload = {
-        "message": message,
-        "content": base64.b64encode(raw).decode("ascii"),
-        "branch": BRANCH,
-    }
+    payload = {"message": message, "content": base64.b64encode(raw).decode("ascii"), "branch": BRANCH}
     current = api("GET", path)
     if current and current.get("sha"):
         payload["sha"] = current["sha"]
@@ -76,30 +67,28 @@ def main():
         current = json.load(f)
 
     previous = read_json("bridge/status.json") or {}
-    old_last_good = {
-        "fetched_at_utc": previous.get("last_good_fetched_at_utc"),
-        "fetched_at_bj": previous.get("last_good_fetched_at_bj"),
-        "latest_bar_max": previous.get("last_good_latest_bar_max"),
-        "commit_sha": previous.get("last_good_commit_sha"),
-    }
-
+    old_last_good = {"fetched_at_utc": previous.get("last_good_fetched_at_utc"), "fetched_at_bj": previous.get("last_good_fetched_at_bj"), "latest_bar_max": previous.get("last_good_latest_bar_max"), "commit_sha": previous.get("last_good_commit_sha")}
     now = datetime.now(timezone.utc).isoformat()
+
+    market_commit = None
+    market_live = False
+    if os.path.exists("bridge/market.json"):
+        with open("bridge/market.json", "r", encoding="utf-8") as f:
+            market = json.load(f)
+        market_live = bool(market.get("live_eligible"))
+        market_commit = publish_json("bridge/market.json", market, "FSIS bridge: publish full-market discovery")
+        if os.path.exists("bridge/generated-request.json"):
+            with open("bridge/generated-request.json", "r", encoding="utf-8") as f:
+                generated = json.load(f)
+            publish_json("bridge/generated-request.json", generated, "FSIS bridge: publish generated minute candidate request")
+
     live = bool(current.get("live_eligible"))
     new_latest_commit = None
     if live:
         with open("bridge/latest.json", "r", encoding="utf-8") as f:
             latest = json.load(f)
-        new_latest_commit = publish_json(
-            "bridge/latest.json",
-            latest,
-            "FSIS bridge: publish verified minute snapshot",
-        )
-        last_good = {
-            "fetched_at_utc": current.get("fetched_at_utc"),
-            "fetched_at_bj": current.get("fetched_at_bj"),
-            "latest_bar_max": current.get("latest_bar_max"),
-            "commit_sha": new_latest_commit,
-        }
+        new_latest_commit = publish_json("bridge/latest.json", latest, "FSIS bridge: publish verified minute snapshot")
+        last_good = {"fetched_at_utc": current.get("fetched_at_utc"), "fetched_at_bj": current.get("fetched_at_bj"), "latest_bar_max": current.get("latest_bar_max"), "commit_sha": new_latest_commit}
     else:
         last_good = old_last_good
 
@@ -108,6 +97,8 @@ def main():
         "request_state": REQUEST_STATE,
         "request_reason": REQUEST_REASON,
         "published_at_utc": now,
+        "market_live_eligible": market_live,
+        "market_commit_sha": market_commit,
         "last_good_snapshot_available": bool(last_good.get("fetched_at_utc")),
         "last_good_snapshot_updated": live,
         "last_good_fetched_at_utc": last_good.get("fetched_at_utc"),
@@ -115,22 +106,12 @@ def main():
         "last_good_latest_bar_max": last_good.get("latest_bar_max"),
         "last_good_commit_sha": last_good.get("commit_sha"),
     })
-
-    # Publish the actual object that verification will read. Never publish a stale local file.
-    status_commit = publish_json(
-        "bridge/status.json",
-        published_status,
-        "FSIS bridge: publish current data status",
-    )
-    print(json.dumps({
-        "status_commit": status_commit,
-        "latest_commit": new_latest_commit,
-        "status": published_status,
-    }, ensure_ascii=False))
-
-    # DATA constraints are a valid operational state, not a CI infrastructure failure.
+    status_commit = publish_json("bridge/status.json", published_status, "FSIS bridge: publish current data status")
+    print(json.dumps({"status_commit": status_commit, "latest_commit": new_latest_commit, "market_commit": market_commit, "status": published_status}, ensure_ascii=False))
     if not live:
-        print(f"::warning::FSIS bridge data is not live-eligible: {current.get('status')} / {REQUEST_REASON}")
+        print(f"::warning::FSIS minute data is not live-eligible: {current.get('status')} / {REQUEST_REASON}")
+    if not market_live:
+        print("::warning::FSIS full-market discovery is not live-eligible")
     return 0
 
 
