@@ -31,7 +31,7 @@ def request_json(url, params=None, headers=None):
         url = f"{url}?{urlencode(params)}"
     last = None
     for attempt in range(RETRIES + 1):
-        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Market/5.1", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
+        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Market/5.2", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
         try:
             with urlopen(req, timeout=TIMEOUT) as r:
                 if r.status != 200:
@@ -106,20 +106,7 @@ def normalize_tencent(row):
     if market is None or not code.isdigit():
         return None
     code = code.zfill(6)
-    return {
-        "secid": f"{market}.{code}",
-        "code": code,
-        "market": market,
-        "name": first(row, "name", "stock_name", "stockName"),
-        "price": first(row, "zxj", "price", "now", "latest", "current", "last", "currentPrice", "lastPrice", "latestPrice", "curPrice"),
-        "change_pct": first(row, "zdf", "percent", "changePercent", "change_pct", "pct", "changeRatio", "changeRate"),
-        "change": first(row, "zd", "change", "priceChange", "changeValue"),
-        "volume": first(row, "volume", "vol", "dealVolume", "deal_volume"),
-        "amount": first(row, "turnover", "amount", "turnoverAmount", "dealAmount", "deal_amount"),
-        "amplitude": first(row, "zf", "amplitude", "amp", "amplitudeRate"),
-        "turnover": first(row, "hsl", "turnoverRate", "turnover_rate"),
-        "raw": row,
-    }
+    return {"secid": f"{market}.{code}", "code": code, "market": market, "name": first(row, "name", "stock_name", "stockName"), "price": first(row, "zxj", "price", "now", "latest", "current", "last", "currentPrice", "lastPrice", "latestPrice", "curPrice"), "change_pct": first(row, "zdf", "percent", "changePercent", "change_pct", "pct", "changeRatio", "changeRate"), "change": first(row, "zd", "change", "priceChange", "changeValue"), "volume": first(row, "volume", "vol", "dealVolume", "deal_volume"), "amount": first(row, "turnover", "amount", "turnoverAmount", "dealAmount", "deal_amount"), "amplitude": first(row, "zf", "amplitude", "amp", "amplitudeRate"), "turnover": first(row, "hsl", "turnoverRate", "turnover_rate"), "raw": row}
 
 
 def tx_page(page):
@@ -163,9 +150,10 @@ def rank_candidates(items):
     scored = []
     for idx, x in enumerate(items):
         p, chg, amt, amp = map(num, [x.get("price"), x.get("change_pct"), x.get("amount"), x.get("amplitude")])
-        if p <= 0:
+        signal = abs(chg) + abs(amp) + min(abs(amt) / 1e8, 20.0)
+        if p <= 0 and signal <= 0:
             continue
-        score = (min(abs(chg), 12.0) * 2.0) + (min(amp, 15.0) * 0.35) + (min(amt / 1e8, 20.0) * 0.15)
+        score = (min(abs(chg), 12.0) * 2.0) + (min(abs(amp), 15.0) * 0.35) + (min(abs(amt) / 1e8, 20.0) * 0.15)
         scored.append((score, -idx, x))
     scored.sort(key=lambda t: (t[0], t[1]), reverse=True)
     return [x for _, __, x in scored[:CANDIDATES]]
