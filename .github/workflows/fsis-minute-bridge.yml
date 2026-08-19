@@ -34,7 +34,9 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --location https://raw.githubusercontent.com/Northern-Summer/xuzhi_workspace/master/fsis-bridge/fetch_minute.py --output fetch_minute.py
           curl --fail --silent --show-error --location https://raw.githubusercontent.com/Northern-Summer/xuzhi_workspace/master/fsis-bridge/publish_bridge.py --output publish_bridge.py
-          python3 -m py_compile fetch_minute.py publish_bridge.py
+          curl --fail --silent --show-error --location https://raw.githubusercontent.com/Northern-Summer/xuzhi_workspace/master/fsis-bridge/selftest.py --output selftest.py
+          python3 -m py_compile fetch_minute.py publish_bridge.py selftest.py
+          python3 selftest.py
 
       - name: Ensure data branch exists
         env:
