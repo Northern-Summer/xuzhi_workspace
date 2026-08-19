@@ -1,6 +1,6 @@
 {
   "schema": "FSIS.market-bridge.v3",
-  "fetched_at_utc": "2026-08-19T01:43:47.886236+00:00",
+  "fetched_at_utc": "2026-08-19T01:45:17.222159+00:00",
   "status": "FAILED",
   "live_eligible": false,
   "universe_total": 0,
