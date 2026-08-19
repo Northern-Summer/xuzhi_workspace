@@ -22,7 +22,7 @@ REQUEST_REASON = os.environ.get("REQUEST_REASON", "")
 
 def api(method, path, payload=None):
     url = f"https://api.github.com/repos/{REPO}/contents/{path}?ref={urllib.parse.quote(BRANCH)}"
-    headers = {"Authorization": f"Bearer {TOKEN}", "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "FSIS-Minute-Bridge/3.0"}
+    headers = {"Authorization": f"Bearer {TOKEN}", "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "FSIS-Minute-Bridge/3.1"}
     body = None
     if payload is not None:
         body = json.dumps(payload).encode("utf-8")
@@ -72,11 +72,16 @@ def main():
 
     market_commit = None
     market_live = False
+    last_good_market = {"fetched_at_utc": previous.get("last_good_market_fetched_at_utc"), "universe_total": previous.get("last_good_market_universe_total"), "validated_source": previous.get("last_good_market_source"), "commit_sha": previous.get("last_good_market_commit_sha")}
     if os.path.exists("bridge/market.json"):
         with open("bridge/market.json", "r", encoding="utf-8") as f:
             market = json.load(f)
         market_live = bool(market.get("live_eligible"))
-        market_commit = publish_json("bridge/market.json", market, "FSIS bridge: publish full-market discovery")
+        if market_live:
+            market_commit = publish_json("bridge/market.json", market, "FSIS bridge: publish verified full-market discovery")
+            last_good_market = {"fetched_at_utc": market.get("fetched_at_utc"), "universe_total": market.get("universe_total"), "validated_source": market.get("validated_source"), "commit_sha": market_commit}
+        else:
+            market_commit = publish_json("bridge/market.json", market, "FSIS bridge: publish current full-market state")
         if os.path.exists("bridge/generated-request.json"):
             with open("bridge/generated-request.json", "r", encoding="utf-8") as f:
                 generated = json.load(f)
@@ -99,6 +104,11 @@ def main():
         "published_at_utc": now,
         "market_live_eligible": market_live,
         "market_commit_sha": market_commit,
+        "last_good_market_available": bool(last_good_market.get("fetched_at_utc")),
+        "last_good_market_fetched_at_utc": last_good_market.get("fetched_at_utc"),
+        "last_good_market_universe_total": last_good_market.get("universe_total"),
+        "last_good_market_source": last_good_market.get("validated_source"),
+        "last_good_market_commit_sha": last_good_market.get("commit_sha"),
         "last_good_snapshot_available": bool(last_good.get("fetched_at_utc")),
         "last_good_snapshot_updated": live,
         "last_good_fetched_at_utc": last_good.get("fetched_at_utc"),
