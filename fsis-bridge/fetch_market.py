@@ -31,7 +31,7 @@ def request_json(url, params=None, headers=None):
         url = f"{url}?{urlencode(params)}"
     last = None
     for attempt in range(RETRIES + 1):
-        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Market/5.0", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
+        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Market/5.1", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
         try:
             with urlopen(req, timeout=TIMEOUT) as r:
                 if r.status != 200:
@@ -106,12 +106,25 @@ def normalize_tencent(row):
     if market is None or not code.isdigit():
         return None
     code = code.zfill(6)
-    return {"secid": f"{market}.{code}", "code": code, "market": market, "name": first(row, "name", "stock_name", "stockName"), "price": first(row, "price", "now", "latest", "current", "last", "currentPrice", "lastPrice", "latestPrice", "curPrice"), "change_pct": first(row, "percent", "changePercent", "change_pct", "pct", "changeRatio", "changeRate", "zdf"), "change": first(row, "change", "priceChange", "changeValue"), "volume": first(row, "volume", "vol", "dealVolume", "deal_volume"), "amount": first(row, "amount", "turnover", "turnoverAmount", "dealAmount", "deal_amount"), "amplitude": first(row, "amplitude", "amp", "amplitudeRate"), "turnover": first(row, "turnoverRate", "turnover_rate"), "raw": row}
+    return {
+        "secid": f"{market}.{code}",
+        "code": code,
+        "market": market,
+        "name": first(row, "name", "stock_name", "stockName"),
+        "price": first(row, "zxj", "price", "now", "latest", "current", "last", "currentPrice", "lastPrice", "latestPrice", "curPrice"),
+        "change_pct": first(row, "zdf", "percent", "changePercent", "change_pct", "pct", "changeRatio", "changeRate"),
+        "change": first(row, "zd", "change", "priceChange", "changeValue"),
+        "volume": first(row, "volume", "vol", "dealVolume", "deal_volume"),
+        "amount": first(row, "turnover", "amount", "turnoverAmount", "dealAmount", "deal_amount"),
+        "amplitude": first(row, "zf", "amplitude", "amp", "amplitudeRate"),
+        "turnover": first(row, "hsl", "turnoverRate", "turnover_rate"),
+        "raw": row,
+    }
 
 
 def tx_page(page):
     params = {"_appver": "11.17.0", "board_code": "aStock", "sort_type": "price", "direct": "down", "offset": str(page * TX_PAGE_SIZE), "count": str(TX_PAGE_SIZE)}
-    body = request_json(TX_URL, params, {"User-Agent": "Mozilla/5.0 FSIS-Tencent-Market/2.0", "Referer": "https://stockapp.finance.qq.com/", "Accept": "application/json,text/plain,*/*"})
+    body = request_json(TX_URL, params, {"User-Agent": "Mozilla/5.0 FSIS-Tencent-Market/2.1", "Referer": "https://stockapp.finance.qq.com/", "Accept": "application/json,text/plain,*/*"})
     data = body.get("data") if isinstance(body, dict) else None
     if not isinstance(data, dict):
         raise RuntimeError("Tencent market response missing data")
