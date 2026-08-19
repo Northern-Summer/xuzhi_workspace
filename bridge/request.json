@@ -1,9 +1,9 @@
 {
   "schema": "FSIS.market-bridge.request.v2",
-  "request_id": "full-market-default-202608191030",
+  "request_id": "full-market-default-202608191100",
   "symbols": [],
   "scope": "full-market",
   "expires_at_bj": "2099-12-31T23:59:59+08:00",
   "purpose": "Full A-share market discovery with ranked 1m execution candidates",
-  "trigger": "final-freshness-metadata-validation"
+  "trigger": "v9-provider-polite-runtime-validation"
 }
