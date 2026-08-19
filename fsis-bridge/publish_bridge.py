@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# 工程改进铁律合规 — Ξ | 2026-03-25
-# 自问：此操作是否让系统更安全/准确/优雅/高效？答案：YES
-
 import base64
 import json
 import os
@@ -22,7 +19,7 @@ REQUEST_REASON = os.environ.get("REQUEST_REASON", "")
 
 def api(method, path, payload=None):
     url = f"https://api.github.com/repos/{REPO}/contents/{path}?ref={urllib.parse.quote(BRANCH)}"
-    headers = {"Authorization": f"Bearer {TOKEN}", "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "FSIS-Minute-Bridge/3.4"}
+    headers = {"Authorization": f"Bearer {TOKEN}", "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "FSIS-Minute-Bridge/3.9"}
     body = None
     if payload is not None:
         body = json.dumps(payload).encode("utf-8")
@@ -67,35 +64,19 @@ def main():
         current = json.load(f)
 
     previous = read_json("bridge/status.json") or {}
-    old_last_good = {
-        "fetched_at_utc": previous.get("last_good_fetched_at_utc"),
-        "fetched_at_bj": previous.get("last_good_fetched_at_bj"),
-        "latest_bar_max": previous.get("last_good_latest_bar_max"),
-        "commit_sha": previous.get("last_good_commit_sha"),
-    }
-    old_last_good_market = {
-        "fetched_at_utc": previous.get("last_good_market_fetched_at_utc"),
-        "universe_total": previous.get("last_good_market_universe_total"),
-        "validated_source": previous.get("last_good_market_source"),
-        "commit_sha": previous.get("last_good_market_commit_sha"),
-    }
+    old_last_good = {"fetched_at_utc": previous.get("last_good_fetched_at_utc"), "fetched_at_bj": previous.get("last_good_fetched_at_bj"), "latest_bar_max": previous.get("last_good_latest_bar_max"), "commit_sha": previous.get("last_good_commit_sha")}
     now = datetime.now(timezone.utc).isoformat()
 
     market_commit = None
     market_live = False
-    market = None
+    last_good_market = {"fetched_at_utc": previous.get("last_good_market_fetched_at_utc"), "universe_total": previous.get("last_good_market_universe_total"), "validated_source": previous.get("last_good_market_source"), "commit_sha": previous.get("last_good_market_commit_sha")}
     if os.path.exists("bridge/market.json"):
         with open("bridge/market.json", "r", encoding="utf-8") as f:
             market = json.load(f)
         market_live = bool(market.get("live_eligible"))
         if market_live:
             market_commit = publish_json("bridge/market.json", market, "FSIS bridge: publish verified full-market discovery")
-            old_last_good_market = {
-                "fetched_at_utc": market.get("fetched_at_utc"),
-                "universe_total": market.get("universe_total"),
-                "validated_source": market.get("provider"),
-                "commit_sha": market_commit,
-            }
+            last_good_market = {"fetched_at_utc": market.get("fetched_at_utc"), "universe_total": market.get("universe_total"), "validated_source": market.get("validated_source"), "commit_sha": market_commit}
         else:
             market_commit = publish_json("bridge/market.json", market, "FSIS bridge: publish current full-market state")
         if os.path.exists("bridge/generated-request.json"):
@@ -106,17 +87,17 @@ def main():
     minute_live = bool(current.get("live_eligible"))
     tradeable_live = minute_live and market_live
     new_latest_commit = None
-    last_good = old_last_good
     if tradeable_live:
         with open("bridge/latest.json", "r", encoding="utf-8") as f:
             latest = json.load(f)
-        new_latest_commit = publish_json("bridge/latest.json", latest, "FSIS bridge: publish verified tradeable minute snapshot")
-        last_good = {
-            "fetched_at_utc": current.get("fetched_at_utc"),
-            "fetched_at_bj": current.get("fetched_at_bj"),
-            "latest_bar_max": current.get("latest_bar_max"),
-            "commit_sha": new_latest_commit,
-        }
+        new_latest_commit = publish_json("bridge/latest.json", latest, "FSIS bridge: publish verified minute snapshot")
+        latest_bar_max = current.get("latest_bar_max") or current.get("pit_cutoff_bar")
+        last_good = {"fetched_at_utc": current.get("fetched_at_utc"), "fetched_at_bj": current.get("fetched_at_bj"), "latest_bar_max": latest_bar_max, "commit_sha": new_latest_commit}
+    else:
+        fallback_latest = current.get("latest_bar_max") or current.get("pit_cutoff_bar")
+        last_good = dict(old_last_good)
+        if not last_good.get("latest_bar_max") and fallback_latest:
+            last_good["latest_bar_max"] = fallback_latest
 
     published_status = dict(current)
     published_status.update({
@@ -127,11 +108,11 @@ def main():
         "minute_live_eligible": minute_live,
         "tradeable_live_eligible": tradeable_live,
         "market_commit_sha": market_commit,
-        "last_good_market_available": bool(old_last_good_market.get("fetched_at_utc")),
-        "last_good_market_fetched_at_utc": old_last_good_market.get("fetched_at_utc"),
-        "last_good_market_universe_total": old_last_good_market.get("universe_total"),
-        "last_good_market_source": old_last_good_market.get("validated_source"),
-        "last_good_market_commit_sha": old_last_good_market.get("commit_sha"),
+        "last_good_market_available": bool(last_good_market.get("fetched_at_utc")),
+        "last_good_market_fetched_at_utc": last_good_market.get("fetched_at_utc"),
+        "last_good_market_universe_total": last_good_market.get("universe_total"),
+        "last_good_market_source": last_good_market.get("validated_source"),
+        "last_good_market_commit_sha": last_good_market.get("commit_sha"),
         "last_good_snapshot_available": bool(last_good.get("fetched_at_utc")),
         "last_good_snapshot_updated": tradeable_live,
         "last_good_fetched_at_utc": last_good.get("fetched_at_utc"),
@@ -139,18 +120,14 @@ def main():
         "last_good_latest_bar_max": last_good.get("latest_bar_max"),
         "last_good_commit_sha": last_good.get("commit_sha"),
     })
-    status_commit = publish_json("bridge/status.json", published_status, "FSIS bridge: publish current joint live status")
-    print(json.dumps({
-        "status_commit": status_commit,
-        "latest_commit": new_latest_commit,
-        "market_commit": market_commit,
-        "market_live_eligible": market_live,
-        "minute_live_eligible": minute_live,
-        "tradeable_live_eligible": tradeable_live,
-        "status": published_status,
-    }, ensure_ascii=False))
+    status_commit = publish_json("bridge/status.json", published_status, "FSIS bridge: publish current data status")
+    print(json.dumps({"status_commit": status_commit, "latest_commit": new_latest_commit, "market_commit": market_commit, "status": published_status}, ensure_ascii=False))
+    if not minute_live:
+        print(f"::warning::FSIS minute data is not live-eligible: {current.get('status')} / {REQUEST_REASON}")
+    if not market_live:
+        print("::warning::FSIS full-market discovery is not live-eligible")
     if not tradeable_live:
-        print(f"::warning::FSIS joint live gate closed: market={market_live}, minute={minute_live}, minute_status={current.get('status')} / {REQUEST_REASON}")
+        print("::warning::FSIS joint tradeable admission is not live-eligible")
     return 0
 
 
