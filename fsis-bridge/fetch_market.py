@@ -2,18 +2,12 @@
 # 工程改进铁律合规 — Ξ | 2026-03-25
 # 自问：此操作是否让系统更安全/准确/优雅/高效？答案：YES
 
-"""Full A-share market discovery layer.
-
-This is deliberately separate from the 1m execution layer: the market layer
-answers "what exists and is moving now?" in a few batched calls; the minute
-layer then drills into a bounded candidate set.
-"""
+"""Batch A-share discovery: partition, paginate, dedupe, validate, rank."""
 
 import json
 import os
 import random
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -26,11 +20,17 @@ HOSTS = [
 ]
 TIMEOUT = float(os.getenv("FSIS_MARKET_TIMEOUT", "8"))
 RETRIES = int(os.getenv("FSIS_MARKET_RETRIES", "2"))
+PAGE_SIZE = max(500, min(5000, int(os.getenv("FSIS_MARKET_PAGE_SIZE", "5000"))))
 CANDIDATES = max(25, min(250, int(os.getenv("FSIS_MINUTE_CANDIDATES", "120"))))
+MIN_UNIVERSE = max(1000, int(os.getenv("FSIS_MIN_UNIVERSE", "3500")))
 
-# Shanghai, Shenzhen main/ChiNext, and Beijing exchange A-shares.
-A_SHARE_FS = "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048"
-FIELDS = "f2,f3,f4,f5,f6,f7,f12,f13,f14,f15,f16,f17,f18,f20,f21,f22,f23,f24,f25,f26,f62,f128,f136,f140,f141,f152"
+# Exchange partitions are deliberately separate because a broad composite fs
+# expression has returned truncated/partial universes in production.
+MARKET_FILTERS = {
+    "sse_sz_core": ["m:1+t:2,m:1+t:23", "m:0+t:6,m:0+t:80"],
+    "bse": ["m:0+t:81"],
+}
+FIELDS = "f2,f3,f4,f5,f6,f7,f8,f12,f13,f14,f15,f16,f17,f18,f20,f21,f22,f23,f24,f25,f26,f62,f128,f136,f140,f141,f152"
 
 
 def http_json(host, path, params):
@@ -38,7 +38,7 @@ def http_json(host, path, params):
     last = None
     for attempt in range(RETRIES + 1):
         req = Request(url, headers={
-            "User-Agent": "Mozilla/5.0 FSIS-FullMarket/3.0",
+            "User-Agent": "Mozilla/5.0 FSIS-FullMarket/3.2",
             "Referer": "https://quote.eastmoney.com/",
             "Accept": "application/json,text/plain,*/*",
             "Connection": "close",
@@ -47,8 +47,7 @@ def http_json(host, path, params):
             with urlopen(req, timeout=TIMEOUT) as r:
                 if r.status != 200:
                     raise RuntimeError(f"HTTP {r.status}")
-                raw = r.read().decode("utf-8", errors="strict")
-                return json.loads(raw)
+                return json.loads(r.read().decode("utf-8", errors="strict"))
         except Exception as exc:
             last = exc
             if attempt < RETRIES:
@@ -56,40 +55,15 @@ def http_json(host, path, params):
     raise RuntimeError(f"{host} failed after {RETRIES + 1} attempts: {last!r}")
 
 
-def fetch_list(host):
-    params = {
-        "pn": 1,
-        "pz": 5000,
-        "po": 1,
-        "np": 1,
-        "ut": TOKEN,
-        "fltt": 2,
-        "invt": 2,
-        "fid": "f6",
-        "fs": A_SHARE_FS,
-        "fields": FIELDS,
-    }
-    body = http_json(host, "/api/qt/clist/get", params)
-    data = body.get("data") if isinstance(body, dict) else None
-    if not isinstance(data, dict):
-        raise RuntimeError("missing data object")
-    diff = data.get("diff")
-    if not isinstance(diff, list) or not diff:
-        raise RuntimeError("missing/empty data.diff")
-    total = int(data.get("total") or 0)
-    if total and len(diff) < min(total, 1000):
-        # A very small diff is suspicious for a 5000-sized request; the caller
-        # will cross-check another host before declaring success.
-        raise RuntimeError(f"suspiciously short diff: {len(diff)} of reported {total}")
-    return total or len(diff), diff
-
-
 def normalize(row):
-    # EastMoney fields are loosely typed and occasionally null; preserve raw
-    # values but normalize the keys FSIS actually consumes.
+    market = row.get("f13")
+    code = str(row.get("f12") or "").strip()
+    if market not in (0, 1) or not code:
+        return None
     return {
-        "code": str(row.get("f12") or "").strip(),
-        "market": int(row.get("f13") or 0),
+        "secid": f"{int(market)}.{code.zfill(6)}",
+        "code": code.zfill(6),
+        "market": int(market),
         "name": str(row.get("f14") or "").strip(),
         "price": row.get("f2"),
         "change_pct": row.get("f3"),
@@ -97,6 +71,7 @@ def normalize(row):
         "volume": row.get("f5"),
         "amount": row.get("f6"),
         "amplitude": row.get("f7"),
+        "turnover": row.get("f8"),
         "high": row.get("f15"),
         "low": row.get("f16"),
         "open": row.get("f17"),
@@ -104,14 +79,53 @@ def normalize(row):
         "float_cap": row.get("f20"),
         "total_cap": row.get("f21"),
         "pe": row.get("f23"),
-        "turnover": row.get("f8"),
-        "pb": row.get("f167"),
+        "pb": row.get("f24"),
         "raw": row,
     }
 
 
-def secid(x):
-    return f"{x['market']}.{x['code']}"
+def fetch_partition(host, fs):
+    merged = {}
+    page = 1
+    reported_total = None
+    pages = 0
+    while page <= 50:
+        params = {
+            "pn": page,
+            "pz": PAGE_SIZE,
+            "po": 1,
+            "np": 1,
+            "ut": TOKEN,
+            "fltt": 2,
+            "invt": 2,
+            "fid": "f6",
+            "fs": fs,
+            "fields": FIELDS,
+        }
+        body = http_json(host, "/api/qt/clist/get", params)
+        data = body.get("data") if isinstance(body, dict) else None
+        if not isinstance(data, dict):
+            raise RuntimeError("missing data object")
+        rows = data.get("diff")
+        if not isinstance(rows, list):
+            raise RuntimeError("missing diff list")
+        total = int(data.get("total") or 0)
+        reported_total = total if reported_total is None else max(reported_total, total)
+        pages += 1
+        for row in rows:
+            item = normalize(row)
+            if item:
+                merged[item["secid"]] = item
+        if not rows or len(rows) < PAGE_SIZE:
+            break
+        if total and page * PAGE_SIZE >= total:
+            break
+        page += 1
+    return list(merged.values()), {
+        "reported_total": reported_total or len(merged),
+        "row_count": len(merged),
+        "pages": pages,
+    }
 
 
 def rank_candidates(items):
@@ -120,17 +134,12 @@ def rank_candidates(items):
             return float(v)
         except (TypeError, ValueError):
             return 0.0
-
-    # Broad, liquidity-aware momentum score. This is only candidate generation;
-    # FSIS still requires multi-scale 1m confirmation before any trade.
     scored = []
     for x in items:
         p, chg, amt, amp = map(num, [x.get("price"), x.get("change_pct"), x.get("amount"), x.get("amplitude")])
         if p <= 0 or amt <= 0:
             continue
         score = (min(abs(chg), 12.0) * 2.0) + (min(amp, 15.0) * 0.35) + (min(amt / 1e8, 20.0) * 0.15)
-        # Keep both strong up/down tails in the candidate pool; the strategy
-        # layer decides direction later.
         scored.append((score, x))
     scored.sort(key=lambda t: t[0], reverse=True)
     return [x for _, x in scored[:CANDIDATES]]
@@ -138,99 +147,73 @@ def rank_candidates(items):
 
 def main():
     fetched = datetime.now(timezone.utc).isoformat()
+    universe = {}
     attempts = []
-    successful = []
-    for host in HOSTS:
-        try:
-            total, rows = fetch_list(host)
-            attempts.append({"host": host, "status": "OK", "reported_total": total, "row_count": len(rows)})
-            successful.append((host, total, rows))
-        except Exception as exc:
-            attempts.append({"host": host, "status": "FAILED", "error": repr(exc)})
+    partition_stats = {}
 
-    if not successful:
-        payload = {
-            "schema": "FSIS.market-bridge.v3",
-            "fetched_at_utc": fetched,
-            "status": "FAILED",
-            "live_eligible": False,
-            "universe_total": 0,
-            "candidates": [],
-            "source_attempts": attempts,
+    for partition, filters in MARKET_FILTERS.items():
+        partition_rows = {}
+        partition_success = False
+        partition_errors = []
+        for fs in filters:
+            done = False
+            for host in HOSTS:
+                try:
+                    rows, meta = fetch_partition(host, fs)
+                    partition_success = True
+                    done = True
+                    for item in rows:
+                        partition_rows[item["secid"]] = item
+                    attempts.append({"partition": partition, "filter": fs, "host": host, "status": "OK", **meta})
+                    break
+                except Exception as exc:
+                    partition_errors.append({"filter": fs, "host": host, "error": repr(exc)})
+                    attempts.append({"partition": partition, "filter": fs, "host": host, "status": "FAILED", "error": repr(exc)})
+            if not done:
+                continue
+        for secid, item in partition_rows.items():
+            universe[secid] = item
+        partition_stats[partition] = {
+            "universe_count": len(partition_rows),
+            "success": partition_success,
+            "errors": partition_errors,
         }
-        os.makedirs("bridge", exist_ok=True)
-        with open("bridge/market.json", "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
-        print(json.dumps(payload, ensure_ascii=False))
-        return 0
 
-    # Build per-code signatures and require at least one large, internally
-    # coherent snapshot. If two hosts agree on universe size/order-independent
-    # code set, confidence is materially higher than a single 200 response.
-    normalized = []
-    for host, total, rows in successful:
-        rows_n = [normalize(r) for r in rows]
-        codes = {x["code"] for x in rows_n if x["code"]}
-        normalized.append((host, total, rows_n, codes))
+    universe_rows = list(universe.values())
+    plausible = len(universe_rows) >= MIN_UNIVERSE
+    candidates = rank_candidates(universe_rows)
+    status = "OK" if plausible and candidates else ("PARTIAL_FAILURE" if universe_rows else "FAILED")
+    live = plausible and bool(candidates)
 
-    best = max(normalized, key=lambda t: len(t[3]))
-    host, total, rows_n, code_set = best
-    quorum = 1
-    intersections = []
-    for other in normalized:
-        if other is best:
-            continue
-        inter = len(code_set & other[3])
-        ratio = inter / max(1, min(len(code_set), len(other[3])))
-        intersections.append({"host": other[0], "intersection": inter, "ratio": round(ratio, 4)})
-        if ratio >= 0.95:
-            quorum += 1
-
-    # Require a plausible A-share universe. Current market size is well above
-    # 4,000, so a tiny successful page is not accepted as full-market live data.
-    universe_plausible = len(code_set) >= int(os.getenv("FSIS_MIN_UNIVERSE", "3500"))
-    status = "OK" if universe_plausible else "PARTIAL_FAILURE"
-    live = universe_plausible and quorum >= 1
-    candidates = rank_candidates(rows_n)
-
-    out = {
-        "schema": "FSIS.market-bridge.v3",
-        "provider": "eastmoney",
+    payload = {
+        "schema": "FSIS.market-bridge.v4",
+        "provider": "eastmoney-batched",
         "fetched_at_utc": fetched,
         "status": status,
         "live_eligible": live,
-        "universe_total": len(code_set),
-        "reported_total": total,
-        "validated_source": host,
-        "source_quorum": quorum,
-        "cross_source_checks": intersections,
+        "universe_total": len(universe_rows),
+        "min_universe_required": MIN_UNIVERSE,
         "candidate_count": len(candidates),
-        "candidate_secids": [secid(x) for x in candidates],
-        "candidates": candidates,
+        "candidate_secids": [x["secid"] for x in candidates],
+        "partition_stats": partition_stats,
         "source_attempts": attempts,
+        "pagination": {"page_size": PAGE_SIZE},
         "batch_mode": True,
-        "a_share_filter": A_SHARE_FS,
+        "cross_partition_dedupe": True,
     }
     os.makedirs("bridge", exist_ok=True)
     with open("bridge/market.json", "w", encoding="utf-8") as f:
-        json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
+        json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
     with open("bridge/generated-request.json", "w", encoding="utf-8") as f:
         json.dump({
-            "schema": "FSIS.minute-bridge.request.v2",
+            "schema": "FSIS.minute-bridge.request.v3",
             "request_id": f"full-market-{fetched.replace(':', '').replace('.', '')}",
-            "symbols": out["candidate_secids"],
-            "source": "full-market-discovery",
+            "symbols": payload["candidate_secids"],
+            "source": "full-market-discovery-v4",
             "generated_at_utc": fetched,
             "source_market_status": status,
         }, f, ensure_ascii=False, indent=2)
-    print(json.dumps({
-        "status": status,
-        "live_eligible": live,
-        "universe_total": len(code_set),
-        "candidate_count": len(candidates),
-        "validated_source": host,
-        "source_quorum": quorum,
-    }, ensure_ascii=False))
+    print(json.dumps({k: payload[k] for k in ("status", "live_eligible", "universe_total", "candidate_count", "partition_stats")}, ensure_ascii=False))
     return 0
 
 
