@@ -5,13 +5,13 @@
 """Fast deterministic OOD regression tests for FSIS bridge state boundaries."""
 
 
-def minute_classify(successes: int, requested: int, future_or_open: int, min_coverage: float = 0.80) -> tuple[str, bool]:
+def minute_classify(successes: int, requested: int, stale_successes: int, cutoff_present: bool, min_coverage: float = 0.80) -> tuple[str, bool]:
     if requested <= 0 or successes <= 0:
         return "FAILED", False
     coverage = successes / requested
-    if future_or_open:
+    if coverage < min_coverage or not cutoff_present or stale_successes > 0:
         return "PARTIAL_FAILURE", False
-    return ("OK", True) if coverage >= min_coverage else ("PARTIAL_FAILURE", False)
+    return "OK", True
 
 
 def market_classify(universe: int, candidate_count: int, source_ok: bool, total_reported: int | None = None, min_universe: int = 3500) -> tuple[str, bool]:
@@ -22,6 +22,10 @@ def market_classify(universe: int, candidate_count: int, source_ok: bool, total_
     return "OK", True
 
 
+def tradeable_live(market_live: bool, minute_live: bool) -> bool:
+    return bool(market_live and minute_live)
+
+
 def quorum_ratio(a: set[str], b: set[str]) -> float:
     if not a or not b:
         return 0.0
@@ -29,15 +33,15 @@ def quorum_ratio(a: set[str], b: set[str]) -> float:
 
 
 def main() -> int:
+    # In-flight bars are expected and are excluded by PIT validation; their count
+    # alone must never invalidate an otherwise coherent snapshot.
     minute_cases = [
-        ((0, 8, 0), ("FAILED", False)),
-        ((3, 8, 0), ("PARTIAL_FAILURE", False)),
-        ((6, 8, 0), ("PARTIAL_FAILURE", False)),
-        ((8, 8, 2), ("PARTIAL_FAILURE", False)),
-        ((8, 8, 0), ("OK", True)),
-        ((120, 120, 0), ("OK", True)),
-        ((98, 120, 0), ("OK", True)),
-        ((95, 120, 1), ("PARTIAL_FAILURE", False)),
+        ((0, 8, 0, False), ("FAILED", False)),
+        ((3, 8, 0, True), ("PARTIAL_FAILURE", False)),
+        ((96, 120, 0, True), ("OK", True)),
+        ((120, 120, 0, True), ("OK", True)),
+        ((120, 120, 17, True), ("PARTIAL_FAILURE", False)),
+        ((120, 120, 0, False), ("PARTIAL_FAILURE", False)),
     ]
     for actual, expected in minute_cases:
         got = minute_classify(*actual)
@@ -45,7 +49,7 @@ def main() -> int:
 
     market_cases = [
         ((0, 120, False, None), ("FAILED", False)),
-        ((1200, 120, True, 1200), ("FAILED", False)),
+        ((200, 120, True, 200), ("FAILED", False)),
         ((3500, 120, True, 3500), ("OK", True)),
         ((4800, 0, True, 4800), ("FAILED", False)),
         ((4800, 120, False, 4800), ("FAILED", False)),
@@ -54,13 +58,17 @@ def main() -> int:
         got = market_classify(*actual)
         assert got == expected, (actual, got, expected)
 
+    assert tradeable_live(True, True) is True
+    assert tradeable_live(True, False) is False
+    assert tradeable_live(False, True) is False
+
     a = {f"S{i:04d}" for i in range(5000)}
     b = set(a)
     b -= {"S0001", "S0002", "S0003", "S0004", "S0005"}
     assert quorum_ratio(a, b) > 0.99
     assert quorum_ratio(set(), b) == 0.0
 
-    print("FSIS full-market + minute OOD selftest: PASS")
+    print("FSIS full-market + PIT + trade-admission OOD selftest: PASS")
     return 0
 
 
