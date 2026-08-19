@@ -162,3 +162,5 @@ jobs:
           if status.get("status") == "OK" and not status.get("last_good_snapshot_updated"):
               raise SystemExit("verified OK snapshot was not recorded as last-good")
           PY
+
+      # OOD control: DATA_UNAVAILABLE is a valid market-data state, not a CI failure.
