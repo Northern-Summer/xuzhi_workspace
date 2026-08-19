@@ -1,10 +1,10 @@
 {
   "schema": "FSIS.market-bridge.v7",
   "provider": "tencent",
-  "fetched_at_utc": "2026-08-19T01:57:51.572297+00:00",
+  "fetched_at_utc": "2026-08-19T02:16:13.350466+00:00",
   "status": "PARTIAL_FAILURE",
   "live_eligible": false,
-  "universe_total": 5542,
+  "universe_total": 5540,
   "min_universe_required": 3500,
   "candidate_count": 0,
   "candidate_secids": [],
@@ -38,7 +38,7 @@
       "host": "proxy.finance.qq.com",
       "status": "OK",
       "reported_total": 5547,
-      "row_count": 5542,
+      "row_count": 5540,
       "pages": 28,
       "page_size": 200,
       "sample_keys": [
