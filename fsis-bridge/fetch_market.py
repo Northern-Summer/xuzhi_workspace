@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Full A-share discovery with bounded-latency parallel pagination and fallback."""
+"""Full A-share discovery with bounded latency and provider-polite fallback."""
 
 import json
 import os
@@ -17,8 +17,8 @@ TIMEOUT = float(os.getenv("FSIS_MARKET_TIMEOUT", "5"))
 RETRIES = int(os.getenv("FSIS_MARKET_RETRIES", "1"))
 EM_PAGE_SIZE = 100
 TX_PAGE_SIZE = 200
-MAX_PAGES = max(10, min(100, int(os.getenv("FSIS_MARKET_MAX_PAGES", "80"))))
-PAGE_WORKERS = max(2, min(12, int(os.getenv("FSIS_MARKET_PAGE_WORKERS", "8"))))
+MAX_PAGES = max(10, min(80, int(os.getenv("FSIS_MARKET_MAX_PAGES", "60"))))
+PAGE_WORKERS = max(2, min(8, int(os.getenv("FSIS_MARKET_PAGE_WORKERS", "4"))))
 HOST_WORKERS = max(2, min(4, int(os.getenv("FSIS_MARKET_HOST_WORKERS", "4"))))
 CANDIDATES = max(25, min(250, int(os.getenv("FSIS_MINUTE_CANDIDATES", "120"))))
 MIN_UNIVERSE = max(1000, int(os.getenv("FSIS_MIN_UNIVERSE", "3500")))
@@ -31,7 +31,7 @@ def request_json(url, params=None, headers=None):
         url = f"{url}?{urlencode(params)}"
     last = None
     for attempt in range(RETRIES + 1):
-        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Market/5.2", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
+        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Market/5.3", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
         try:
             with urlopen(req, timeout=TIMEOUT) as r:
                 if r.status != 200:
@@ -53,15 +53,37 @@ def first(row, *keys):
 
 
 def normalize_em(row):
-    market = row.get("f13"); code = str(row.get("f12") or "").strip()
+    market = row.get("f13")
+    code = str(row.get("f12") or "").strip()
     if market not in (0, 1) or not code:
         return None
-    return {"secid": f"{int(market)}.{code.zfill(6)}", "code": code.zfill(6), "market": int(market), "name": str(row.get("f14") or "").strip(), "price": row.get("f2"), "change_pct": row.get("f3"), "change": row.get("f4"), "volume": row.get("f5"), "amount": row.get("f6"), "amplitude": row.get("f7"), "turnover": row.get("f8"), "high": row.get("f15"), "low": row.get("f16"), "open": row.get("f17"), "prev_close": row.get("f18"), "raw": row}
+    return {
+        "secid": f"{int(market)}.{code.zfill(6)}",
+        "code": code.zfill(6),
+        "market": int(market),
+        "name": str(row.get("f14") or "").strip(),
+        "price": row.get("f2"),
+        "change_pct": row.get("f3"),
+        "change": row.get("f4"),
+        "volume": row.get("f5"),
+        "amount": row.get("f6"),
+        "amplitude": row.get("f7"),
+        "turnover": row.get("f8"),
+        "high": row.get("f15"),
+        "low": row.get("f16"),
+        "open": row.get("f17"),
+        "prev_close": row.get("f18"),
+        "raw": row,
+    }
 
 
 def em_page(host, page):
     params = {"pn": page, "pz": EM_PAGE_SIZE, "po": 1, "np": 1, "ut": TOKEN, "fltt": 2, "invt": 2, "fid": "f6", "fs": A_SHARE_FILTER, "fields": FIELDS}
-    body = request_json(f"https://{host}/api/qt/clist/get", params, {"User-Agent": "Mozilla/5.0 FSIS-EastMoney/5.0", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*"})
+    body = request_json(
+        f"https://{host}/api/qt/clist/get",
+        params,
+        {"User-Agent": "Mozilla/5.0 FSIS-EastMoney/5.0", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*"},
+    )
     data = (body.get("data") if isinstance(body, dict) else None) or {}
     rows = data.get("diff")
     if not isinstance(rows, list):
@@ -69,14 +91,13 @@ def em_page(host, page):
     return int(data.get("total") or 0), rows
 
 
-def fetch_eastmoney_host(host):
-    total, first_rows = em_page(host, 1)
+def fetch_eastmoney_host(host, first_total, first_rows):
     merged = {}
     for row in first_rows:
         item = normalize_em(row)
         if item:
             merged[item["secid"]] = item
-    target_pages = min(MAX_PAGES, max(1, (total + EM_PAGE_SIZE - 1) // EM_PAGE_SIZE)) if total else 1
+    target_pages = min(MAX_PAGES, max(1, (first_total + EM_PAGE_SIZE - 1) // EM_PAGE_SIZE)) if first_total else 1
     if target_pages > 1:
         with ThreadPoolExecutor(max_workers=PAGE_WORKERS) as pool:
             futures = {pool.submit(em_page, host, page): page for page in range(2, target_pages + 1)}
@@ -86,7 +107,7 @@ def fetch_eastmoney_host(host):
                     item = normalize_em(row)
                     if item:
                         merged[item["secid"]] = item
-    return list(merged.values()), {"reported_total": total or len(merged), "row_count": len(merged), "pages": target_pages}
+    return list(merged.values()), {"reported_total": first_total or len(merged), "row_count": len(merged), "pages": target_pages}
 
 
 def normalize_tencent(row):
@@ -95,18 +116,36 @@ def normalize_tencent(row):
     raw_code = str(first(row, "code", "stock_code", "symbol") or "").strip().lower()
     if not raw_code:
         return None
-    market = None; code = raw_code
+    market = None
+    code = raw_code
     for prefix, m in (("sh", 1), ("sz", 0), ("bj", 0)):
         if raw_code.startswith(prefix):
-            market = m; code = raw_code[len(prefix):]; break
+            market = m
+            code = raw_code[len(prefix):]
+            break
     if market is None:
         mf = str(first(row, "market", "market_code") or "").lower()
-        if mf in {"sh", "1", "sse"}: market = 1
-        elif mf in {"sz", "0", "szse", "bj", "bse"}: market = 0
+        if mf in {"sh", "1", "sse"}:
+            market = 1
+        elif mf in {"sz", "0", "szse", "bj", "bse"}:
+            market = 0
     if market is None or not code.isdigit():
         return None
     code = code.zfill(6)
-    return {"secid": f"{market}.{code}", "code": code, "market": market, "name": first(row, "name", "stock_name", "stockName"), "price": first(row, "zxj", "price", "now", "latest", "current", "last", "currentPrice", "lastPrice", "latestPrice", "curPrice"), "change_pct": first(row, "zdf", "percent", "changePercent", "change_pct", "pct", "changeRatio", "changeRate"), "change": first(row, "zd", "change", "priceChange", "changeValue"), "volume": first(row, "volume", "vol", "dealVolume", "deal_volume"), "amount": first(row, "turnover", "amount", "turnoverAmount", "dealAmount", "deal_amount"), "amplitude": first(row, "zf", "amplitude", "amp", "amplitudeRate"), "turnover": first(row, "hsl", "turnoverRate", "turnover_rate"), "raw": row}
+    return {
+        "secid": f"{market}.{code}",
+        "code": code,
+        "market": market,
+        "name": first(row, "name", "stock_name", "stockName"),
+        "price": first(row, "zxj", "price", "now", "latest", "current", "last", "currentPrice", "lastPrice", "latestPrice", "curPrice"),
+        "change_pct": first(row, "zdf", "percent", "changePercent", "change_pct", "pct", "changeRatio", "changeRate"),
+        "change": first(row, "zd", "change", "priceChange", "changeValue"),
+        "volume": first(row, "volume", "vol", "dealVolume", "deal_volume"),
+        "amount": first(row, "turnover", "amount", "turnoverAmount", "dealAmount", "deal_amount"),
+        "amplitude": first(row, "zf", "amplitude", "amp", "amplitudeRate"),
+        "turnover": first(row, "hsl", "turnoverRate", "turnover_rate"),
+        "raw": row,
+    }
 
 
 def tx_page(page):
@@ -145,8 +184,10 @@ def fetch_tencent():
 
 def rank_candidates(items):
     def num(v):
-        try: return float(v)
-        except (TypeError, ValueError): return 0.0
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return 0.0
     scored = []
     for idx, x in enumerate(items):
         p, chg, amt, amp = map(num, [x.get("price"), x.get("change_pct"), x.get("amount"), x.get("amplitude")])
@@ -161,54 +202,79 @@ def rank_candidates(items):
 
 def main():
     fetched = datetime.now(timezone.utc).isoformat()
-    successful, attempts = [], []
+    probe_results = []
+    healthy_probes = []
     with ThreadPoolExecutor(max_workers=HOST_WORKERS) as pool:
-        futures = {pool.submit(fetch_eastmoney_host, host): host for host in EM_HOSTS}
+        futures = {pool.submit(em_page, host, 1): host for host in EM_HOSTS}
         for future in as_completed(futures):
             host = futures[future]
             try:
-                rows, meta = future.result()
-                attempts.append({"provider": "eastmoney", "host": host, "status": "OK", **meta})
-                successful.append((host, rows, meta))
+                total, rows = future.result()
+                probe = {"provider": "eastmoney", "host": host, "status": "OK", "reported_total": total, "first_page_rows": len(rows)}
+                probe_results.append(probe)
+                healthy_probes.append((host, total, rows))
             except Exception as exc:
-                attempts.append({"provider": "eastmoney", "host": host, "status": "FAILED", "error": repr(exc)})
+                probe_results.append({"provider": "eastmoney", "host": host, "status": "FAILED", "error": repr(exc)})
 
-    if successful:
-        best = max(successful, key=lambda item: len(item[1]))
-        universe = {x["secid"]: x for x in best[1]}
-        provider_used = "eastmoney"
-        if len(universe) < MIN_UNIVERSE:
-            try:
-                tx_rows, tx_meta = fetch_tencent()
-                attempts.append(tx_meta)
-                if len(tx_rows) > len(universe):
-                    universe = {x["secid"]: x for x in tx_rows}
-                    provider_used = "tencent"
-            except Exception as exc:
-                attempts.append({"provider": "tencent", "host": "proxy.finance.qq.com", "status": "FAILED", "error": repr(exc)})
-    else:
+    attempts = list(probe_results)
+    universe = {}
+    provider_used = "none"
+    selected_host = None
+    if healthy_probes:
+        healthy_probes.sort(key=lambda x: len(x[2]), reverse=True)
+        selected_host, first_total, first_rows = healthy_probes[0]
+        try:
+            rows, meta = fetch_eastmoney_host(selected_host, first_total, first_rows)
+            universe = {x["secid"]: x for x in rows}
+            provider_used = "eastmoney"
+            for attempt in attempts:
+                if attempt.get("host") == selected_host:
+                    attempt.update(meta, selected=True)
+                    break
+            if len(universe) < MIN_UNIVERSE:
+                raise RuntimeError(f"selected EastMoney host yielded only {len(universe)} symbols")
+        except Exception as exc:
+            attempts.append({"provider": "eastmoney", "host": selected_host, "status": "FAILED_DURING_PAGINATION", "error": repr(exc)})
+            universe = {}
+
+    if len(universe) < MIN_UNIVERSE:
         try:
             tx_rows, tx_meta = fetch_tencent()
             attempts.append(tx_meta)
-            universe = {x["secid"]: x for x in tx_rows}
-            provider_used = "tencent"
+            if len(tx_rows) > len(universe):
+                universe = {x["secid"]: x for x in tx_rows}
+                provider_used = "tencent"
         except Exception as exc:
             attempts.append({"provider": "tencent", "host": "proxy.finance.qq.com", "status": "FAILED", "error": repr(exc)})
-            universe = {}
-            provider_used = "none"
 
     universe_rows = list(universe.values())
     plausible = len(universe_rows) >= MIN_UNIVERSE
     candidates = rank_candidates(universe_rows)
     status = "OK" if plausible and candidates else ("PARTIAL_FAILURE" if universe_rows else "FAILED")
     live = plausible and bool(candidates)
-    payload = {"schema": "FSIS.market-bridge.v8", "provider": provider_used, "fetched_at_utc": fetched, "status": status, "live_eligible": live, "universe_total": len(universe_rows), "min_universe_required": MIN_UNIVERSE, "candidate_count": len(candidates), "candidate_secids": [x["secid"] for x in candidates], "source_attempts": attempts, "a_share_filter": A_SHARE_FILTER, "batch_mode": True, "heterogeneous_fallback": True, "latency_control": {"host_workers": HOST_WORKERS, "page_workers": PAGE_WORKERS, "request_timeout_seconds": TIMEOUT, "retries": RETRIES}}
+    payload = {
+        "schema": "FSIS.market-bridge.v9",
+        "provider": provider_used,
+        "fetched_at_utc": fetched,
+        "status": status,
+        "live_eligible": live,
+        "universe_total": len(universe_rows),
+        "min_universe_required": MIN_UNIVERSE,
+        "candidate_count": len(candidates),
+        "candidate_secids": [x["secid"] for x in candidates],
+        "validated_source": selected_host if provider_used == "eastmoney" else provider_used,
+        "source_attempts": attempts,
+        "a_share_filter": A_SHARE_FILTER,
+        "batch_mode": True,
+        "heterogeneous_fallback": True,
+        "latency_control": {"host_workers": HOST_WORKERS, "page_workers": PAGE_WORKERS, "request_timeout_seconds": TIMEOUT, "retries": RETRIES, "selected_single_eastmoney_host": True},
+    }
     os.makedirs("bridge", exist_ok=True)
     with open("bridge/market.json", "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
     with open("bridge/generated-request.json", "w", encoding="utf-8") as f:
-        json.dump({"schema": "FSIS.minute-bridge.request.v3", "request_id": f"full-market-{fetched.replace(':', '').replace('.', '')}", "symbols": payload["candidate_secids"], "source": "full-market-discovery-v8", "generated_at_utc": fetched, "source_market_status": status}, f, ensure_ascii=False, indent=2)
-    print(json.dumps({k: payload.get(k) for k in ("status", "live_eligible", "universe_total", "candidate_count", "provider", "latency_control")}, ensure_ascii=False))
+        json.dump({"schema": "FSIS.minute-bridge.request.v3", "request_id": f"full-market-{fetched.replace(':', '').replace('.', '')}", "symbols": payload["candidate_secids"], "source": "full-market-discovery-v9", "generated_at_utc": fetched, "source_market_status": status}, f, ensure_ascii=False, indent=2)
+    print(json.dumps({k: payload.get(k) for k in ("status", "live_eligible", "universe_total", "candidate_count", "provider", "validated_source", "latency_control")}, ensure_ascii=False))
     return 0
 
 
