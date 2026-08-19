@@ -1,8 +1,8 @@
 {
   "schema": "FSIS.minute-bridge.request.v3",
-  "request_id": "full-market-2026-08-19T015751572297+0000",
+  "request_id": "full-market-2026-08-19T021613350466+0000",
   "symbols": [],
   "source": "full-market-discovery-v7",
-  "generated_at_utc": "2026-08-19T01:57:51.572297+00:00",
+  "generated_at_utc": "2026-08-19T02:16:13.350466+00:00",
   "source_market_status": "PARTIAL_FAILURE"
 }
