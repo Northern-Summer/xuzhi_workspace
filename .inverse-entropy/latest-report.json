@@ -1,10 +1,17 @@
 {
-  "branches": [],
+  "branches": [
+    {
+      "branch": "fsis-data",
+      "disposition": "protected-live"
+    }
+  ],
   "coverage_percent": 100.0,
   "default_branch": "master",
-  "finished_at": "2026-08-19T01:35:26.757584+00:00",
+  "finished_at": "2026-08-19T01:41:47.245225+00:00",
   "repository": "Northern-Summer/xuzhi_workspace",
   "schema": "inverse-entropy-reconciliation/v1",
-  "started_at": "2026-08-19T01:35:26.757562+00:00",
-  "summary": {}
+  "started_at": "2026-08-19T01:41:47.245205+00:00",
+  "summary": {
+    "protected-live": 1
+  }
 }
