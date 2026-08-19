@@ -32,7 +32,7 @@ def request_json(url, params=None, headers=None):
     url = url if not params else f"{url}?{urlencode(params)}"
     last = None
     for attempt in range(RETRIES + 1):
-        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/3.3", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
+        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/3.4", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
         try:
             with urlopen(req, timeout=HTTP_TIMEOUT) as r:
                 if r.status != 200:
@@ -46,7 +46,7 @@ def request_json(url, params=None, headers=None):
 
 
 def em_json(host, path, params):
-    return request_json(f"https://{host}{path}", params, {"User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/3.3", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
+    return request_json(f"https://{host}{path}", params, {"User-Agent": "Mozilla/5.0 FSIS-Minute-Bridge/3.4", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
 
 
 def fetch_kline(secid, session_date):
@@ -201,14 +201,15 @@ def main():
     effective_cutoffs=[x["pit_cutoff_bar"] for x in results if x.get("pit_cutoff_bar")]
     effective_cutoff=min(effective_cutoffs) if effective_cutoffs else None
     latests=[x["latest_bar_ts"] for x in results if x.get("latest_bar_ts")]
+    latest_bar_max=max(latests) if latests else None
     stale_count=sum(1 for ts in latests if effective_cutoff and ts < effective_cutoff)
     future_drops=sum(x.get("future_or_open_bars_dropped",0) for x in results)
     status_code="FAILED" if not results else ("PARTIAL_FAILURE" if coverage<LIVE_COVERAGE else "OK")
     live_eligible=coverage>=LIVE_COVERAGE and bool(effective_cutoff) and stale_count==0
-    payload={"schema":"FSIS.minute-bridge.v3","provider":"heterogeneous: eastmoney+tencent","fetched_at_utc":fetched_at,"fetched_at_bj":bj_now.isoformat(),"session_date_bj":session_date,"resolution":"1m","source_mode":"public_http","request_id":request_id,"symbols_requested":len(symbols),"symbols_succeeded":len(results),"symbols_failed":len(failures),"coverage_ratio":coverage,"pit_cutoff_bar":effective_cutoff,"stale_success_count":stale_count,"future_or_open_bars_dropped":future_drops,"status":status_code,"live_eligible":live_eligible,"fetch_workers":WORKERS,"http_timeout_seconds":HTTP_TIMEOUT,"retry_count":RETRIES,"results":results,"failures":failures}
+    payload={"schema":"FSIS.minute-bridge.v3","provider":"heterogeneous: eastmoney+tencent","fetched_at_utc":fetched_at,"fetched_at_bj":bj_now.isoformat(),"session_date_bj":session_date,"resolution":"1m","source_mode":"public_http","request_id":request_id,"symbols_requested":len(symbols),"symbols_succeeded":len(results),"symbols_failed":len(failures),"coverage_ratio":coverage,"latest_bar_max":latest_bar_max,"pit_cutoff_bar":effective_cutoff,"stale_success_count":stale_count,"future_or_open_bars_dropped":future_drops,"status":status_code,"live_eligible":live_eligible,"fetch_workers":WORKERS,"http_timeout_seconds":HTTP_TIMEOUT,"retry_count":RETRIES,"results":results,"failures":failures}
     with open("bridge/latest.json","w",encoding="utf-8") as f: json.dump(payload,f,ensure_ascii=False,separators=(",",":"))
-    with open("bridge/status.json","w",encoding="utf-8") as f: json.dump({k:payload[k] for k in ["schema","provider","fetched_at_utc","fetched_at_bj","session_date_bj","resolution","request_id","symbols_requested","symbols_succeeded","symbols_failed","coverage_ratio","pit_cutoff_bar","stale_success_count","future_or_open_bars_dropped","status","live_eligible","fetch_workers","http_timeout_seconds","retry_count"]},f,ensure_ascii=False,indent=2)
-    print(json.dumps({k:payload[k] for k in ["status","live_eligible","symbols_requested","symbols_succeeded","symbols_failed","coverage_ratio","pit_cutoff_bar","stale_success_count","future_or_open_bars_dropped"]},ensure_ascii=False))
+    with open("bridge/status.json","w",encoding="utf-8") as f: json.dump({k:payload[k] for k in ["schema","provider","fetched_at_utc","fetched_at_bj","session_date_bj","resolution","request_id","symbols_requested","symbols_succeeded","symbols_failed","coverage_ratio","latest_bar_max","pit_cutoff_bar","stale_success_count","future_or_open_bars_dropped","status","live_eligible","fetch_workers","http_timeout_seconds","retry_count"]},f,ensure_ascii=False,indent=2)
+    print(json.dumps({k:payload[k] for k in ["status","live_eligible","symbols_requested","symbols_succeeded","symbols_failed","coverage_ratio","latest_bar_max","pit_cutoff_bar","stale_success_count","future_or_open_bars_dropped"]},ensure_ascii=False))
     return 0
 
 
