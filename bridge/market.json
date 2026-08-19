@@ -1,44 +1,44 @@
 {
-  "schema": "FSIS.market-bridge.v7",
+  "schema": "FSIS.market-bridge.v8",
   "provider": "tencent",
-  "fetched_at_utc": "2026-08-19T02:16:13.350466+00:00",
+  "fetched_at_utc": "2026-08-19T02:49:53.759857+00:00",
   "status": "PARTIAL_FAILURE",
   "live_eligible": false,
-  "universe_total": 5540,
+  "universe_total": 5545,
   "min_universe_required": 3500,
   "candidate_count": 0,
   "candidate_secids": [],
   "source_attempts": [
     {
       "provider": "eastmoney",
-      "host": "push2.eastmoney.com",
+      "host": "80.push2.eastmoney.com",
       "status": "FAILED",
-      "error": "RuntimeError(\"request failed after 3 attempts: <HTTPError 502: 'Bad Gateway'>\")"
-    },
-    {
-      "provider": "eastmoney",
-      "host": "82.push2.eastmoney.com",
-      "status": "FAILED",
-      "error": "RuntimeError(\"request failed after 3 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
+      "error": "RuntimeError(\"request failed after 2 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
     },
     {
       "provider": "eastmoney",
       "host": "99.push2.eastmoney.com",
       "status": "FAILED",
-      "error": "RuntimeError(\"request failed after 3 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
+      "error": "RuntimeError(\"request failed after 2 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
     },
     {
       "provider": "eastmoney",
-      "host": "80.push2.eastmoney.com",
+      "host": "push2.eastmoney.com",
       "status": "FAILED",
-      "error": "RuntimeError(\"request failed after 3 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
+      "error": "RuntimeError(\"request failed after 2 attempts: <HTTPError 502: 'Bad Gateway'>\")"
+    },
+    {
+      "provider": "eastmoney",
+      "host": "82.push2.eastmoney.com",
+      "status": "FAILED",
+      "error": "RuntimeError(\"request failed after 2 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
     },
     {
       "provider": "tencent",
       "host": "proxy.finance.qq.com",
       "status": "OK",
       "reported_total": 5547,
-      "row_count": 5540,
+      "row_count": 5545,
       "pages": 28,
       "page_size": 200,
       "sample_keys": [
@@ -75,5 +75,11 @@
   ],
   "a_share_filter": "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
   "batch_mode": true,
-  "heterogeneous_fallback": true
+  "heterogeneous_fallback": true,
+  "latency_control": {
+    "host_workers": 4,
+    "page_workers": 8,
+    "request_timeout_seconds": 5.0,
+    "retries": 1
+  }
 }
