@@ -1,20 +1,10 @@
 {
-  "branches": [
-    {
-      "archive_tag": "archive/inverse-entropy/fsis-data-9e00b66c6eeb",
-      "branch": "fsis-data",
-      "disposition": "absorbed-and-reclaimed",
-      "tag_created": true,
-      "tip": "9e00b66c6eebd337300f3452abb63214d095c858"
-    }
-  ],
+  "branches": [],
   "coverage_percent": 100.0,
   "default_branch": "master",
-  "finished_at": "2026-08-19T01:22:22.903697+00:00",
+  "finished_at": "2026-08-19T01:23:36.636687+00:00",
   "repository": "Northern-Summer/xuzhi_workspace",
   "schema": "inverse-entropy-reconciliation/v1",
-  "started_at": "2026-08-19T01:22:20.490346+00:00",
-  "summary": {
-    "absorbed-and-reclaimed": 1
-  }
+  "started_at": "2026-08-19T01:23:36.636671+00:00",
+  "summary": {}
 }
