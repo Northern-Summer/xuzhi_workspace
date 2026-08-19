@@ -31,7 +31,7 @@ def request_json(url, params=None, headers=None):
         url = f"{url}?{urlencode(params)}"
     last = None
     for attempt in range(RETRIES + 1):
-        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Market/5.3", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
+        req = Request(url, headers=headers or {"User-Agent": "Mozilla/5.0 FSIS-Market/5.4", "Accept": "application/json,text/plain,*/*", "Connection": "close"})
         try:
             with urlopen(req, timeout=TIMEOUT) as r:
                 if r.status != 200:
@@ -57,33 +57,12 @@ def normalize_em(row):
     code = str(row.get("f12") or "").strip()
     if market not in (0, 1) or not code:
         return None
-    return {
-        "secid": f"{int(market)}.{code.zfill(6)}",
-        "code": code.zfill(6),
-        "market": int(market),
-        "name": str(row.get("f14") or "").strip(),
-        "price": row.get("f2"),
-        "change_pct": row.get("f3"),
-        "change": row.get("f4"),
-        "volume": row.get("f5"),
-        "amount": row.get("f6"),
-        "amplitude": row.get("f7"),
-        "turnover": row.get("f8"),
-        "high": row.get("f15"),
-        "low": row.get("f16"),
-        "open": row.get("f17"),
-        "prev_close": row.get("f18"),
-        "raw": row,
-    }
+    return {"secid": f"{int(market)}.{code.zfill(6)}", "code": code.zfill(6), "market": int(market), "name": str(row.get("f14") or "").strip(), "price": row.get("f2"), "change_pct": row.get("f3"), "change": row.get("f4"), "volume": row.get("f5"), "amount": row.get("f6"), "amplitude": row.get("f7"), "turnover": row.get("f8"), "high": row.get("f15"), "low": row.get("f16"), "open": row.get("f17"), "prev_close": row.get("f18"), "raw": row}
 
 
 def em_page(host, page):
     params = {"pn": page, "pz": EM_PAGE_SIZE, "po": 1, "np": 1, "ut": TOKEN, "fltt": 2, "invt": 2, "fid": "f6", "fs": A_SHARE_FILTER, "fields": FIELDS}
-    body = request_json(
-        f"https://{host}/api/qt/clist/get",
-        params,
-        {"User-Agent": "Mozilla/5.0 FSIS-EastMoney/5.0", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*"},
-    )
+    body = request_json(f"https://{host}/api/qt/clist/get", params, {"User-Agent": "Mozilla/5.0 FSIS-EastMoney/5.0", "Referer": "https://quote.eastmoney.com/", "Accept": "application/json,text/plain,*/*"})
     data = (body.get("data") if isinstance(body, dict) else None) or {}
     rows = data.get("diff")
     if not isinstance(rows, list):
@@ -132,20 +111,7 @@ def normalize_tencent(row):
     if market is None or not code.isdigit():
         return None
     code = code.zfill(6)
-    return {
-        "secid": f"{market}.{code}",
-        "code": code,
-        "market": market,
-        "name": first(row, "name", "stock_name", "stockName"),
-        "price": first(row, "zxj", "price", "now", "latest", "current", "last", "currentPrice", "lastPrice", "latestPrice", "curPrice"),
-        "change_pct": first(row, "zdf", "percent", "changePercent", "change_pct", "pct", "changeRatio", "changeRate"),
-        "change": first(row, "zd", "change", "priceChange", "changeValue"),
-        "volume": first(row, "volume", "vol", "dealVolume", "deal_volume"),
-        "amount": first(row, "turnover", "amount", "turnoverAmount", "dealAmount", "deal_amount"),
-        "amplitude": first(row, "zf", "amplitude", "amp", "amplitudeRate"),
-        "turnover": first(row, "hsl", "turnoverRate", "turnover_rate"),
-        "raw": row,
-    }
+    return {"secid": f"{market}.{code}", "code": code, "market": market, "name": first(row, "name", "stock_name", "stockName"), "price": first(row, "zxj", "price", "now", "latest", "current", "last", "currentPrice", "lastPrice", "latestPrice", "curPrice"), "change_pct": first(row, "zdf", "percent", "changePercent", "change_pct", "pct", "changeRatio", "changeRate"), "change": first(row, "zd", "change", "priceChange", "changeValue"), "volume": first(row, "volume", "vol", "dealVolume", "deal_volume"), "amount": first(row, "turnover", "amount", "turnoverAmount", "dealAmount", "deal_amount"), "amplitude": first(row, "zf", "amplitude", "amp", "amplitudeRate"), "turnover": first(row, "hsl", "turnoverRate", "turnover_rate"), "raw": row}
 
 
 def tx_page(page):
@@ -182,36 +148,47 @@ def fetch_tencent():
     return list(merged.values()), {"provider": "tencent", "host": "proxy.finance.qq.com", "status": "OK", "reported_total": total or len(merged), "row_count": len(merged), "pages": target_pages, "page_size": TX_PAGE_SIZE, "sample_keys": sample_keys}
 
 
-def rank_candidates(items):
-    def num(v):
-        try:
-            return float(v)
-        except (TypeError, ValueError):
+def num(v):
+    try:
+        if v is None or v in ("", "-", "--"):
             return 0.0
+        return float(str(v).replace(",", "").replace("%", ""))
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def rank_candidates(items):
     scored = []
+    diagnostics = {"price_positive": 0, "change_positive": 0, "amplitude_positive": 0, "amount_positive": 0, "signal_positive": 0}
+    samples = []
     for idx, x in enumerate(items):
-        p, chg, amt, amp = map(num, [x.get("price"), x.get("change_pct"), x.get("amount"), x.get("amplitude")])
+        p, chg, amt, amp = num(x.get("price")), num(x.get("change_pct")), num(x.get("amount")), num(x.get("amplitude"))
+        diagnostics["price_positive"] += p > 0
+        diagnostics["change_positive"] += abs(chg) > 0
+        diagnostics["amplitude_positive"] += abs(amp) > 0
+        diagnostics["amount_positive"] += abs(amt) > 0
         signal = abs(chg) + abs(amp) + min(abs(amt) / 1e8, 20.0)
+        diagnostics["signal_positive"] += signal > 0
+        if len(samples) < 3:
+            samples.append({"secid": x.get("secid"), "price": x.get("price"), "change_pct": x.get("change_pct"), "amplitude": x.get("amplitude"), "amount": x.get("amount")})
         if p <= 0 and signal <= 0:
             continue
         score = (min(abs(chg), 12.0) * 2.0) + (min(abs(amp), 15.0) * 0.35) + (min(abs(amt) / 1e8, 20.0) * 0.15)
         scored.append((score, -idx, x))
     scored.sort(key=lambda t: (t[0], t[1]), reverse=True)
-    return [x for _, __, x in scored[:CANDIDATES]]
+    return [x for _, __, x in scored[:CANDIDATES]], diagnostics, samples
 
 
 def main():
     fetched = datetime.now(timezone.utc).isoformat()
-    probe_results = []
-    healthy_probes = []
+    probe_results, healthy_probes = [], []
     with ThreadPoolExecutor(max_workers=HOST_WORKERS) as pool:
         futures = {pool.submit(em_page, host, 1): host for host in EM_HOSTS}
         for future in as_completed(futures):
             host = futures[future]
             try:
                 total, rows = future.result()
-                probe = {"provider": "eastmoney", "host": host, "status": "OK", "reported_total": total, "first_page_rows": len(rows)}
-                probe_results.append(probe)
+                probe_results.append({"provider": "eastmoney", "host": host, "status": "OK", "reported_total": total, "first_page_rows": len(rows)})
                 healthy_probes.append((host, total, rows))
             except Exception as exc:
                 probe_results.append({"provider": "eastmoney", "host": host, "status": "FAILED", "error": repr(exc)})
@@ -249,32 +226,14 @@ def main():
 
     universe_rows = list(universe.values())
     plausible = len(universe_rows) >= MIN_UNIVERSE
-    candidates = rank_candidates(universe_rows)
+    candidates, candidate_diagnostics, candidate_samples = rank_candidates(universe_rows)
     status = "OK" if plausible and candidates else ("PARTIAL_FAILURE" if universe_rows else "FAILED")
     live = plausible and bool(candidates)
-    payload = {
-        "schema": "FSIS.market-bridge.v9",
-        "provider": provider_used,
-        "fetched_at_utc": fetched,
-        "status": status,
-        "live_eligible": live,
-        "universe_total": len(universe_rows),
-        "min_universe_required": MIN_UNIVERSE,
-        "candidate_count": len(candidates),
-        "candidate_secids": [x["secid"] for x in candidates],
-        "validated_source": selected_host if provider_used == "eastmoney" else provider_used,
-        "source_attempts": attempts,
-        "a_share_filter": A_SHARE_FILTER,
-        "batch_mode": True,
-        "heterogeneous_fallback": True,
-        "latency_control": {"host_workers": HOST_WORKERS, "page_workers": PAGE_WORKERS, "request_timeout_seconds": TIMEOUT, "retries": RETRIES, "selected_single_eastmoney_host": True},
-    }
+    payload = {"schema": "FSIS.market-bridge.v9", "provider": provider_used, "fetched_at_utc": fetched, "status": status, "live_eligible": live, "universe_total": len(universe_rows), "min_universe_required": MIN_UNIVERSE, "candidate_count": len(candidates), "candidate_secids": [x["secid"] for x in candidates], "candidate_diagnostics": candidate_diagnostics, "candidate_samples": candidate_samples, "validated_source": selected_host if provider_used == "eastmoney" else provider_used, "source_attempts": attempts, "a_share_filter": A_SHARE_FILTER, "batch_mode": True, "heterogeneous_fallback": True, "latency_control": {"host_workers": HOST_WORKERS, "page_workers": PAGE_WORKERS, "request_timeout_seconds": TIMEOUT, "retries": RETRIES, "selected_single_eastmoney_host": True}}
     os.makedirs("bridge", exist_ok=True)
-    with open("bridge/market.json", "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
-    with open("bridge/generated-request.json", "w", encoding="utf-8") as f:
-        json.dump({"schema": "FSIS.minute-bridge.request.v3", "request_id": f"full-market-{fetched.replace(':', '').replace('.', '')}", "symbols": payload["candidate_secids"], "source": "full-market-discovery-v9", "generated_at_utc": fetched, "source_market_status": status}, f, ensure_ascii=False, indent=2)
-    print(json.dumps({k: payload.get(k) for k in ("status", "live_eligible", "universe_total", "candidate_count", "provider", "validated_source", "latency_control")}, ensure_ascii=False))
+    with open("bridge/market.json", "w", encoding="utf-8") as f: json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+    with open("bridge/generated-request.json", "w", encoding="utf-8") as f: json.dump({"schema": "FSIS.minute-bridge.request.v3", "request_id": f"full-market-{fetched.replace(':', '').replace('.', '')}", "symbols": payload["candidate_secids"], "source": "full-market-discovery-v9", "generated_at_utc": fetched, "source_market_status": status}, f, ensure_ascii=False, indent=2)
+    print(json.dumps({k: payload.get(k) for k in ("status", "live_eligible", "universe_total", "candidate_count", "candidate_diagnostics", "candidate_samples", "provider", "validated_source", "latency_control")}, ensure_ascii=False))
     return 0
 
 
