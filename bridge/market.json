@@ -1,7 +1,7 @@
 {
   "schema": "FSIS.market-bridge.v10",
   "provider": "tencent",
-  "fetched_at_utc": "2026-08-21T07:49:50.682242+00:00",
+  "fetched_at_utc": "2026-08-21T08:21:47.104036+00:00",
   "status": "OK",
   "live_eligible": true,
   "universe_total": 5549,
@@ -98,8 +98,8 @@
     "1.603626",
     "0.300598",
     "0.000505",
-    "0.920344",
     "0.000017",
+    "0.920344",
     "0.001367",
     "1.603378",
     "1.603395",
@@ -113,8 +113,8 @@
     "0.301202",
     "1.688221",
     "1.603538",
-    "0.920403",
     "1.600371",
+    "0.920403",
     "1.688289",
     "1.603958",
     "1.600664",
@@ -122,9 +122,9 @@
     "0.000735",
     "0.000915",
     "1.605179",
+    "0.920946",
     "0.000931",
     "0.002900",
-    "0.920946",
     "0.001286",
     "1.605116",
     "0.002306"
@@ -134,7 +134,7 @@
     "change_positive": 5367,
     "amplitude_positive": 5540,
     "amount_positive": 5543,
-    "speed_positive": 4313,
+    "speed_positive": 4316,
     "money_flow_nonzero": 5202,
     "signal_positive": 5543
   },
@@ -178,12 +178,6 @@
     },
     {
       "provider": "eastmoney",
-      "host": "82.push2.eastmoney.com",
-      "status": "FAILED",
-      "error": "RuntimeError(\"request failed after 2 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
-    },
-    {
-      "provider": "eastmoney",
       "host": "80.push2.eastmoney.com",
       "status": "OK",
       "reported_total": 5901,
@@ -192,6 +186,13 @@
     {
       "provider": "eastmoney",
       "host": "99.push2.eastmoney.com",
+      "status": "OK",
+      "reported_total": 5901,
+      "first_page_rows": 100
+    },
+    {
+      "provider": "eastmoney",
+      "host": "82.push2.eastmoney.com",
       "status": "OK",
       "reported_total": 5901,
       "first_page_rows": 100
