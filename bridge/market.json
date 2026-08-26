@@ -1,7 +1,7 @@
 {
   "schema": "FSIS.market-bridge.v10",
   "provider": "tencent",
-  "fetched_at_utc": "2026-08-26T07:13:32.104310+00:00",
+  "fetched_at_utc": "2026-08-26T08:01:51.907585+00:00",
   "status": "OK",
   "live_eligible": true,
   "universe_total": 5550,
@@ -177,15 +177,15 @@
     },
     {
       "provider": "eastmoney",
-      "host": "80.push2.eastmoney.com",
-      "status": "FAILED",
-      "error": "RuntimeError(\"request failed after 2 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
-    },
-    {
-      "provider": "eastmoney",
       "host": "push2.eastmoney.com",
       "status": "FAILED",
       "error": "RuntimeError(\"request failed after 2 attempts: <HTTPError 502: 'Bad Gateway'>\")"
+    },
+    {
+      "provider": "eastmoney",
+      "host": "80.push2.eastmoney.com",
+      "status": "FAILED",
+      "error": "RuntimeError(\"request failed after 2 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
     },
     {
       "provider": "eastmoney",
