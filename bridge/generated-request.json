@@ -1,6 +1,6 @@
 {
   "schema": "FSIS.minute-bridge.request.v3",
-  "request_id": "full-market-2026-09-24T103247822508+0000",
+  "request_id": "full-market-2026-09-25T054800091597+0000",
   "symbols": [
     "0.920706",
     "0.920427",
@@ -124,6 +124,6 @@
     "0.300852"
   ],
   "source": "full-market-discovery-v10",
-  "generated_at_utc": "2026-09-24T10:32:47.822508+00:00",
+  "generated_at_utc": "2026-09-25T05:48:00.091597+00:00",
   "source_market_status": "OK"
 }
