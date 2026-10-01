@@ -1,7 +1,7 @@
 {
   "schema": "FSIS.market-bridge.v10",
   "provider": "tencent",
-  "fetched_at_utc": "2026-10-01T06:49:13.436841+00:00",
+  "fetched_at_utc": "2026-10-01T13:57:32.158880+00:00",
   "status": "OK",
   "live_eligible": true,
   "universe_total": 5572,
@@ -134,7 +134,7 @@
     "change_positive": 5391,
     "amplitude_positive": 5554,
     "amount_positive": 5561,
-    "speed_positive": 4309,
+    "speed_positive": 4310,
     "money_flow_nonzero": 5212,
     "signal_positive": 5561
   },
@@ -193,8 +193,9 @@
     {
       "provider": "eastmoney",
       "host": "99.push2.eastmoney.com",
-      "status": "FAILED",
-      "error": "RuntimeError(\"request failed after 2 attempts: <HTTPError 502: 'Bad Gateway'>\")"
+      "status": "OK",
+      "reported_total": 5921,
+      "first_page_rows": 100
     },
     {
       "provider": "eastmoney",
