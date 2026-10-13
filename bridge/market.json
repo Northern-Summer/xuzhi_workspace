@@ -1,7 +1,7 @@
 {
   "schema": "FSIS.market-bridge.v10",
   "provider": "eastmoney",
-  "fetched_at_utc": "2026-10-13T07:20:30.809856+00:00",
+  "fetched_at_utc": "2026-10-13T15:09:17.231629+00:00",
   "status": "OK",
   "live_eligible": true,
   "universe_total": 5923,
@@ -167,11 +167,11 @@
       "money_flow": null
     }
   ],
-  "validated_source": "push2.eastmoney.com",
+  "validated_source": "80.push2.eastmoney.com",
   "source_attempts": [
     {
       "provider": "eastmoney",
-      "host": "push2.eastmoney.com",
+      "host": "80.push2.eastmoney.com",
       "status": "OK",
       "reported_total": 5923,
       "first_page_rows": 100,
@@ -181,14 +181,7 @@
     },
     {
       "provider": "eastmoney",
-      "host": "80.push2.eastmoney.com",
-      "status": "OK",
-      "reported_total": 5923,
-      "first_page_rows": 100
-    },
-    {
-      "provider": "eastmoney",
-      "host": "82.push2.eastmoney.com",
+      "host": "push2.eastmoney.com",
       "status": "OK",
       "reported_total": 5923,
       "first_page_rows": 100
@@ -196,6 +189,13 @@
     {
       "provider": "eastmoney",
       "host": "99.push2.eastmoney.com",
+      "status": "OK",
+      "reported_total": 5923,
+      "first_page_rows": 100
+    },
+    {
+      "provider": "eastmoney",
+      "host": "82.push2.eastmoney.com",
       "status": "OK",
       "reported_total": 5923,
       "first_page_rows": 100
