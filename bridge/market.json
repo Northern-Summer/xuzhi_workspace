@@ -1,7 +1,7 @@
 {
   "schema": "FSIS.market-bridge.v10",
   "provider": "eastmoney",
-  "fetched_at_utc": "2026-11-05T07:42:00.723898+00:00",
+  "fetched_at_utc": "2026-11-05T15:49:10.936109+00:00",
   "status": "OK",
   "live_eligible": true,
   "universe_total": 5927,
@@ -181,7 +181,7 @@
     },
     {
       "provider": "eastmoney",
-      "host": "80.push2.eastmoney.com",
+      "host": "push2.eastmoney.com",
       "status": "OK",
       "reported_total": 5927,
       "first_page_rows": 100
@@ -195,7 +195,7 @@
     },
     {
       "provider": "eastmoney",
-      "host": "push2.eastmoney.com",
+      "host": "80.push2.eastmoney.com",
       "status": "OK",
       "reported_total": 5927,
       "first_page_rows": 100
