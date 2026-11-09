@@ -1,7 +1,7 @@
 {
   "schema": "FSIS.market-bridge.v10",
   "provider": "tencent",
-  "fetched_at_utc": "2026-11-09T07:38:54.335429+00:00",
+  "fetched_at_utc": "2026-11-09T17:48:21.622947+00:00",
   "status": "OK",
   "live_eligible": true,
   "universe_total": 5579,
@@ -134,7 +134,7 @@
     "change_positive": 5390,
     "amplitude_positive": 5569,
     "amount_positive": 5573,
-    "speed_positive": 4277,
+    "speed_positive": 4280,
     "money_flow_nonzero": 5212,
     "signal_positive": 5573
   },
@@ -171,6 +171,13 @@
   "source_attempts": [
     {
       "provider": "eastmoney",
+      "host": "82.push2.eastmoney.com",
+      "status": "OK",
+      "reported_total": 5927,
+      "first_page_rows": 100
+    },
+    {
+      "provider": "eastmoney",
       "host": "99.push2.eastmoney.com",
       "status": "OK",
       "reported_total": 5927,
@@ -193,12 +200,6 @@
     {
       "provider": "eastmoney",
       "host": "82.push2.eastmoney.com",
-      "status": "FAILED",
-      "error": "RuntimeError(\"request failed after 2 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
-    },
-    {
-      "provider": "eastmoney",
-      "host": "99.push2.eastmoney.com",
       "status": "FAILED_DURING_PAGINATION",
       "error": "RuntimeError(\"request failed after 2 attempts: RemoteDisconnected('Remote end closed connection without response')\")"
     },
